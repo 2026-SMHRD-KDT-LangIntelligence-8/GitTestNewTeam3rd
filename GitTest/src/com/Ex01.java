@@ -6,6 +6,8 @@ public class Ex01 {
 		System.out.println("팀장 커밋");
 		System.out.println("팀원1 두번째 커밋");
 		System.out.println("팀원2 두번째 커밋");
+		System.out.println("팀원3 충돌 해결");
+		
 	}
 
 }
