@@ -11,6 +11,11 @@ public class Ex01 {
 		System.out.println("팀장 엔딩요정은 접니다☆");
 		
 		
+		
+		
+		System.out.println("세희 개인 브랜치 커밋");
+		System.out.println("주형 개인 브랜치 커밋");
+		
 	}
 
 }
