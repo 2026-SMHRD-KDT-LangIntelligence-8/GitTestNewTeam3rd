@@ -1,12 +1,12 @@
 function signup() {
 
     const data = {
-        userId: document.getElementById("userId").value,
-        password: document.getElementById("password").value,
-        birthDate: document.getElementById("birthDate").value,
-        nickname: document.getElementById("nickname").value,
-        phoneNumber: document.getElementById("phoneNumber").value,
-        email: document.getElementById("email").value
+        userId: document.getElementById("userId").value.trim(),
+        password: document.getElementById("password").value.trim(),
+        birthDate: document.getElementById("birthDate").value.trim(),
+        nickname: document.getElementById("nickname").value.trim(),
+        phoneNumber: document.getElementById("phoneNumber").value.trim(),
+        email: document.getElementById("email").value.trim()
     };
 
     // 간단한 입력값 체크
@@ -32,7 +32,7 @@ function signup() {
             alert(result);
 
             // 👉 회원가입 성공 후 페이지 이동
-            window.location.href = "/signup";
+            window.location.href = "/login";
         })
         .catch(error => {
             console.error(error);
