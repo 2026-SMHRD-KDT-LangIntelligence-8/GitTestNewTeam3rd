@@ -27,6 +27,15 @@ public class TodayRecordService {
                 .build();
 
         SpendingLog saveLog = spendingLogRepository.save(spendingLog);
+        Diary diary = Diary.builder()
+                .userId(dto.getUserId())
+                .content(dto.getContent())
+                .emotionTag(dto.getEmotionTag())
+                .sentimentScore(0.0)
+                .isImpulsive(false)
+                .logId(saveLog.getLogId())
+                .build();
+
 
    }
 }
