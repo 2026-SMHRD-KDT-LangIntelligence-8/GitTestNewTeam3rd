@@ -2,6 +2,7 @@ package com.smhrd.jumeokbap.service;
 
 
 import com.smhrd.jumeokbap.domain.User;
+import com.smhrd.jumeokbap.dto.UserLoginRequest;
 import com.smhrd.jumeokbap.dto.UserSignupRequest;
 import com.smhrd.jumeokbap.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,16 @@ public class UserService {
 
         // 저장
         userRepository.save(user);
+    }
+
+    public String login(UserLoginRequest dto) {
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("아이디가 존재하지 않습니다."));
+
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        }
+
+        return user.getNickname() + "님 로그인 성공";
     }
 }

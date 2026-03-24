@@ -11,4 +11,10 @@ public class UserViewController {
     public String signupPage() {
         return "signup"; // templates/signup.html
     }
+
+    // 로그인 페이지 이동
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login"; // templates/login.html
+    }
 }
