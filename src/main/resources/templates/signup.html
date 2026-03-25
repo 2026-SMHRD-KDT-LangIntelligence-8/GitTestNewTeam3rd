@@ -5,6 +5,9 @@
     <title>회원가입</title>
 
     <style>
+
+
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
@@ -12,6 +15,7 @@
 
         .container {
             width: 400px;
+            height: 874px;
             margin: 60px auto;
             background: white;
             padding: 30px;
@@ -21,41 +25,72 @@
 
         h1 {
             text-align: center;
+            margin-bottom: 90px;
+            margin-top: 70px;
         }
 
         .input-box {
-            margin-bottom: 15px;
+
+            margin-bottom: 22px;
+            display: flex;              /* 가로 정렬 */
+            align-items: center;        /* 세로 가운데 정렬 */
+            gap: 10px;
         }
 
         .input-box label {
-            display: block;
-            margin-bottom: 5px;
+            margin-top: auto;
+            margin-bottom: auto;
             font-weight: bold;
+            width: 100px; /* 라벨 너비 고정 */
+            white-space: nowrap;
+        }
+
+        .id-box {
+            /*display: flex;*/
+            flex: none;                    /* 남은 공간 차지 */
+            gap: 8px;
+            width: 280px;
         }
 
         .input-box input {
-            width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
+
+            min-width: 0;
         }
 
-        /* ⭐ 아이디 + 버튼 가로 정렬 */
-        .id-box {
-            display: flex;
-            gap: 8px;
+        /* 버튼 스타일 */
+        .check-btn {
+            padding:  4px 2px;
+            border: none;
+            border-radius: 6px;
+            background-color: black !important;
+            color: white;
+            cursor: pointer;
+            white-space: nowrap;         /* 줄바꿈 방지 */
+            margin: 0;
         }
+
+        /* 버튼 hover 효과 */
+        .check-btn:hover {
+            background-color: #e6c200 !important;
+        }
+        /* ⭐ 아이디 + 버튼 가로 정렬 */
+
 
         .id-box input {
-            flex: 1;
+            flex: 1;        /* ⭐ 다시 이걸로 */
+            min-width: 0;
+            height: 15px/* ⭐ 필수 */
         }
 
         .check-btn {
-            width: 100px;
+            width: 84px;
             padding: 10px;
             background-color: #2196F3;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .check-btn:hover {
@@ -69,9 +104,10 @@
         }
 
         button {
+            margin-top: 50px;
             width: 100%;
             padding: 12px;
-            background-color: #4CAF50;
+            background-color:  gold !important;
             color: white;
             border: none;
             border-radius: 6px;
@@ -90,18 +126,18 @@
     <h1>회원가입</h1>
 
     <!-- ⭐ 아이디 부분 수정 -->
-    <div class="input-box">
+    <div class="input-box" >
         <label>아이디</label>
 
         <div class="id-box">
             <input type="text" id="userId" placeholder="아이디 입력">
-            <button type="button" class="check-btn" onclick="checkId()">중복확인</button>
+            <button type="button" class="check-btn" onclick="checkId()">중복체크</button>
         </div>
 
-        <!-- 결과 표시 -->
-        <div id="idCheckResult"></div>
-    </div>
 
+    </div>
+    <!-- 결과 표시 -->
+    <div id="idCheckResult"></div>
     <div class="input-box">
         <label>비밀번호</label>
         <input type="password" id="password" placeholder="비밀번호 입력">
