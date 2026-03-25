@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>챌린지 설정</title>
+  <style>
+    body { font-family: 'Pretendard', sans-serif; padding: 40px; background-color: #f0f2f5; color: #333; }
+    .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    h2 { text-align: center; margin-bottom: 25px; color: #1a73e8; }
+
+    .form-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+    input { width: 100%; padding: 12px; border: 1.5px solid #e0e0e0; border-radius: 8px; box-sizing: border-box; transition: 0.3s; }
+    input:focus { border-color: #1a73e8; outline: none; }
+
+    /* 토글 버튼 스타일 */
+    .toggle-container { display: flex; background: #f1f3f4; padding: 5px; border-radius: 10px; margin-bottom: 15px; }
+    .toggle-item { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 8px; font-size: 14px; transition: 0.3s; }
+    .toggle-item.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #1a73e8; font-weight: bold; }
+
+    /* 직접 입력 창 초기에는 숨김 */
+    #customDateRange { display: none; margin-top: 15px; border-left: 3px solid #1a73e8; padding-left: 15px; }
+
+    /* 계산 결과창 스타일 */
+    .result-box { background: #e8f0fe; padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px dashed #1a73e8; }
+    .result-text { font-size: 16px; font-weight: bold; color: #1967d2; text-align: center; }
+
+    .btn-save { width: 100%; padding: 15px; background-color: #1a73e8; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 20px; }
+    .btn-save:hover { background-color: #1557b0; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>🏆 챌린지 설정</h2>
+
+  <form id="budgetForm">
+    <div class="form-group">
+      <label>챌린지 이름</label>
+      <input type="text" id="challengeName" placeholder="예: 무지출 챌린지, 식비 절약" required>
+    </div>
+
+    <label>목표 기간</label>
+    <div class="toggle-container">
+      <div class="toggle-item active" onclick="selectPeriod(30, this)">1개월</div>
+      <div class="toggle-item" onclick="selectPeriod(7, this)">1주일</div>
+      <div class="toggle-item" onclick="selectPeriod('custom', this)">직접입력</div>
+    </div>
+
+    <div id="customDateRange">
+      <div class="form-group">
+        <label>시작일</label>
+        <input type="date" id="startDate" onchange="calculateDailyBudget()">
+      </div>
+      <div class="form-group">
+        <label>종료일</label>
+        <input type="date" id="endDate" onchange="calculateDailyBudget()">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>총 예산 한도 (원)</label>
+      <input type="number" id="totalLimit" placeholder="0" oninput="calculateDailyBudget()" required>
+    </div>
+    <div class="form-group">
+      <label>고정 지출 합계 (원)</label>
+      <input type="number" id="fixedCostSum" placeholder="0" oninput="calculateDailyBudget()">
+    </div>
+
+    <div class="result-box">
+      <div class="result-text">
+        하루 권장 예산: <span id="dailyAmount">0</span>원
+      </div>
+      <p style="font-size: 11px; text-align: center; color: #666; margin-top: 5px;">
+        (총 예산 - 고정 지출) / 기간
+      </p>
+    </div>
+
+    <button type="button" class="btn-save" onclick="handleSave()">챌린지 시작하기</button>
+  </form>
+</div>
+
+<script>
+  let selectedDays = 30; // 기본값 1개월(30일)
+
+  // 오늘 날짜 가져오기 (YYYY-MM-DD)
+  const today = new Date().toISOString().split('T')[0];
+
+  // 기간 토글 선택 함수
+  function selectPeriod(days, element) {
+    // 토글 스타일 변경
+    document.querySelectorAll('.toggle-item').forEach(item => item.classList.remove('active'));
+    element.classList.add('active');
+
+    const customDiv = document.getElementById('customDateRange');
+
+    if (days === 'custom') {
+      customDiv.style.display = 'block';
+      selectedDays = 0; // 직접 입력시에는 날짜 계산으로 처리
+    } else {
+      customDiv.style.display = 'none';
+      selectedDays = days;
+
+      // 토글 선택 시 시작일은 오늘, 종료일은 오늘+days로 세팅
+      document.getElementById('startDate').value = today;
+      let end = new Date();
+      end.setDate(end.getDate() + days);
+      document.getElementById('endDate').value = end.toISOString().split('T')[0];
+    }
+    calculateDailyBudget();
+  }
+
+  // 초기 실행 시 날짜 세팅
+  window.onload = () => {
+    document.getElementById('startDate').value = today;
+    let end = new Date();
+    end.setDate(end.getDate() + 30);
+    document.getElementById('endDate').value = end.toISOString().split('T')[0];
+  };
+
+  // 하루 예산 자동 계산 함수
+  function calculateDailyBudget() {
+    const total = parseInt(document.getElementById('totalLimit').value) || 0;
+    const fixed = parseInt(document.getElementById('fixedCostSum').value) || 0;
+    const start = new Date(document.getElementById('startDate').value);
+    const end = new Date(document.getElementById('endDate').value);
+
+    // 날짜 차이 계산
+    const diffTime = end - start;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // 시작일 포함
+
+    if (diffDays > 0 && total > fixed) {
+      const daily = Math.floor((total - fixed) / diffDays);
+      document.getElementById('dailyAmount').innerText = daily.toLocaleString();
+    } else {
+      document.getElementById('dailyAmount').innerText = '0';
+    }
+  }
+
+  async function handleSave() {
+    // 전송할 데이터 구성
+    const budgetData = {
+      challenge: document.getElementById('challengeName').value,
+      startDate: document.getElementById('startDate').value,
+      endDate: document.getElementById('endDate').value,
+      totalLimit: parseInt(document.getElementById('totalLimit').value),
+      fixedCostSum: parseInt(document.getElementById('fixedCostSum').value) || 0,
+      userId: "user_test" // 실제 연동시 유저ID 세션에서 가져오기
+      // challengeName: document.getElementById('challengeName').value // 필요시 DTO에 추가
+    };
+
+    try {
+      const response = await fetch('/api/budget/budget-save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(budgetData)
+      });
+
+      if (response.ok) {
+        alert("챌린지 목표가 저장되었습니다! 화이팅! 🔥");
+      } else {
+        alert("저장에 실패했습니다.");
+      }
+    } catch (error) {
+      alert("서버 연결 에러!");
+    }
+  }
+</script>
+
+</body>
+</html>
