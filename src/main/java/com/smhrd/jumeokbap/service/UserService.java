@@ -50,4 +50,9 @@ public class UserService {
 
         return user.getNickname() + "님 로그인 성공";
     }
+
+    // 아이디 중복 확인
+    public boolean isUserIdDuplicate(String userId) {
+        return userRepository.existsByUserId(userId);
+    }
 }

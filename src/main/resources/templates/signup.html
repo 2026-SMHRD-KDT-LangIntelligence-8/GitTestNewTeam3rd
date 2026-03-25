@@ -40,6 +40,34 @@
             border-radius: 6px;
         }
 
+        /* ⭐ 아이디 + 버튼 가로 정렬 */
+        .id-box {
+            display: flex;
+            gap: 8px;
+        }
+
+        .id-box input {
+            flex: 1;
+        }
+
+        .check-btn {
+            width: 100px;
+            padding: 10px;
+            background-color: #2196F3;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .check-btn:hover {
+            background-color: #1976D2;
+        }
+
+        /* 결과 메시지 */
+        #idCheckResult {
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
         button {
             width: 100%;
             padding: 12px;
@@ -61,14 +89,28 @@
 <div class="container">
     <h1>회원가입</h1>
 
+    <!-- ⭐ 아이디 부분 수정 -->
     <div class="input-box">
         <label>아이디</label>
-        <input type="text" id="userId" placeholder="아이디 입력">
+
+        <div class="id-box">
+            <input type="text" id="userId" placeholder="아이디 입력">
+            <button type="button" class="check-btn" onclick="checkId()">중복확인</button>
+        </div>
+
+        <!-- 결과 표시 -->
+        <div id="idCheckResult"></div>
     </div>
 
     <div class="input-box">
         <label>비밀번호</label>
         <input type="password" id="password" placeholder="비밀번호 입력">
+    </div>
+
+    <div class="input-box">
+        <label>비밀번호 확인</label>
+        <input type="password" id="passwordConfirm" placeholder="비밀번호 다시 입력">
+        <div id="passwordCheckResult" style="font-size:13px; margin-top:5px;"></div>
     </div>
 
     <div class="input-box">
@@ -94,7 +136,6 @@
     <button type="button" onclick="signup()">회원가입</button>
 </div>
 
-<!-- JS 연결 -->
 <script src="/js/signup.js"></script>
 
 </body>
