@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>로그인</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #74ebd5, #9face6);
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      width: 400px;
+      margin: 100px auto;
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .input-box {
+      margin-bottom: 20px;
+    }
+
+    .input-box label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .input-box input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+
+    .input-box input:focus {
+      border-color: #6c63ff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(108,99,255,0.5);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: #6c63ff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-login:hover {
+      background: #574fd6;
+    }
+
+    .bottom-text {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .bottom-text a {
+      color: #6c63ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .bottom-text a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>로그인</h1>
+
+  <div class="input-box">
+    <label for="userId">아이디</label>
+    <input type="text" id="userId" placeholder="아이디 입력">
+  </div>
+
+  <div class="input-box">
+    <label for="password">비밀번호</label>
+    <input type="password" id="password" placeholder="비밀번호 입력">
+  </div>
+
+  <button class="btn-login" onclick="login()">로그인</button>
+
+  <div class="bottom-text">
+    계정이 없으신가요? <a href="/signup">회원가입</a>
+  </div>
+</div>
+
+<script src="/js/login.js"></script>
+
+</body>
+</html>
