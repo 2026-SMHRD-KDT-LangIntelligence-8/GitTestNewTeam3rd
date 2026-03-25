@@ -27,6 +27,8 @@ public class Diary {
     private Long logId;
     @Column(nullable = false)
     private String userId;
+    @Column(nullable = false)
+    private Boolean isMain;
 
 
 }

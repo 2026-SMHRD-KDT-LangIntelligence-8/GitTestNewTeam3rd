@@ -16,17 +16,19 @@ public class TodayRecordService {
     private final SpendingLogRepository spendingLogRepository;
 
     @Transactional
-    public void saveTodayRecord(TodayRecordRequest dto) {
+    // 수동입력
+    public void manualRecord(TodayRecordRequest dto) {
         SpendingLog spendingLog = SpendingLog.builder()
                 .userId(dto.getUserId())
                 .amount(Integer.valueOf(dto.getAmount()))
                 .storeName(dto.getStoreName())
                 .spentAt(dto.getSpentAt())
                 .imageUrl(dto.getImageUrl())
-                .isManual(String.valueOf(dto.getIsManual()))
+                .isManual("Y")
                 .build();
 
         SpendingLog saveLog = spendingLogRepository.save(spendingLog);
+
         Diary diary = Diary.builder()
                 .userId(dto.getUserId())
                 .content(dto.getContent())
@@ -35,6 +37,13 @@ public class TodayRecordService {
                 .isImpulsive(false)
                 .logId(saveLog.getLogId())
                 .build();
+
+
+
+
+
+
+
 
 
    }
