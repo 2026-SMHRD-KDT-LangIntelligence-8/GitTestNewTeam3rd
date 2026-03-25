@@ -1,6 +1,5 @@
 package com.smhrd.jumeokbap.service;
 
-
 import com.smhrd.jumeokbap.domain.User;
 import com.smhrd.jumeokbap.dto.UserLoginRequest;
 import com.smhrd.jumeokbap.dto.UserSignupRequest;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -48,11 +48,12 @@ public class UserService {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
-        return user.getNickname() + "님 로그인 성공";
+        // 세션에 저장할 사용자 식별값 반환
+        return user.getUserId();
     }
 
     // 아이디 중복 확인
     public boolean isUserIdDuplicate(String userId) {
-        return userRepository.existsByUserId(userId);
+        return userRepository.existsById(userId);
     }
 }

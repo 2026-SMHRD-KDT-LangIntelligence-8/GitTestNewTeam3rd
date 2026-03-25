@@ -14,6 +14,7 @@ function login() {
         headers: {
             "Content-Type": "application/json"
         },
+        credentials: "include",
         body: JSON.stringify(data)
     })
         .then(response => {
@@ -24,7 +25,7 @@ function login() {
         })
         .then(result => {
             alert(result);
-            window.location.href = "/";
+            window.location.href = "/login";
         })
         .catch(error => {
             console.error(error);
