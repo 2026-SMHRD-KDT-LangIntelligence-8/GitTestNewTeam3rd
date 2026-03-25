@@ -19,15 +19,4 @@ public class UserViewController {
     public String loginPage() {
         return "login";
     }
-
-    // 메인 페이지 (세션 활용) - 지금은 테스트만 씀
-    @GetMapping("/")
-    public String homePage(HttpSession session, Model model) {
-
-        String loginUserId = (String) session.getAttribute("loginUserId");
-
-        model.addAttribute("loginUserId", loginUserId);
-
-        return "index"; // templates/index.html
-    }
 }
