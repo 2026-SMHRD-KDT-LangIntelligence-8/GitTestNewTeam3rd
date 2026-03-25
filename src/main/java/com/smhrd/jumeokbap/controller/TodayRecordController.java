@@ -18,6 +18,7 @@ public class TodayRecordController {
     private final TodayRecordService todayRecordService;
 
     @PostMapping("/api/save")
+    // 수동 입력
     public ResponseEntity<String> saveRecord(@RequestBody TodayRecordRequest dto) {
         try {
             todayRecordService.manualRecord(dto);
@@ -29,6 +30,7 @@ public class TodayRecordController {
     }
 
     @GetMapping("/api/main/{userId}")
+    // 조회 기능
     public ResponseEntity<List<SpendingLog>> getDailyTimeline(@PathVariable String userId) {
         try {
             List<SpendingLog> logs = todayRecordService.getDailyTimeline(userId);
