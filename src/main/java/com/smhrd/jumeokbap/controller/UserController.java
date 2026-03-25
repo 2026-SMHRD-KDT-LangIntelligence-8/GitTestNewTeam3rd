@@ -5,10 +5,7 @@ import com.smhrd.jumeokbap.dto.UserSignupRequest;
 import com.smhrd.jumeokbap.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,5 +23,11 @@ public class UserController {
     public ResponseEntity<String> login(@RequestBody UserLoginRequest dto) {
         String result = userService.login(dto);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/check-id")
+    public ResponseEntity<Boolean> checkUserId(@RequestParam String userId) {
+        boolean exists = userService.isUserIdDuplicate(userId);
+        return ResponseEntity.ok(exists);
     }
 }
