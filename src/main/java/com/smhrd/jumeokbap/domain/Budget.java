@@ -20,8 +20,6 @@ public class Budget { // 예산(소비 목표 설정) 엔터티
     @Column (name = "GOAL_ID")
     private Long goalId; // 목표 ID
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CHALLENGE_NAME")
     private String challengeName;
 
