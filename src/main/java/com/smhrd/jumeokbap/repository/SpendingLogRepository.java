@@ -7,4 +7,5 @@ import java.util.List;
 public interface SpendingLogRepository extends JpaRepository<SpendingLog, Long> {
 
     List<SpendingLog> findByUserIdOrderBySpentAtDesc(String userId);
+
 }

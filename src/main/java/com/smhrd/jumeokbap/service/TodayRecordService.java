@@ -8,8 +8,14 @@ import com.smhrd.jumeokbap.repository.SpendingLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
+
 
 @RequiredArgsConstructor
 @Service
@@ -44,12 +50,40 @@ public class TodayRecordService {
         diaryRepository.save(diary);
 
     }
+
     @Transactional(readOnly = true)
     // 조회기능
-    public List<SpendingLog> getDailyTimeline(String userId){
+    public List<SpendingLog> getDailyTimeline(String userId) {
         return spendingLogRepository.findByUserIdOrderBySpentAtDesc(userId);
     }
 
+    // 특정 내역 건의 상세페이지로 이동!
+    public SpendingLog getLogDetail(Long logId) {
+        return spendingLogRepository.findById(logId)
+                .orElseThrow(() -> new RuntimeException("기록을 못찾겠어요! ID: " + logId));
+    }
 
-   }
+    // 감성분석(flask 주소) 연동
+    public String analyzeText(String content) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "http://127.0.0.1:5000/predict";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, String> body = new HashMap<>();
+        body.put("text", content);
+
+        HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+
+        try {
+            String result = restTemplate.postForObject(url, entity, String.class);
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "분석 서버 연결 실패";
+        }
+
+    }
+}
 

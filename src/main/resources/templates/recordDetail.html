@@ -1,0 +1,13 @@
+<div class="info-box">
+    <h2 th:text="${detail.storeName}">가게이름</h2>
+    <p>결제 금액: <span th:text="${detail.amount}">0</span>원</p>
+    <p>결제 시간: <span th:text="${detail.spentAt}">시간</span></p>
+</div>
+
+<hr>
+
+<form action="/api/analyze" method="post">
+    <input type="hidden" name="logId" th:value="${detail.logId}">
+    <textarea name="content" placeholder="오늘의 소비는 어땠나요?"></textarea>
+    <button type="submit">감정 분석 시작</button>
+</form>

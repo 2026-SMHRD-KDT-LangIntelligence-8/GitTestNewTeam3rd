@@ -1,0 +1,9 @@
+<div th:each="item : ${list}">
+    <p>가게: <span th:text="${item.storeName}">식당이름</span></p>
+    <p>금액: <span th:text="${item.amount}">0</span>원</p>
+    <p>시간: <span th:text="${item.spentAt}">시간</span></p>
+
+    <button th:onclick="|location.href='/api/recordDetail/' + ${item.logId}|">
+        상세보기/일기쓰기
+    </button>
+</div>
