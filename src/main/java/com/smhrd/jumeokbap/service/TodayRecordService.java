@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 public class TodayRecordService {
@@ -35,8 +37,20 @@ public class TodayRecordService {
                 .emotionTag(dto.getEmotionTag())
                 .sentimentScore(0.0)
                 .isImpulsive(false)
+                .isMain(true)
                 .logId(saveLog.getLogId())
                 .build();
+
+        diaryRepository.save(diary);
+
+    }
+    @Transactional(readOnly = true)
+    // 조회기능
+    public List<SpendingLog> getDailyTimeline(String userId){
+        return spendingLogRepository.findByUserIdOrderBySpentAtDesc(userId);
+    }
+
+
 
 
 
@@ -47,4 +61,4 @@ public class TodayRecordService {
 
 
    }
-}
+
