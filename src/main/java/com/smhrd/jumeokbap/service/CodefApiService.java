@@ -1,10 +1,8 @@
 package com.smhrd.jumeokbap.service;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -12,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 public class CodefApiService {
 
     private final CodefTokenService codefTokenService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public CodefApiService(CodefTokenService codefTokenService) {
         this.codefTokenService = codefTokenService;
@@ -19,11 +18,9 @@ public class CodefApiService {
 
     /**
      * CODEF API 공통 호출 메서드
-     * @param url 호출할 CODEF API 주소
-     * @param requestBody JSON 문자열
-     * @return CODEF 응답 문자열
      */
-    public String callPostApi(String url, String requestBody) {
+    public JsonNode callPostApi(String url, String requestBody) {
+
         String accessToken = codefTokenService.getAccessToken();
 
         RestTemplate restTemplate = new RestTemplate();
@@ -41,6 +38,11 @@ public class CodefApiService {
                 String.class
         );
 
-        return response.getBody();
+        try {
+            // 🔥 문자열 → JSON으로 변환
+            return objectMapper.readTree(response.getBody());
+        } catch (Exception e) {
+            throw new RuntimeException("CODEF 응답 파싱 실패", e);
+        }
     }
 }
