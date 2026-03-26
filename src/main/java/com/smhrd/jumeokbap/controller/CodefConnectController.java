@@ -16,9 +16,9 @@ public class CodefConnectController {
     @PostMapping("/connect/card")
     public ResponseEntity<String> connectCard(@RequestBody CodefConnectRequest dto) {
 
-        // 세션 아직 안 쓰는 상태니까 임시 사용자 아이디
-        String userId = "testUser";
+        System.out.println("컨트롤러 진입 성공");
 
+        String userId = "testUser";
         String connectedId = codefConnectedIdService.connectCard(userId, dto);
 
         return ResponseEntity.ok("connectedId 발급 성공: " + connectedId);
