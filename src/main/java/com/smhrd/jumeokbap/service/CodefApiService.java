@@ -6,6 +6,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 @Service
 public class CodefApiService {
 
@@ -38,9 +41,13 @@ public class CodefApiService {
                 String.class
         );
 
+        System.out.println("CODEF raw response = " + response.getBody());
+
         try {
-            // 🔥 문자열 → JSON으로 변환
-            return objectMapper.readTree(response.getBody());
+            String decoded = URLDecoder.decode(response.getBody(), StandardCharsets.UTF_8);
+            System.out.println("디코딩 응답 = " + decoded);
+
+            return objectMapper.readTree(decoded);
         } catch (Exception e) {
             throw new RuntimeException("CODEF 응답 파싱 실패", e);
         }
