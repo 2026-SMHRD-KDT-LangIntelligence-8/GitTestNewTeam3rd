@@ -106,5 +106,12 @@ public class TodayRecordService {
                 .orElse(new Diary());
     }
 
+    @Transactional
+    public void deleteRecord(Long logId) {
+        diaryRepository.deleteByLogId(logId);
+        spendingLogRepository.deleteById(logId);
+    }
+
+
 }
 

@@ -29,6 +29,7 @@ public class TodayRecordController {
     }
 
     @PostMapping("/save")
+    // 등록 저장
     public String saveRecord(@ModelAttribute TodayRecordRequest dto,
                              @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
         try {
@@ -36,6 +37,22 @@ public class TodayRecordController {
             todayRecordService.manualRecord(dto, imageFile);
 
             return "redirect:/api/recordMain/" + dto.getUserId();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error";
+        }
+    }
+
+    @GetMapping("/delete/{logId}")
+    // 삭제 기능
+    public String deleteRecord(@PathVariable("logId") Long logId) {
+        try {
+            SpendingLog log = todayRecordService.getLogDetail(logId);
+            String userId = log.getUserId();
+            todayRecordService.deleteRecord(logId);
+
+            return "redirect:/recordMain/"+ userId;
 
         } catch (Exception e) {
             e.printStackTrace();

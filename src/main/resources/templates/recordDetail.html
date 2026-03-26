@@ -21,11 +21,26 @@
         .photo-box img { width: 100%; height: 100%; object-fit: cover; }
         .no-image { color: #bbb; font-size: 14px; }
 
-        .memo-box { height: 120px; border: 1px solid #e0e7d0; resize: none; text-align: center; font-size: 16px; padding: 15px; box-sizing: border-box; background-color: #fafff0; width: 100%; border-radius: 10px; outline: none; }
+        .memo-box { height: 120px; border: 1px solid #e0e7d0; resize: none; text-align: center; font-size: 16px; padding: 15px; box-sizing: border-box; background-color: #fafff0; width: 100%; border-radius: 10px; outline: none; margin-bottom: 20px; }
 
-        /* 이모티콘 & 고정비 영역 */
+        /* 이모티콘 & 구분 영역 (두 칸 유지) */
         .options-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 30px; }
-        .option-item { background-color: #fafff0; border: 1px solid #e0e7d0; flex: 1; padding: 15px 5px; border-radius: 10px; font-size: 14px; }
+        .option-item {
+            background-color: #fafff0;
+            border: 1px solid #e0e7d0;
+            flex: 1;
+            padding: 15px 5px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80px; /* 박스 높이 균형 유지 */
+        }
+
+        /* 왼쪽 이모티콘 크기 강조 */
+        .emoji-large { font-size: 50px !important; margin: 0 !important; line-height: 1; }
         .emoji-val { font-size: 24px; display: block; margin-top: 5px; }
 
         /* 하단 버튼 */
@@ -61,9 +76,9 @@
 
     <div class="options-row">
         <div class="option-item">
-            기분
-            <span class="emoji-val" th:text="${diary.emotionTag}">😊</span>
+            <span class="emoji-large" th:text="${diary.emotionTag}">😊</span>
         </div>
+
         <div class="option-item">
             구분
             <span class="emoji-val" style="font-size: 16px; margin-top: 12px;"
@@ -80,9 +95,8 @@
 <script th:inline="javascript">
     function deleteRecord(logId) {
         if(confirm("이 기록을 정말 삭제하시겠습니까?")) {
-            // 삭제 요청 로직 (예: location.href 또는 fetch)
-            // location.href = '/api/delete/' + logId;
-            alert("삭제 기능이 호출되었습니다. (ID: " + logId + ")");
+            // 실제 삭제 요청 시 주석 해제하여 사용하세요
+            location.href = '/api/delete/' + logId;
         }
     }
 </script>
