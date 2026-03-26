@@ -25,7 +25,7 @@ function login() {
         })
         .then(result => {
             alert(result);
-            window.location.href = "/login";
+            window.location.href = "/codef/connect-page";
         })
         .catch(error => {
             console.error(error);
