@@ -19,7 +19,7 @@ public class TodayRecordRequest {
     private Boolean isManual;
 
     private String content;
-    private String emotionTag;
+    private Integer emotionTag;
     private Boolean isImpulsive;
 
 }

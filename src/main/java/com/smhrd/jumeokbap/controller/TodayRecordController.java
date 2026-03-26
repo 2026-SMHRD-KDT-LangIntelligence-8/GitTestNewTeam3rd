@@ -31,7 +31,7 @@ public class TodayRecordController {
     }
 
     @GetMapping("/recordMain/{userId}")
-    // 조회 기능
+    // 전체 조회 기능
     public String getRecordMain(@PathVariable String userId, Model model) {
             List<SpendingLog> logs = todayRecordService.getDailyTimeline(userId);
             model.addAttribute("list",logs);
@@ -39,7 +39,7 @@ public class TodayRecordController {
     }
 
     @GetMapping("/recordDetail/{logId}")
-    // 상세페이지
+    // 특정 지출 조회 기능
     public String getRecordDetail(@PathVariable("logId") Long logId, Model model){
         try{
             SpendingLog detail = todayRecordService.getLogDetail(logId);
@@ -53,6 +53,7 @@ public class TodayRecordController {
 
     @PostMapping("/analyze")
     @ResponseBody
+    // 소비메모 감성분석(flask연동)
     public String analyzeEmotion(@RequestParam("logId") Long logId,
                                  @RequestParam("content") String content){
 

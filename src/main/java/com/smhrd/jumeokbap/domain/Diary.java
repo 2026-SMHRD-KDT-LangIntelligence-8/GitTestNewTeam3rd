@@ -18,7 +18,7 @@ public class Diary {
     @Column(length = 400)
     private String content;
     @Column(nullable = false)
-    private String emotionTag;
+    private Integer emotionTag;
     private Double sentimentScore;
     private Boolean isImpulsive;
     @Column(nullable = false)

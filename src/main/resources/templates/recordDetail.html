@@ -1,13 +1,91 @@
-<div class="info-box">
-    <h2 th:text="${detail.storeName}">가게이름</h2>
-    <p>결제 금액: <span th:text="${detail.amount}">0</span>원</p>
-    <p>결제 시간: <span th:text="${detail.spentAt}">시간</span></p>
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>오늘의 기록 상세</title>
+    <style>
+        body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .container { background-color: white; width: 360px; padding: 40px 20px; border-radius: 10px; text-align: center; }
+
+        .header { color: #888; font-size: 14px; margin-bottom: 20px; }
+        .info-row { display: flex; justify-content: space-around; align-items: center; font-size: 20px; font-weight: bold; margin-bottom: 30px; }
+        .arrow { color: #ccc; cursor: pointer; }
+
+        /* 사진 & 메모 영역 */
+        .box { background-color: #fafff0; border: none; border-radius: 5px; width: 100%; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .photo-box { height: 180px; }
+        .memo-box { height: 150px; border: none; resize: none; text-align: center; font-size: 16px; padding: 10px; box-sizing: border-box; }
+
+        /* 이모티콘 & 고정비 영역 */
+        .options-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 30px; }
+        .option-item { background-color: #fafff0; flex: 1; padding: 15px 5px; border-radius: 5px; font-size: 14px; position: relative; }
+
+        /* 이모티콘 라디오 커스텀 */
+        .emoji-select { display: none; } /* 실제 선택창은 팝업이나 모달로 띄우는 게 깔끔하지만, 여기선 기본 선택 기능만 넣었습니다 */
+
+        /* 하단 버튼 */
+        .btn-group { display: flex; justify-content: space-between; gap: 10px; }
+        .btn { flex: 1; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .btn-submit { background-color: #ffcc00; color: black; }
+        .btn-delete { background-color: #ffcc00; color: black; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">오늘의 기록 상세</div>
+
+    <div class="info-row">
+        <span class="arrow">&lt;</span>
+        <span>시간</span>
+        <span>장소</span>
+        <span>금액</span>
+        <span class="arrow">&gt;</span>
+    </div>
+
+    <form id="recordForm">
+        <div class="box photo-box">
+            <span>사진 추가</span>
+        </div>
+
+        <textarea class="box memo-box" placeholder="메모 추가" name="content"></textarea>
+
+        <div class="options-row">
+            <div class="option-item" onclick="openEmojiPicker()">
+                <span id="selectedEmoji">이모티콘</span>
+                <input type="hidden" name="emotionTag" id="emotionTag">
+            </div>
+            <div class="option-item">
+                <label style="cursor:pointer;">
+                    고정비 등록
+                    <input type="checkbox" name="isFixed" value="Y" style="margin-left:5px;">
+                </label>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button type="button" class="btn btn-submit" onclick="saveData()">등록</button>
+            <button type="button" class="btn btn-delete" onclick="deleteData()">삭제</button>
+        </div>
+    </form>
 </div>
 
-<hr>
+<script>
+    // 이모티콘 선택 로직 (간단 예시)
+    function openEmojiPicker() {
+        const emojis = ['😭', '☹️', '😐', '🙂', '🤩'];
+        const choice = prompt("오늘의 기분 (1:😭, 2:☹️, 3:😐, 4:🙂, 5:🤩)");
+        if(choice >= 1 && choice <= 5) {
+            document.getElementById('selectedEmoji').innerText = emojis[choice-1];
+            document.getElementById('emotionTag').value = choice;
+        }
+    }
 
-<form action="/api/analyze" method="post">
-    <input type="hidden" name="logId" th:value="${detail.logId}">
-    <textarea name="content" placeholder="오늘의 소비는 어땠나요?"></textarea>
-    <button type="submit">감정 분석 시작</button>
-</form>
+    function saveData() {
+        // 여기에 fetch를 이용한 DB 저장 로직을 넣으면 됩니다.
+        alert("데이터가 저장되었습니다!");
+    }
+</script>
+
+</body>
+</html>
