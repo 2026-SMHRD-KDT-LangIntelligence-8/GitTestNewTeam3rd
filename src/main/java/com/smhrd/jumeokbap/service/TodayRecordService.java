@@ -57,6 +57,11 @@ public class TodayRecordService {
         return spendingLogRepository.findByUserIdOrderBySpentAtDesc(userId);
     }
 
+    // 날짜별 조회
+    public List<SpendingLog> getdailyTimeLine(String userId, String date){
+        return spendingLogRepository.findByUserIdAndRegDate(userId, date);
+    }
+
     // 특정 내역 건의 상세페이지로 이동!
     public SpendingLog getLogDetail(Long logId) {
         return spendingLogRepository.findById(logId)

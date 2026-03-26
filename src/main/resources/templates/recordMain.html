@@ -5,23 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>오늘의 기록 메인</title>
     <style>
-        body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        body { background-color: #e9e9e9; font-family: 'Pretendard', -serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .container { background-color: white; width: 360px; height: 640px; padding: 20px; border-radius: 20px; position: relative; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .header-title { color: #888; font-size: 12px; margin-bottom: 20px; text-align: left; }
 
         /* 날짜 선택바 */
         .date-selector { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; position: relative; }
-        .date-text { font-size: 22px; font-weight: bold; min-width: 140px; text-align: center; }
-        .arrow { color: #ccc; cursor: pointer; font-size: 28px; border: none; background: none; outline: none; padding: 5px; }
+        .date-text { font-size: 20px; font-weight: bold; min-width: 120px; text-align: center; }
+        .arrow { color: #ccc; cursor: pointer; font-size: 28px; border: none; background: none; outline: none; padding: 0 10px; }
         .arrow:hover { color: #ffcc00; }
 
         /* 지출 내역 박스 */
         .content-box { background-color: #fafff0; border-radius: 10px; height: 420px; padding: 10px; overflow-y: auto; }
         .list-header { display: flex; justify-content: space-between; padding: 10px 15px; font-weight: bold; color: #666; border-bottom: 1px solid #e0e7d0; margin-bottom: 10px; font-size: 14px; }
 
+        /* 내역 아이템 */
         .record-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; border-bottom: 1px dotted #e0e7d0; text-decoration: none; color: black; cursor: pointer; }
         .record-item span { flex: 1; text-align: center; font-size: 14px; }
 
+        /* 추가 버튼 */
         .btn-add { position: absolute; bottom: 30px; right: 30px; background-color: #ffcc00; width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 35px; color: white; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
         .no-data { text-align: center; padding-top: 120px; color: #bbb; font-size: 14px; line-height: 1.6; }
@@ -34,8 +36,10 @@
 
     <div class="date-selector">
         <button type="button" class="arrow" onclick="moveDate(-1)">&lt;</button>
+
         <span class="date-text" id="targetDateDisplay"
-              th:text="${targetDate}">2026-03-26</span>
+              th:text="${targetDate != null ? targetDate : #calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}">2026-03-26</span>
+
         <button type="button" class="arrow" onclick="moveDate(1)">&gt;</button>
     </div>
 
@@ -67,23 +71,30 @@
 
 <script th:inline="javascript">
     function moveDate(offset) {
-        // 1. 현재 화면에 표시된 날짜 문자열 가져오기
-        const dateText = document.getElementById('targetDateDisplay').innerText.trim();
+        // 1. 현재 날짜 텍스트 가져오기
+        const dateDisplay = document.getElementById('targetDateDisplay');
+        if (!dateDisplay) {
+            alert("ID 'targetDateDisplay'를 찾을 수 없습니다.");
+            return;
+        }
 
-        // 2. 날짜 객체 생성 (날짜 계산 시 발생할 수 있는 타임존 에러 방지 처리)
-        let dateParts = dateText.split('-');
-        let date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+        const dateText = dateDisplay.innerText.trim();
+        const parts = dateText.split('-');
 
-        // 3. 날짜 가감
+        // 2. 날짜 계산
+        let date = new Date(parts[0], parts[1] - 1, parts[2]);
         date.setDate(date.getDate() + offset);
 
-        // 4. yyyy-MM-dd 형식으로 다시 만들기
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const newDateStr = `${year}-${month}-${day}`;
+        // 3. 포맷팅 (yyyy-MM-dd)
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const newDateStr = `${y}-${m}-${d}`;
 
-        // 5. 현재 페이지로 이동 (userId 포함 경로 유지)
+        // 4. 실행 확인용 알림 (테스트 후 삭제하세요)
+        console.log("이동할 날짜:", newDateStr);
+
+        // 5. URL 이동
         const currentPath = window.location.pathname;
         window.location.href = currentPath + "?date=" + newDateStr;
     }

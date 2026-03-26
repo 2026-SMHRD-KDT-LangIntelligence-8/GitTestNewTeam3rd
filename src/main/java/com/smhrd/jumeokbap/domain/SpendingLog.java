@@ -16,7 +16,7 @@ public class SpendingLog {
     @Column(updatable = false)
     private Long logId;
 
-
+    private String regDate;
     private Integer amount;
     private String storeName;
     private String spentAt;
