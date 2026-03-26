@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>회원가입</title>
+    <title>정보수정</title>
 
     <style>
 
@@ -25,19 +25,24 @@
 
         h1 {
             text-align: center;
-            margin-bottom: 100px;
-            margin-top: 70px;
+            margin-bottom: 110px;
+            margin-top: 80px;
+        }
+
+        input {
+            width: 250px;
         }
 
         .input-box {
 
-            margin-bottom: 22px;
+            margin-bottom: 50px;
             display: flex;              /* 가로 정렬 */
             align-items: center;        /* 세로 가운데 정렬 */
-            gap: 10px;
+            gap: 1px;
         }
 
         .input-box label {
+            margin-left: 8px;
             margin-top: auto;
             margin-bottom: auto;
             font-weight: bold;
@@ -53,6 +58,7 @@
         }
 
         .input-box input {
+
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
@@ -70,6 +76,7 @@
             cursor: pointer;
             white-space: nowrap;         /* 줄바꿈 방지 */
             margin: 0;
+
         }
 
 
@@ -120,19 +127,9 @@
 <body>
 
 <div class="container">
-    <h1>회원가입</h1>
-
-    <!-- ⭐ 아이디 부분 수정 -->
-    <div class="input-box" >
-        <label>아이디</label>
-
-        <div class="id-box">
-            <input type="text" id="userId" placeholder="아이디 입력">
-            <button type="button" class="check-btn" onclick="checkId()">중복체크</button>
-        </div>
+    <h1>정보수정</h1>
 
 
-    </div>
     <!-- 결과 표시 -->
     <div id="idCheckResult"></div>
     <div class="input-box">
@@ -140,16 +137,9 @@
         <input type="password" id="password" placeholder="비밀번호 입력">
     </div>
 
-    <div class="input-box">
-        <label>비밀번호 확인</label>
-        <input type="password" id="passwordConfirm" placeholder="비밀번호 다시 입력">
-        <div id="passwordCheckResult" style="font-size:13px; margin-top:5px;"></div>
-    </div>
 
-    <div class="input-box">
-        <label>생년월일</label>
-        <input type="text" id="birthDate" placeholder="2000-01-01">
-    </div>
+
+
 
     <div class="input-box">
         <label>닉네임</label>
@@ -166,7 +156,7 @@
         <input type="email" id="email" placeholder="example@email.com">
     </div>
 
-    <button type="button" onclick="signup()">가입하기</button>
+    <button type="button" onclick="signup()">수정하기</button>
 </div>
 
 <script src="/js/signup.js"></script>

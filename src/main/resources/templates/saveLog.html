@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지출 기록 추가</title>
+    <style>
+        body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background-color: white; width: 360px; height: 640px; padding: 20px; border-radius: 20px; position: relative; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+
+        /* 상단 입력부 */
+        .top-inputs { display: flex; justify-content: space-around; align-items: center; margin: 20px 0; gap: 10px; }
+        .top-inputs input { width: 30%; border: none; border-bottom: 2px solid #eee; padding: 8px 0; text-align: center; font-size: 16px; font-weight: bold; outline: none; }
+        .top-inputs input:focus { border-bottom-color: #ffcc00; }
+
+        /* 사진 및 메모 박스 */
+        .content-area { flex-grow: 1; display: flex; flex-direction: column; gap: 15px; }
+        .box { background-color: #fafff0; border-radius: 12px; display: flex; justify-content: center; align-items: center; color: #666; font-size: 15px; cursor: pointer; border: 1px dashed #e0e7d0; transition: 0.2s; position: relative; overflow: hidden; }
+        .box:hover { background-color: #f2f7e5; }
+        .photo-box { height: 180px; padding: 0; }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .memo-box { height: 140px; }
+
+        /* 하단 버튼들 */
+        .sub-buttons { display: flex; gap: 15px; margin-bottom: 20px; position: relative; }
+        .btn-small { flex: 1; background-color: #fafff0; border: none; border-radius: 8px; padding: 12px; font-size: 13px; color: #444; cursor: pointer; text-align: center; }
+
+        /* 이모티콘 선택창 (팝업) */
+        .emoji-picker {
+            display: none; position: absolute; bottom: 50px; left: 0; width: 100%;
+            background: white; border: 1px solid #ddd; border-radius: 10px;
+            padding: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            justify-content: space-around; z-index: 10;
+        }
+        .emoji-item { font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .emoji-item:hover { transform: scale(1.3); }
+
+        .action-buttons { display: flex; gap: 15px; }
+        .btn-main { flex: 1; border: none; border-radius: 12px; padding: 15px; font-size: 16px; font-weight: bold; cursor: pointer; color: #333; transition: 0.2s; }
+        .btn-reg { background-color: #ffcc00; }
+        .btn-del { background-color: #ffda44; }
+
+        textarea { width: 100%; height: 100%; border: none; background: transparent; resize: none; outline: none; padding: 15px; box-sizing: border-box; text-align: center; font-family: inherit; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <form th:action="@{/api/save}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="userId" th:value="${userId}">
+
+        <input type="hidden" name="emotionTag" id="emotionTagInput" value="">
+
+        <div class="top-inputs">
+            <input type="time" name="spentAt" required>
+            <input type="text" name="storeName" placeholder="장소" required>
+            <input type="number" name="amount" id="amountInput" placeholder="금액" step="1000" min="0" required>
+        </div>
+
+        <div class="content-area">
+            <div class="box photo-box" onclick="document.getElementById('fileInput').click();">
+                <img id="preview" alt="미리보기">
+                <span id="photo-text">사진 추가</span>
+                <input type="file" id="fileInput" name="imageFile" accept="image/*" style="display:none;" onchange="previewImage(this);">
+            </div>
+            <div class="box memo-box">
+                <textarea name="content" placeholder="메모 추가"></textarea>
+            </div>
+        </div>
+
+        <div class="sub-buttons">
+            <button type="button" class="btn-small" id="emojiBtn" onclick="toggleEmojiPicker()">이모티콘 선택</button>
+            <button type="button" class="btn-small">고정비 등록</button>
+
+            <div class="emoji-picker" id="emojiPicker">
+                <span class="emoji-item" onclick="selectEmoji('😊')">😊</span>
+                <span class="emoji-item" onclick="selectEmoji('😭')">😭</span>
+                <span class="emoji-item" onclick="selectEmoji('😡')">😡</span>
+                <span class="emoji-item" onclick="selectEmoji('😋')">😋</span>
+                <span class="emoji-item" onclick="selectEmoji('💸')">💸</span>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button type="submit" class="btn-main btn-reg">등록</button>
+            <button type="button" class="btn-main btn-del" onclick="history.back()">삭제</button>
+        </div>
+    </form>
+</div>
+
+<script th:inline="javascript">
+    // 1. 금액 보정 (1000원 단위)
+    const amountInput = document.getElementById('amountInput');
+    amountInput.addEventListener('blur', function() {
+        let value = parseInt(this.value) || 0;
+        if (value > 0) this.value = Math.round(value / 1000) * 1000;
+    });
+
+    // 2. 사진 미리보기
+    function previewImage(input) {
+        const preview = document.getElementById('preview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                document.getElementById('photo-text').style.display = 'none';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // 3. 이모티콘 선택 기능
+    function toggleEmojiPicker() {
+        const picker = document.getElementById('emojiPicker');
+        // display가 flex이면 숨기고, 아니면 flex로 보이기
+        picker.style.display = (picker.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    function selectEmoji(emoji) {
+        // [중요] 사용자가 클릭한 이모티콘(문자)을 그대로 UI와 Hidden Input에 반영합니다.
+        console.log("선택된 이모티콘:", emoji);
+
+        // 버튼 글자를 선택한 이모티콘으로 변경
+        document.getElementById('emojiBtn').innerText = emoji;
+
+        // 숨겨진 input(name="emotionTag")에 이모티콘 문자 저장
+        document.getElementById('emotionTagInput').value = emoji;
+
+        // 선택창 닫기
+        toggleEmojiPicker();
+    }
+</script>
+
+</body>
+</html>
