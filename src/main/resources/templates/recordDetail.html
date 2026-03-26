@@ -4,86 +4,86 @@
     <meta charset="UTF-8">
     <title>오늘의 기록 상세</title>
     <style>
-        body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; padding: 20px; }
-        .container { background-color: white; width: 360px; padding: 40px 20px; border-radius: 10px; text-align: center; }
+        body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; min-height: 100vh; align-items: center; }
+        .container { background-color: white; width: 360px; padding: 40px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); box-sizing: border-box; }
 
-        .header { color: #888; font-size: 14px; margin-bottom: 20px; }
-        .info-row { display: flex; justify-content: space-around; align-items: center; font-size: 20px; font-weight: bold; margin-bottom: 30px; }
-        .arrow { color: #ccc; cursor: pointer; }
+        .header { color: #888; font-size: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { cursor: pointer; border: none; background: none; font-size: 18px; color: #888; }
+
+        /* 상단 정보 (시간, 장소, 금액) */
+        .info-row { display: flex; justify-content: space-around; align-items: center; font-size: 18px; font-weight: bold; margin-bottom: 30px; color: #333; }
+        .info-item { flex: 1; text-align: center; }
+        .amount-text { color: #ffcc00; }
 
         /* 사진 & 메모 영역 */
-        .box { background-color: #fafff0; border: none; border-radius: 5px; width: 100%; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .box { background-color: #fafff0; border: 1px solid #e0e7d0; border-radius: 10px; width: 100%; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         .photo-box { height: 180px; }
-        .memo-box { height: 150px; border: none; resize: none; text-align: center; font-size: 16px; padding: 10px; box-sizing: border-box; }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .no-image { color: #bbb; font-size: 14px; }
+
+        .memo-box { height: 120px; border: 1px solid #e0e7d0; resize: none; text-align: center; font-size: 16px; padding: 15px; box-sizing: border-box; background-color: #fafff0; width: 100%; border-radius: 10px; outline: none; }
 
         /* 이모티콘 & 고정비 영역 */
         .options-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 30px; }
-        .option-item { background-color: #fafff0; flex: 1; padding: 15px 5px; border-radius: 5px; font-size: 14px; position: relative; }
-
-        /* 이모티콘 라디오 커스텀 */
-        .emoji-select { display: none; } /* 실제 선택창은 팝업이나 모달로 띄우는 게 깔끔하지만, 여기선 기본 선택 기능만 넣었습니다 */
+        .option-item { background-color: #fafff0; border: 1px solid #e0e7d0; flex: 1; padding: 15px 5px; border-radius: 10px; font-size: 14px; }
+        .emoji-val { font-size: 24px; display: block; margin-top: 5px; }
 
         /* 하단 버튼 */
         .btn-group { display: flex; justify-content: space-between; gap: 10px; }
-        .btn { flex: 1; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
-        .btn-submit { background-color: #ffcc00; color: black; }
+        .btn { flex: 1; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-back { background-color: #eee; color: #666; }
         .btn-delete { background-color: #ffcc00; color: black; }
+        .btn:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">오늘의 기록 상세</div>
-
-    <div class="info-row">
-        <span class="arrow">&lt;</span>
-        <span>시간</span>
-        <span>장소</span>
-        <span>금액</span>
-        <span class="arrow">&gt;</span>
+    <div class="header">
+        <span class="back-btn" onclick="history.back()">←</span>
+        <span>오늘의 기록 상세</span>
+        <span></span>
     </div>
 
-    <form id="recordForm">
-        <div class="box photo-box">
-            <span>사진 추가</span>
-        </div>
+    <div class="info-row">
+        <span class="info-item" th:text="${#strings.length(detail.spentAt) > 5 ? #strings.substring(detail.spentAt, 11, 16) : detail.spentAt}">시간</span>
+        <span class="info-item" th:text="${detail.storeName}">장소</span>
+        <span class="info-item amount-text" th:text="${#numbers.formatInteger(detail.amount, 0, 'COMMA') + '원'}">금액</span>
+    </div>
 
-        <textarea class="box memo-box" placeholder="메모 추가" name="content"></textarea>
+    <div class="box photo-box">
+        <img th:if="${detail.imageUrl != null and detail.imageUrl != ''}"
+             th:src="@{'/upload/' + ${detail.imageUrl}}" alt="지출 사진">
+        <span th:unless="${detail.imageUrl != null and detail.imageUrl != ''}" class="no-image">등록된 사진이 없습니다.</span>
+    </div>
 
-        <div class="options-row">
-            <div class="option-item" onclick="openEmojiPicker()">
-                <span id="selectedEmoji">이모티콘</span>
-                <input type="hidden" name="emotionTag" id="emotionTag">
-            </div>
-            <div class="option-item">
-                <label style="cursor:pointer;">
-                    고정비 등록
-                    <input type="checkbox" name="isFixed" value="Y" style="margin-left:5px;">
-                </label>
-            </div>
-        </div>
+    <textarea class="memo-box" th:text="${diary.content}" readonly>메모가 없습니다.</textarea>
 
-        <div class="btn-group">
-            <button type="button" class="btn btn-submit" onclick="saveData()">등록</button>
-            <button type="button" class="btn btn-delete" onclick="deleteData()">삭제</button>
+    <div class="options-row">
+        <div class="option-item">
+            기분
+            <span class="emoji-val" th:text="${diary.emotionTag}">😊</span>
         </div>
-    </form>
+        <div class="option-item">
+            구분
+            <span class="emoji-val" style="font-size: 16px; margin-top: 12px;"
+                  th:text="${detail.isManual == 'Y' ? '수동입력' : '자동입력'}">입력방식</span>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button type="button" class="btn btn-back" onclick="history.back()">뒤로가기</button>
+        <button type="button" class="btn btn-delete" th:onclick="|deleteRecord(${detail.logId})|">내역 삭제</button>
+    </div>
 </div>
 
-<script>
-    // 이모티콘 선택 로직 (간단 예시)
-    function openEmojiPicker() {
-        const emojis = ['😭', '☹️', '😐', '🙂', '🤩'];
-        const choice = prompt("오늘의 기분 (1:😭, 2:☹️, 3:😐, 4:🙂, 5:🤩)");
-        if(choice >= 1 && choice <= 5) {
-            document.getElementById('selectedEmoji').innerText = emojis[choice-1];
-            document.getElementById('emotionTag').value = choice;
+<script th:inline="javascript">
+    function deleteRecord(logId) {
+        if(confirm("이 기록을 정말 삭제하시겠습니까?")) {
+            // 삭제 요청 로직 (예: location.href 또는 fetch)
+            // location.href = '/api/delete/' + logId;
+            alert("삭제 기능이 호출되었습니다. (ID: " + logId + ")");
         }
-    }
-
-    function saveData() {
-        // 여기에 fetch를 이용한 DB 저장 로직을 넣으면 됩니다.
-        alert("데이터가 저장되었습니다!");
     }
 </script>
 

@@ -27,13 +27,21 @@ public class TodayRecordService {
 
     @Transactional
     // 수동입력
-    public void manualRecord(TodayRecordRequest dto) {
+    public void manualRecord(TodayRecordRequest dto, org.springframework.web.multipart.MultipartFile imageFile) {
+
+        String fileName = "";
+        if (imageFile != null && !imageFile.isEmpty()) {
+            fileName = imageFile.getOriginalFilename();
+
+        }
+
         SpendingLog spendingLog = SpendingLog.builder()
                 .userId(dto.getUserId())
                 .amount(Integer.valueOf(dto.getAmount()))
                 .storeName(dto.getStoreName())
                 .spentAt(dto.getSpentAt())
-                .imageUrl(dto.getImageUrl())
+                .imageUrl(fileName)
+                .regDate(LocalDate.now().toString())
                 .isManual("Y")
                 .build();
 
@@ -92,5 +100,11 @@ public class TodayRecordService {
         }
 
     }
+
+    public Diary getDiaryByLogId(Long logId){
+        return diaryRepository.findByLogId(logId)
+                .orElse(new Diary());
+    }
+
 }
 
