@@ -8,7 +8,7 @@
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #74ebd5, #9face6);
+      background: white;
       font-family: Arial, sans-serif;
     }
 
@@ -23,12 +23,13 @@
 
     h1 {
       text-align: center;
-      margin-bottom: 30px;
-      color: #333;
+      margin-bottom: 60px;
+      color: #333333;
     }
 
     .input-box {
-      margin-bottom: 20px;
+      margin-bottom: 17px;
+
     }
 
     .input-box label {
@@ -39,23 +40,19 @@
     }
 
     .input-box input {
-      width: 100%;
+      width: 95%;
       padding: 12px;
       border: 1px solid #ccc;
       border-radius: 8px;
       transition: 0.3s;
+
     }
 
-    .input-box input:focus {
-      border-color: #6c63ff;
-      outline: none;
-      box-shadow: 0 0 5px rgba(108,99,255,0.5);
-    }
 
     .btn-login {
       width: 100%;
       padding: 14px;
-      background: #6c63ff;
+      background: black;
       border: none;
       border-radius: 8px;
       color: white;
@@ -63,20 +60,20 @@
       font-weight: bold;
       cursor: pointer;
       transition: 0.3s;
+      margin-top: 50px;
     }
 
-    .btn-login:hover {
-      background: #574fd6;
-    }
+
 
     .bottom-text {
       text-align: center;
       margin-top: 20px;
       font-size: 14px;
+      color: #706A6A;
     }
 
     .bottom-text a {
-      color: #6c63ff;
+      color: #FFCC00;
       text-decoration: none;
       font-weight: bold;
     }
@@ -89,15 +86,16 @@
 <body>
 
 <div class="container">
-  <h1>로그인</h1>
+
+  <h1 style='font-size:35px;'>&#127833;주먹밥!</h1>
 
   <div class="input-box">
-    <label for="userId">아이디</label>
+
     <input type="text" id="userId" placeholder="아이디 입력">
   </div>
 
   <div class="input-box">
-    <label for="password">비밀번호</label>
+
     <input type="password" id="password" placeholder="비밀번호 입력">
   </div>
 
