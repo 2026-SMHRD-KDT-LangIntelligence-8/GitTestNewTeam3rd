@@ -52,7 +52,7 @@
 
         <div th:if="${list != null and !#lists.isEmpty(list)}">
             <div th:each="log : ${list}" class="record-item"
-                 th:onclick="|location.href='/recordDetail/' + ${log.logId}|">
+                 th:onclick="|location.href='/api/recordDetail/' + ${log.logId}|">
                 <span style="text-align:left; color: #777;" th:text="${log.spentAt}">시간</span>
                 <span style="text-align:center;" th:text="${log.storeName}">장소</span>
                 <span style="text-align:right; font-weight:bold;"
@@ -66,7 +66,7 @@
         </div>
     </div>
 
-    <button class="btn-add" th:onclick="|location.href='/recordDetail'|">+</button>
+    <button class="btn-add" th:onclick="|location.href='/recordDetail/{logId}'|">+</button>
 </div>
 
 <script th:inline="javascript">

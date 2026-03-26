@@ -58,7 +58,7 @@ public class TodayRecordService {
     }
 
     // 날짜별 조회
-    public List<SpendingLog> getdailyTimeLine(String userId, String date){
+    public List<SpendingLog> getDailyTimeline(String userId, String date){
         return spendingLogRepository.findByUserIdAndRegDate(userId, date);
     }
 

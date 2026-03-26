@@ -32,26 +32,25 @@ public class TodayRecordController {
     }
 
     @GetMapping("/recordMain/{userId}")
-    //날짜별 조회 기능
+    // 전체기능조회
     public String getRecordMain(
             @PathVariable String userId,
-            @RequestParam(value = "date", required = false) String date, // 'date'라는 이름으로 받기
+            @RequestParam(value = "date", required = false) String date,
             Model model) {
 
-        if (date == null || date.isEmpty()) date = LocalDate.now().toString();
-        List<SpendingLog> logs = todayRecordService.getDailyTimeline(userId, date);
+        List<SpendingLog> logs;
+
+        if (date == null || date.isEmpty()) {
+            date = LocalDate.now().toString();
+            logs = todayRecordService.getDailyTimeline(userId, date);
+        }
+        else {
+            logs = todayRecordService.getDailyTimeline(userId, date);
+        }
         model.addAttribute("list", logs);
         model.addAttribute("targetDate", date);
 
         return "recordMain";
-    }
-
-    @GetMapping("/recordMain/{userId}")
-    // 전체 조회 기능
-    public String getRecordMain(@PathVariable String userId, Model model) {
-            List<SpendingLog> logs = todayRecordService.getDailyTimeline(userId);
-            model.addAttribute("list",logs);
-            return "recordMain";
     }
 
     @GetMapping("/recordDetail/{logId}")
