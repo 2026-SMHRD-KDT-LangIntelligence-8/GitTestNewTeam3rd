@@ -15,12 +15,25 @@ public class CodefConnectedIdService {
 
     private final CodefApiService codefApiService;
     private final UserCodefAccountRepository repository;
+    private final CodefCryptoService codefCryptoService;   // 추가
 
     public String connectAccount(String userId, CodefConnectRequest dto) {
 
-        String businessType = dto.getAccountType();
+        String businessType;
+        if ("BK".equalsIgnoreCase(dto.getAccountType()) || "bank".equalsIgnoreCase(dto.getAccountType())) {
+            businessType = "BK";
+        } else if ("CD".equalsIgnoreCase(dto.getAccountType()) || "card".equalsIgnoreCase(dto.getAccountType())) {
+            businessType = "CD";
+        } else {
+            throw new IllegalArgumentException("accountType 값이 올바르지 않습니다: " + dto.getAccountType());
+        }
+
         String loginType = (dto.getLoginType() == null || dto.getLoginType().isBlank())
-                ? "1" : dto.getLoginType();
+                ? "1"
+                : dto.getLoginType();
+
+        // 여기서 평문 비밀번호를 RSA 암호화
+        String encryptedPassword = codefCryptoService.encryptPassword(dto.getPassword());
 
         String requestBody = """
         {
@@ -41,7 +54,7 @@ public class CodefConnectedIdService {
                 dto.getOrganization(),
                 loginType,
                 dto.getLoginId(),
-                dto.getPassword()
+                encryptedPassword
         );
 
         JsonNode response = codefApiService.callPostApi(
@@ -50,6 +63,7 @@ public class CodefConnectedIdService {
         );
 
         System.out.println("CODEF 응답 = " + response.toPrettyString());
+        System.out.println("CODEF 요청 바디 = " + requestBody);
 
         String connectedId = response.path("data").path("connectedId").asText();
 
@@ -60,7 +74,7 @@ public class CodefConnectedIdService {
         }
 
         String alias = (dto.getAccountAlias() == null || dto.getAccountAlias().isBlank())
-                ? ("card".equalsIgnoreCase(businessType) ? "내 카드" : "내 계좌")
+                ? ("CD".equalsIgnoreCase(businessType) ? "내 카드" : "내 계좌")
                 : dto.getAccountAlias();
 
         UserCodefAccount account = UserCodefAccount.builder()
