@@ -50,9 +50,12 @@ public class UserController {
             ));
         }
 
+        String nickname = userService.getNicknameByUserId(userId);
+
         return ResponseEntity.ok(Map.of(
                 "loggedIn", true,
-                "userId", userId
+                "userId", userId,
+                "nickname", nickname
         ));
     }
 

@@ -3,12 +3,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     await fetchMainData();
 });
 
-// 로그인 상태 확인 후 버튼 변경
+// 로그인 상태 확인 후 버튼/닉네임 표시 변경
 async function checkLoginStatus() {
     const loginBtn = document.getElementById('loginMoveBtn');
+    const loginUserText = document.getElementById('loginUserText');
 
-    if (!loginBtn) {
-        console.error('loginMoveBtn 버튼을 찾을 수 없습니다.');
+    if (!loginBtn || !loginUserText) {
+        console.error('헤더 요소를 찾을 수 없습니다.');
         return;
     }
 
@@ -22,17 +23,18 @@ async function checkLoginStatus() {
             const data = await response.json();
             console.log('로그인 상태 확인 성공:', data);
 
+            loginUserText.innerText = (data.nickname || '') + '님';
             loginBtn.innerText = '로그아웃';
             loginBtn.onclick = logout;
         } else {
-            console.log('비로그인 상태');
-
+            loginUserText.innerText = '';
             loginBtn.innerText = '로그인';
             loginBtn.onclick = goToLogin;
         }
     } catch (error) {
         console.error('세션 확인 오류:', error);
 
+        loginUserText.innerText = '';
         loginBtn.innerText = '로그인';
         loginBtn.onclick = goToLogin;
     }

@@ -43,11 +43,19 @@
       letter-spacing: -0.5px;
     }
 
-    .login-move-btn {
+    .header-right {
       position: absolute;
       right: 16px;
       top: 50%;
       transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      z-index: 10;
+    }
+
+    .login-move-btn {
       border: none;
       background: #333;
       color: white;
@@ -56,11 +64,21 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      z-index: 10;
+      min-width: 76px;
     }
 
     .login-move-btn:hover {
       opacity: 0.9;
+    }
+
+    .login-user-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: #333;
+      white-space: nowrap;
+      line-height: 1.2;
+      text-align: center;
+      min-height: 14px;
     }
 
     .character-area {
@@ -167,7 +185,11 @@
 <div class="mobile-container" id="mainDashboard">
   <header class="header">
     <h1 id="headerTitle">🍙 주먹밥 🍙</h1>
-    <button id="loginMoveBtn" class="login-move-btn" type="button">로그인</button>
+
+    <div class="header-right">
+      <button id="loginMoveBtn" class="login-move-btn" type="button">로그인</button>
+      <span id="loginUserText" class="login-user-text"></span>
+    </div>
   </header>
 
   <main class="character-area">
