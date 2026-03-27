@@ -25,7 +25,7 @@ function login() {
         })
         .then(result => {
             alert(result);
-            window.location.href = "/codef/connect-page";  //나중에 이거 메인으로 변경할거임!!!!
+            window.location.href = "/";
         })
         .catch(error => {
             console.error(error);

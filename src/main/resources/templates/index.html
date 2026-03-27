@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>주먹밥 - 메인 대시보드</title>
   <style>
-    /* 1. 기본 스타일 초기화 */
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       background-color: #f0f2f5;
       display: flex;
@@ -16,7 +16,6 @@
       font-family: 'Pretendard', -apple-system, sans-serif;
     }
 
-    /* 2. 모바일 화면 비율 고정 */
     .mobile-container {
       width: 360px;
       height: 740px;
@@ -28,14 +27,16 @@
       position: relative;
     }
 
-    /* 3. 상단 헤더 */
+    /* 🔥 헤더 수정 */
     .header {
       flex: 1.2;
       display: flex;
       justify-content: center;
       align-items: center;
       border-bottom: 1px solid #f9f9f9;
+      position: relative;
     }
+
     #headerTitle {
       font-size: 20px;
       font-weight: 800;
@@ -43,7 +44,26 @@
       letter-spacing: -0.5px;
     }
 
-    /* 4. 캐릭터 & 말풍선 영역 */
+    /* 🔥 로그인 버튼 */
+    .login-move-btn {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: #333;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .login-move-btn:hover {
+      opacity: 0.9;
+    }
+
     .character-area {
       flex: 5.8;
       display: flex;
@@ -51,6 +71,7 @@
       justify-content: center;
       align-items: center;
     }
+
     .bubble-container {
       background: #F2F2F2;
       padding: 20px;
@@ -64,6 +85,7 @@
       line-height: 1.6;
       word-break: keep-all;
     }
+
     .bubble-container::after {
       content: '';
       position: absolute;
@@ -74,12 +96,12 @@
       border-right: 12px solid transparent;
       border-top: 12px solid #F2F2F2;
     }
+
     .jumeok-img {
       width: 220px;
       height: auto;
     }
 
-    /* 5. 지출 정보 영역 (그래프 영역) */
     .info-area {
       flex: 3;
       padding: 0 30px;
@@ -92,22 +114,26 @@
     .progress-section {
       width: 100%;
     }
+
     .progress-text-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
     }
+
     #challengeNameDisplay {
       font-size: 15px;
       font-weight: 700;
       color: #333;
     }
+
     #progressPercent {
       font-size: 16px;
       font-weight: 800;
       color: #FFD233;
     }
+
     .progress-bar-bg {
       width: 100%;
       height: 16px;
@@ -115,6 +141,7 @@
       border-radius: 10px;
       overflow: hidden;
     }
+
     .progress-bar-fill {
       width: 0%;
       height: 100%;
@@ -122,6 +149,7 @@
       border-radius: 10px;
       transition: width 1s ease-in-out;
     }
+
     .accumulated-text {
       margin-top: 15px;
       font-size: 13px;
@@ -129,18 +157,22 @@
       text-align: right;
     }
 
-    /* 예산 초과 상태 스타일 */
     .is-over .progress-bar-fill { background: #FF5A5A; }
     .is-over #progressPercent { color: #FF5A5A; }
     .is-over .bubble-container { background: #FFEAEA; }
     .is-over .bubble-container::after { border-top-color: #FFEAEA; }
+
   </style>
 </head>
+
 <body>
 
 <div class="mobile-container" id="mainDashboard">
+
+  <!-- 🔥 헤더 + 로그인 버튼 -->
   <header class="header">
     <h1 id="headerTitle">🍙 주먹밥 🍙</h1>
+    <button class="login-move-btn" onclick="goToLogin()">로그인</button>
   </header>
 
   <main class="character-area">
@@ -156,14 +188,17 @@
         <span id="challengeNameDisplay">챌린지 확인 중...</span>
         <span id="progressPercent">0%</span>
       </div>
+
       <div class="progress-bar-bg">
         <div id="progressBarFill" class="progress-bar-fill"></div>
       </div>
+
       <div class="accumulated-text">
         총 누적: <span id="accumulatedUsage">0</span>원
       </div>
     </div>
   </footer>
+
 </div>
 
 <script src="/js/index.js"></script>
