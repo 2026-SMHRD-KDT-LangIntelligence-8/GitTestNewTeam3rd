@@ -59,10 +59,12 @@ public class TodayRecordService {
         SpendingLog saveLog = spendingLogRepository.save(spendingLog);
 
         String resultFromServer = analyzeText(dto.getContent());
+        boolean isImpulsive = "1".equals(resultFromServer);
         // 3. 콘솔 확인용 로그
         System.out.println("🤖 AI 분석 결과: " + resultFromServer);
 
-        boolean isImpulsive = "1".equals(resultFromServer);
+        boolean existsDiary = diaryRepository.existsByUserIdAndRegDate(dto.getUserId(), recordDate);
+        boolean isMain = !existsDiary;
 
         Diary diary = Diary.builder()
                 .userId(dto.getUserId())
@@ -70,8 +72,9 @@ public class TodayRecordService {
                 .emotionTag(dto.getEmotionTag())
                 .sentimentScore(0.0)
                 .isImpulsive(isImpulsive)
-                .isMain(false)
+                .isMain(isMain)
                 .logId(saveLog.getLogId())
+                .regDate(recordDate)
                 .build();
 
         diaryRepository.save(diary);
@@ -92,6 +95,7 @@ public class TodayRecordService {
             diaryRepository.findByLogId(log.getLogId()).ifPresent(diary -> {
                 log.setEmotionTag(diary.getEmotionTag());
                 log.setIsImpulsive(diary.getIsImpulsive());
+                log.setIsMain(diary.getIsMain());
             });
         }
         return logs;

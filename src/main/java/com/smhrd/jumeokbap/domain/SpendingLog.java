@@ -35,11 +35,6 @@ public class SpendingLog {
     private Long accountId;
     @Column(length = 1)
     private String isFixed = "N";
-
-
-
-
-
-
+    private Boolean isMain;
 
 }
