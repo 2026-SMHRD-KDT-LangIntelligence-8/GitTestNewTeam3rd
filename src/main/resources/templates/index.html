@@ -27,7 +27,6 @@
       position: relative;
     }
 
-    /* 🔥 헤더 수정 */
     .header {
       flex: 1.2;
       display: flex;
@@ -44,7 +43,6 @@
       letter-spacing: -0.5px;
     }
 
-    /* 🔥 로그인 버튼 */
     .login-move-btn {
       position: absolute;
       right: 16px;
@@ -58,6 +56,7 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
+      z-index: 10;
     }
 
     .login-move-btn:hover {
@@ -161,18 +160,14 @@
     .is-over #progressPercent { color: #FF5A5A; }
     .is-over .bubble-container { background: #FFEAEA; }
     .is-over .bubble-container::after { border-top-color: #FFEAEA; }
-
   </style>
 </head>
-
 <body>
 
 <div class="mobile-container" id="mainDashboard">
-
-  <!-- 🔥 헤더 + 로그인 버튼 -->
   <header class="header">
     <h1 id="headerTitle">🍙 주먹밥 🍙</h1>
-    <button class="login-move-btn" onclick="goToLogin()">로그인</button>
+    <button id="loginMoveBtn" class="login-move-btn" type="button">로그인</button>
   </header>
 
   <main class="character-area">
@@ -188,20 +183,16 @@
         <span id="challengeNameDisplay">챌린지 확인 중...</span>
         <span id="progressPercent">0%</span>
       </div>
-
       <div class="progress-bar-bg">
         <div id="progressBarFill" class="progress-bar-fill"></div>
       </div>
-
       <div class="accumulated-text">
         총 누적: <span id="accumulatedUsage">0</span>원
       </div>
     </div>
   </footer>
-
 </div>
 
 <script src="/js/index.js"></script>
-
 </body>
 </html>
