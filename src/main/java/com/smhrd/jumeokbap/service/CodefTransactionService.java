@@ -15,13 +15,14 @@ public class CodefTransactionService {
 
         String requestBody = """
         {
-          "organization": "%s",
-          "connectedId": "%s",
-          "account": "%s",
-          "startDate": "%s",
-          "endDate": "%s",
-          "orderBy": "%s",
-          "inquiryType": "%s"
+            "organization": "%s",
+            "connectedId": "%s",
+            "account": "%s",
+            "startDate": "%s",
+            "endDate": "%s",
+            "orderBy": "%s",
+            "inquiryType": "1",
+            "accountPassword": "%s"
         }
         """.formatted(
                 dto.getOrganization(),
