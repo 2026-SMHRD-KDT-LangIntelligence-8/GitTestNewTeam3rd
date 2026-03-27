@@ -22,8 +22,9 @@ public class TodayRecordController {
 
     @GetMapping("/saveLog")
     // 수동 입력 페이지
-    public String showSaveLog(@RequestParam("userId") String userId, Model model) {
+    public String showSaveLog(@RequestParam("userId") String userId, @RequestParam("date") String date, Model model) {
         model.addAttribute("userId", userId);
+        model.addAttribute("selectedDate", date);
         return "saveLog";
     }
 

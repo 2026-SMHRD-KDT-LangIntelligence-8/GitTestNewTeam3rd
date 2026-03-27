@@ -6,6 +6,7 @@ import com.smhrd.jumeokbap.dto.TodayRecordRequest;
 import com.smhrd.jumeokbap.repository.DiaryRepository;
 import com.smhrd.jumeokbap.repository.SpendingLogRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -36,13 +37,22 @@ public class TodayRecordService {
             fileName = imageFile.getOriginalFilename();
 
         }
+        LocalDate recordDate;
+
+        if (dto.getRegDate() != null && !dto.getRegDate().isEmpty()) {
+            // 💡 문자열 "2026-03-26" 등을 LocalDate 객체로 변환
+            recordDate = LocalDate.parse(dto.getRegDate());
+        } else {
+            recordDate = LocalDate.now();
+        }
+
         SpendingLog spendingLog = SpendingLog.builder()
                 .userId(dto.getUserId())
                 .amount(Integer.valueOf(dto.getAmount()))
                 .storeName(dto.getStoreName())
                 .spentAt(dto.getSpentAt())
                 .imageUrl(fileName)
-                .regDate(LocalDate.now())
+                .regDate(recordDate)
                 .isManual("Y")
                 .build();
 
