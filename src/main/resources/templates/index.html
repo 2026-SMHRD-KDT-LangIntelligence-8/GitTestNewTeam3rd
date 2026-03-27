@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주먹밥 - 메인 대시보드</title>
+  <style>
+    /* 1. 기본 스타일 초기화 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Pretendard', -apple-system, sans-serif;
+    }
+
+    /* 2. 모바일 화면 비율 고정 */
+    .mobile-container {
+      width: 360px;
+      height: 740px;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    /* 3. 상단 헤더 (비중을 조금 줄였습니다) */
+    .header {
+      flex: 1.2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-bottom: 1px solid #f9f9f9;
+    }
+    #headerTitle {
+      font-size: 20px;
+      font-weight: 800;
+      color: #333;
+      letter-spacing: -0.5px;
+    }
+
+    /* 4. 캐릭터 & 말풍선 영역 */
+    .character-area {
+      flex: 5.8;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .bubble-container {
+      background: #F2F2F2;
+      padding: 20px;
+      border-radius: 25px;
+      margin-bottom: 25px;
+      position: relative;
+      width: 85%;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+    .bubble-container::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 12px solid #F2F2F2;
+    }
+    .jumeok-img {
+      width: 220px;
+      height: auto;
+    }
+
+    /* 5. 지출 정보 영역 (그래프 영역) */
+    .info-area {
+      flex: 3;
+      padding: 0 30px;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .progress-section {
+      width: 100%;
+    }
+    .progress-text-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center; /* 세로 중앙 정렬 */
+      margin-bottom: 12px;
+    }
+    /* 챌린지 이름이 들어갈 자리 (왼쪽) */
+    #challengeNameDisplay {
+      font-size: 15px;
+      font-weight: 700;
+      color: #333;
+    }
+    /* 퍼센트 (오른쪽) */
+    #progressPercent {
+      font-size: 16px;
+      font-weight: 800;
+      color: #FFD233; /* 주먹밥 노란색으로 강조 */
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 16px;
+      background: #EBEBEB;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: #FFD233;
+      border-radius: 10px;
+      transition: width 1s ease-in-out;
+    }
+    .accumulated-text {
+      margin-top: 15px;
+      font-size: 13px;
+      color: #aaaaaa;
+      text-align: right;
+    }
+
+    /* 예산 초과 상태 스타일 */
+    .is-over .progress-bar-fill { background: #FF5A5A; }
+    .is-over #progressPercent { color: #FF5A5A; }
+    .is-over .bubble-container { background: #FFEAEA; }
+    .is-over .bubble-container::after { border-top-color: #FFEAEA; }
+  </style>
+</head>
+<body>
+
+<div class="mobile-container" id="mainDashboard">
+  <header class="header">
+    <h1 id="headerTitle">🍙 주먹밥 🍙</h1>
+  </header>
+
+  <main class="character-area">
+    <div class="bubble-container">
+      <p id="bubbleMessage">데이터를 불러오고 있어요! 🍙</p>
+    </div>
+    <img src="/images/jumeok_default.png" alt="주먹밥 캐릭터" class="jumeok-img" id="jumeokImg">
+  </main>
+
+  <footer class="info-area">
+    <div class="progress-section">
+      <div class="progress-text-row">
+        <span id="challengeNameDisplay">챌린지 확인 중...</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div id="progressBarFill" class="progress-bar-fill"></div>
+      </div>
+      <div class="accumulated-text">
+        총 누적: <span id="accumulatedUsage">0</span>원
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    fetchMainData();
+  });
+
+  async function fetchMainData() {
+    try {
+      const response = await fetch('/api/main/dashboard');
+      if (!response.ok) throw new Error('데이터 로드 실패');
+
+      const data = await response.json();
+
+      // 1. 챌린지 이름 설정 (그래프 위쪽 왼쪽에 대입)
+      var challengeName = data.challengeName;
+      if (challengeName === "진행 중인 챌린지가 없습니다" || !challengeName) {
+        // 유저님 요청: 진행 중인 챌린지가 없을 때 문구
+        challengeName = "진행 중인 챌린지가 없어요!";
+      }
+      document.getElementById('challengeNameDisplay').innerText = challengeName;
+
+      // 2. 말풍선 메시지 조합 (데이터 대입 로직)
+      var message = "";
+      var formattedToday = data.todayUsage.toLocaleString();
+
+      // 챌린지 존재 여부에 따라 말풍선 내용 변경
+      if (data.challengeName === "진행 중인 챌린지가 없습니다" || !data.challengeName) {
+        // 챌린지가 없을 때
+        message = "오늘은 " + formattedToday + "원을 사용했어요!<br>새로운 목표를 설정해볼까요?";
+      } else {
+        // 챌린지 진행 중일 때
+        message = "오늘은 " + formattedToday + "원을 사용했어요!";
+        if (data.overBudget) {
+          message += "<br><span style='color: #FF5A5A;'>내일은 지출을 줄여야 해요!</span>";
+        }
+      }
+      document.getElementById('bubbleMessage').innerHTML = message;
+
+      // 3. 기타 데이터 세팅 (그래프 업데이트)
+      document.getElementById('accumulatedUsage').innerText = data.accumulatedUsage.toLocaleString();
+
+      var progress = data.progressPercent;
+      document.getElementById('progressPercent').innerText = progress.toFixed(1) + '%';
+      document.getElementById('progressBarFill').style.width = Math.min(100, progress) + '%';
+
+      // 4. 예산 초과 시 스타일 변경
+      if (data.overBudget) {
+        document.getElementById('mainDashboard').classList.add('is-over');
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById('bubbleMessage').innerText = "데이터를 가져오지 못했어요. 🍙";
+    }
+  }
+</script>
+
+</body>
+</html>
