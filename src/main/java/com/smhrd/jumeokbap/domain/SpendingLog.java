@@ -3,6 +3,8 @@ package com.smhrd.jumeokbap.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -16,7 +18,12 @@ public class SpendingLog {
     @Column(updatable = false)
     private Long logId;
 
-    private String regDate;
+    @Transient
+    private Boolean isImpulsive;
+    @Transient
+    private String emotionTag;
+
+    private LocalDate regDate;
     private Integer amount;
     private String storeName;
     private String spentAt;
@@ -28,6 +35,7 @@ public class SpendingLog {
     private Long accountId;
     @Column(length = 1)
     private String isFixed = "N";
+
 
 
 

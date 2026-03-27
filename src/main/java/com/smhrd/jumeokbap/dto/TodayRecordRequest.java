@@ -22,4 +22,6 @@ public class TodayRecordRequest {
     private String emotionTag;
     private Boolean isImpulsive;
 
+    private String regDate;
+
 }

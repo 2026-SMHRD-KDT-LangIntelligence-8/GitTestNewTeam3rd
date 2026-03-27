@@ -13,9 +13,23 @@
         .arrow { color: #ccc; cursor: pointer; font-size: 28px; border: none; background: none; outline: none; padding: 0 10px; }
         .arrow:hover { color: #ffcc00; }
         .content-box { background-color: #fafff0; border-radius: 10px; height: 420px; padding: 10px; overflow-y: auto; }
+
+        /* 헤더 컬럼 비율 조정 */
         .list-header { display: flex; justify-content: space-between; padding: 10px 15px; font-weight: bold; color: #666; border-bottom: 1px solid #e0e7d0; margin-bottom: 10px; font-size: 14px; }
+        .list-header span { text-align: center; }
+
+        /* 아이템 레이아웃 수정 */
         .record-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; border-bottom: 1px dotted #e0e7d0; text-decoration: none; color: black; cursor: pointer; }
-        .record-item span { flex: 1; text-align: center; font-size: 14px; }
+        .record-item:hover { background-color: #f0f7e0; }
+
+        /* 각 칸의 너비 확보 */
+        .col-time { flex: 1.2; text-align: left; font-size: 13px; color: #777; }
+        .col-store { flex: 2; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .col-amount { flex: 1.5; text-align: right; font-weight: bold; }
+        .col-status { flex: 1.3; text-align: right; font-size: 18px; display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
+
+        .impulse-mark { color: #ff4d4d; font-size: 14px; font-weight: bold; }
+
         .btn-add { position: absolute; bottom: 30px; right: 30px; background-color: #ffcc00; width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 35px; color: white; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); text-decoration: none; }
         .no-data { text-align: center; padding-top: 120px; color: #bbb; font-size: 14px; line-height: 1.6; }
     </style>
@@ -33,21 +47,28 @@
 
     <div class="content-box">
         <div class="list-header">
-            <span style="text-align:left; flex:1;">시간</span>
-            <span style="text-align:center; flex:2;">장소</span>
-            <span style="text-align:right; flex:1;">금액</span>
+            <span style="flex:1.2; text-align:left;">시간</span>
+            <span style="flex:2;">장소</span>
+            <span style="flex:1.5; text-align:right;">금액</span>
+            <span style="flex:1.3; text-align:right;">상태</span>
         </div>
 
         <div th:if="${list != null and !#lists.isEmpty(list)}">
             <div th:each="log : ${list}" class="record-item"
                  th:onclick="|location.href='/api/recordDetail/' + ${log.logId}|">
 
-                <span style="text-align:left; color: #777;"
+                <span class="col-time"
                       th:text="${#strings.length(log.spentAt) > 5 ? #strings.substring(log.spentAt, 11, 16) : log.spentAt}">시간</span>
 
-                <span style="text-align:center;" th:text="${log.storeName}">장소</span>
-                <span style="text-align:right; font-weight:bold;"
+                <span class="col-store" th:text="${log.storeName}">장소</span>
+
+                <span class="col-amount"
                       th:text="${log.amount != null ? #numbers.formatInteger(log.amount, 0, 'COMMA') + '원' : '0원'}">0원</span>
+
+                <span class="col-status">
+                    <span th:if="${log.isImpulsive}" class="impulse-mark">💥</span>
+                    <span th:text="${log.emotionTag}">😊</span>
+                </span>
             </div>
         </div>
 
@@ -72,7 +93,6 @@
         const d = String(date.getDate()).padStart(2, '0');
         const newDateStr = `${y}-${m}-${d}`;
 
-        // 날짜 이동 시 쿼리 파라미터로 날짜 전달
         window.location.href = window.location.pathname + "?date=" + newDateStr;
     }
 </script>
