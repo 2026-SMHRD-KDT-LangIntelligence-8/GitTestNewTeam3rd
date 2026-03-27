@@ -10,6 +10,6 @@ import java.util.List;
 public interface SpendingLogRepository extends JpaRepository<SpendingLog, Long> {
 
     List<SpendingLog> findByUserIdOrderBySpentAtDesc(String userId);
-    List<SpendingLog> findByUserIdAndRegDate(String userId, String regDate);
+    List<SpendingLog> findByUserIdAndRegDate(String userId, LocalDate regDate);
     List<SpendingLog> findByUserIdAndRegDateBetween(String userId, LocalDate startDate, LocalDate endDate);
 }

@@ -63,11 +63,11 @@ public class TodayRecordController {
     // 메인화면
     public String getRecordMain(
             @PathVariable String userId,
-            @RequestParam(value = "date", required = false) String date,
+            @RequestParam(value = "date", required = false) LocalDate date,
             Model model) {
 
-        if (date == null || date.isEmpty()) {
-            date = LocalDate.now().toString();
+        if (date == null) {
+            date = LocalDate.now();
         }
         List<SpendingLog> logs = todayRecordService.getDailyTimeline(userId, date);
 

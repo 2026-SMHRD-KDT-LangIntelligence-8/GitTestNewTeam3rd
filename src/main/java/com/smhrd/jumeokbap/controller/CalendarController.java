@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Map;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -15,15 +17,17 @@ public class CalendarController {
 
     private final CalendarService calendarService;
 
-    @GetMapping("/dailyCalendar/{userId}")
+    @GetMapping("/{userId}")
     public String showCalendar(@PathVariable("userId") String userId, Model model) {
-        // 임시 소비 캘린더 확인용
-        model.addAttribute("userId", userId);
-        model.addAttribute("totalSpent", 985000);
-        model.addAttribute("targetAmount", 1200000);
-        model.addAttribute("impulseCount", 5);
+    Map<String, Object> calendarData = calendarService.getCalendarData(userId);
 
-        return "dailyCalendar";
+        model.addAttribute("totalAmount", calendarData.getOrDefault("totalAmount", 0L));
+        model.addAttribute("totalSpent", calendarData.getOrDefault("totalSpent",0L));
+        model.addAttribute("impulseCount", calendarData.get("impulseCount"));
+        model.addAttribute("calendarMap", calendarData.get("calendarMap"));
+        model.addAttribute("daysInMonth", calendarData.get("daysInMonth"));
+
+        return "daily_calendar";
     }
 
 }

@@ -32,8 +32,21 @@ public class CalendarService {
         Optional<Budget> budget = budgetRepository.findByUser_UserIdAndIsActiveTrue(userId);
         data.put("totalAmount", budget.map(Budget::getTotalLimit).orElse(0L));
 
-        // 이번 달 지출 기록
+        // 이번 달 지출 내역
         List<SpendingLog> monthLogs = spendingLogRepository.findByUserIdAndRegDateBetween(userId, startDate, endDate);
+
+        // 총 합계 계산
+        long totalSpent = monthLogs.stream()
+                .mapToLong(SpendingLog::getAmount)
+                .sum();
+        data.put("totalSpent", totalSpent);
+
+        // 달력에 필요한 날짜 수
+        data.put("daysInMonth", now.lengthOfMonth());
+
+        // 충동구매 횟수 계산
+
+        // 날짜별 이모티콘 지도
 
         return data;
     }
