@@ -19,18 +19,16 @@ public class CodefConnectedIdService {
 
     public String connectAccount(String userId, CodefConnectRequest dto) {
 
-        String businessType;
-        if ("BK".equalsIgnoreCase(dto.getAccountType()) || "bank".equalsIgnoreCase(dto.getAccountType())) {
-            businessType = "BK";
-        } else if ("CD".equalsIgnoreCase(dto.getAccountType()) || "card".equalsIgnoreCase(dto.getAccountType())) {
-            businessType = "CD";
-        } else {
-            throw new IllegalArgumentException("accountType 값이 올바르지 않습니다: " + dto.getAccountType());
+        if (dto.getAccountType() != null &&
+                !dto.getAccountType().isBlank() &&
+                !"card".equalsIgnoreCase(dto.getAccountType()) &&
+                !"CD".equalsIgnoreCase(dto.getAccountType())) {
+            throw new IllegalArgumentException("카드 연결만 지원합니다.");
         }
 
-        String loginType = (dto.getLoginType() == null || dto.getLoginType().isBlank())
-                ? "1"
-                : dto.getLoginType();
+        String businessType = "CD";
+        String loginType = "1";
+
 
         // 여기서 평문 비밀번호를 RSA 암호화
         String encryptedPassword = codefCryptoService.encryptPassword(dto.getPassword());
@@ -74,7 +72,7 @@ public class CodefConnectedIdService {
         }
 
         String alias = (dto.getAccountAlias() == null || dto.getAccountAlias().isBlank())
-                ? ("CD".equalsIgnoreCase(businessType) ? "내 카드" : "내 계좌")
+                ? "내 카드"
                 : dto.getAccountAlias();
 
         UserCodefAccount account = UserCodefAccount.builder()
