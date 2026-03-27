@@ -109,6 +109,17 @@ public class TodayRecordController {
         else return "잘 사셨어요!🍙";
     }
 
+    @GetMapping("/daily-calendar/{userId}")
+    public String showCalendar(@PathVariable("userId") String userId, Model model) {
+        // 임시 소비 캘린더 확인용
+        model.addAttribute("userId", userId);
+        model.addAttribute("totalSpent", 985000);
+        model.addAttribute("targetAmount", 1200000);
+        model.addAttribute("impulseCount", 5);
+
+        return "daily_calendar";
+    }
+
 
 
 
