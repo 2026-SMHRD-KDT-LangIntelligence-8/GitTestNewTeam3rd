@@ -17,7 +17,7 @@ public class CalendarController {
 
     private final CalendarService calendarService;
 
-    @GetMapping("/{userId}")
+    @GetMapping("/dailyCalendar/{userId}")
     public String showCalendar(@PathVariable("userId") String userId, Model model) {
     Map<String, Object> calendarData = calendarService.getCalendarData(userId);
 
@@ -26,8 +26,9 @@ public class CalendarController {
         model.addAttribute("impulseCount", calendarData.get("impulseCount"));
         model.addAttribute("calendarMap", calendarData.get("calendarMap"));
         model.addAttribute("daysInMonth", calendarData.get("daysInMonth"));
+        model.addAttribute("dailyEmojis", calendarData.get("dailyEmojis"));
 
-        return "daily_calendar";
+        return "dailyCalendar";
     }
 
 }

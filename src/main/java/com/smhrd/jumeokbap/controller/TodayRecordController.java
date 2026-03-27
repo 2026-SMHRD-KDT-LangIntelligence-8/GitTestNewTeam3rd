@@ -51,7 +51,7 @@ public class TodayRecordController {
             String userId = log.getUserId();
             todayRecordService.deleteRecord(logId);
 
-            return "redirect:/recordMain/"+ userId;
+            return "redirect:/api/recordMain/"+ userId;
 
         } catch (Exception e) {
             e.printStackTrace();

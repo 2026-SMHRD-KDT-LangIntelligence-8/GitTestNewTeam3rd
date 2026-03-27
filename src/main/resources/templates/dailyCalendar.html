@@ -85,18 +85,18 @@
     <div class="summary-section">
         <div class="summary-item">
             <span class="label">이번 달 지출</span>
-            <span class="value highlight" th:text="${totalSpent != null ? #numbers.formatInteger(totalSpent, 0, 'COMMA') + '원' : '0원'}">980,000원</span>
+            <span class="value highlight" th:text="${totalSpent != null ? #numbers.formatInteger(totalSpent, 0, 'COMMA') + '원' : '0원'}">0원</span>
         </div>
         <div class="summary-item">
             <span class="label">소비 목표</span>
-            <span class="value" th:text="${targetAmount != null ? #numbers.formatInteger(targetAmount, 0, 'COMMA') + '원' : '목표 없음'}">1,200,000원</span>
+            <span class="value" th:text="${totalAmount != null and totalAmount > 0 ? #numbers.formatInteger(totalAmount, 0, 'COMMA') + '원' : '목표 없음'}">목표 없음</span>
         </div>
     </div>
 
     <div class="analysis-section">
         <span class="analysis-title">🍙 먹밥이 분석한 충동구매</span>
         <span class="analysis-result">
-            <span th:text="${impulseCount != null ? impulseCount : 0}">3</span>회
+            <span th:text="${impulseCount != null ? impulseCount : 0}">0</span>회
         </span>
     </div>
 
@@ -107,18 +107,15 @@
             <div class="weekday">토</div>
         </div>
         <div class="days-grid">
-            <div class="day" th:each="i : ${#numbers.sequence(1, 31)}"
-                 th:classappend="${i == 3} ? 'today' : ''">
+            <div class="day" th:each="i : ${#numbers.sequence(1, daysInMonth != null ? daysInMonth : 31)}"
+                 th:classappend="${i == #temporals.day(#temporals.createNow())} ? 'today' : ''">
 
                 <span class="day-num" th:text="${i}"></span>
 
-                <th:block th:each="day : ${calendarList}">
-                    <span class="day-emoji" th:if="${day.date == i}" th:text="${day.emoji}"></span>
-                </th:block>
-
-                <span class="day-emoji" th:if="${i == 1}">😊</span>
-                <span class="day-emoji" th:if="${i == 2}">💸</span>
-                <span class="day-emoji" th:if="${i == 3}">😋</span>
+                <span class="day-emoji"
+                      th:if="${dailyEmojis != null and dailyEmojis.containsKey(i)}"
+                      th:text="${dailyEmojis.get(i)}">
+                </span>
             </div>
         </div>
     </div>
