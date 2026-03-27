@@ -8,12 +8,12 @@
         body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .container { background-color: white; width: 360px; height: 640px; padding: 25px 20px; border-radius: 20px; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
 
-        /* 헤더: 월 이동 및 닫기 */
+        /* 헤더 */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .close-btn { cursor: pointer; font-size: 20px; color: #888; border: none; background: none; }
         .month-title { font-size: 18px; font-weight: bold; color: #333; }
 
-        /* 1. 소비 요약 섹션 (총합 & 목표) */
+        /* 1. 소비 요약 섹션 */
         .summary-section { background-color: #fafff0; border: 1px solid #e0e7d0; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-around; }
         .summary-item { text-align: center; flex: 1; }
         .summary-item:first-child { border-right: 1px solid #e0e7d0; }
@@ -21,25 +21,54 @@
         .value { font-size: 15px; font-weight: bold; color: #333; }
         .highlight { color: #ffcc00; }
 
-        /* 2. '먹밥' 감성 분석 섹션 (충동구매) */
+        /* 2. 먹밥 감성 분석 섹션 */
         .analysis-section { background-color: #fff; border: 1px solid #eee; border-radius: 12px; padding: 12px 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .analysis-title { font-size: 13px; color: #555; font-weight: 600; }
         .analysis-result { font-size: 15px; font-weight: bold; color: #e74c3c; }
 
         /* 3. 소비 캘린더 섹션 */
-        .calendar-wrap { flex-grow: 1; display: flex; flex-direction: column; }
+        .calendar-wrap { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         .weekdays { display: flex; justify-content: space-around; margin-bottom: 10px; border-bottom: 1px solid #f5f5f5; padding-bottom: 5px; }
         .weekday { flex: 1; text-align: center; font-size: 12px; color: #bbb; font-weight: bold; }
 
-        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; flex-grow: 1; }
-        .day { aspect-ratio: 1/1; background: #fafafa; border-radius: 8px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid transparent; cursor: pointer; }
-        .day:hover { background-color: #f2f7e5; border-color: #e0e7d0; }
-        .day-num { position: absolute; top: 4px; left: 6px; font-size: 10px; color: #ccc; }
-        .day-emoji { font-size: 24px; }
-        .day.today { border: 1px solid #ffcc00; background-color: #fffcf0; }
-        .day.empty { background: none; cursor: default; }
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            align-content: start;
+        }
 
-        /* 하단 버튼 (목표 설정 페이지 이동 등) */
+        .day {
+            aspect-ratio: 1/1;
+            background: #fdfdfd;
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .day:hover { background-color: #f2f7e5; border-color: #e0e7d0; }
+
+        .day-num {
+            position: absolute;
+            top: 5px;
+            left: 7px;
+            font-size: 10px;
+            color: #ccc;
+            line-height: 1;
+        }
+
+        .day-emoji {
+            font-size: 26px;
+            margin-top: 5px;
+        }
+
+        .day.today { border: 1px solid #ffcc00; background-color: #fffcf0; }
+        .day.empty { background: none; border: none; cursor: default; }
+
         .footer-btns { margin-top: 15px; }
         .btn-goal { width: 100%; padding: 12px; border: 1px solid #ffcc00; background: white; color: #333; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; }
     </style>
@@ -50,23 +79,24 @@
     <div class="header">
         <button class="close-btn" onclick="history.back()">✕</button>
         <span class="month-title">2026년 3월</span>
-        <div style="width: 20px;"></div> </div>
+        <div style="width: 20px;"></div>
+    </div>
 
     <div class="summary-section">
         <div class="summary-item">
             <span class="label">이번 달 지출</span>
-            <span class="value highlight" th:text="${#numbers.formatInteger(totalSpent, 0, 'COMMA') + '원'}">980,000원</span>
+            <span class="value highlight" th:text="${totalSpent != null ? #numbers.formatInteger(totalSpent, 0, 'COMMA') + '원' : '0원'}">980,000원</span>
         </div>
         <div class="summary-item">
             <span class="label">소비 목표</span>
-            <span class="value" th:text="${#numbers.formatInteger(targetAmount, 0, 'COMMA') + '원'}">1,200,000원</span>
+            <span class="value" th:text="${targetAmount != null ? #numbers.formatInteger(targetAmount, 0, 'COMMA') + '원' : '목표 없음'}">1,200,000원</span>
         </div>
     </div>
 
     <div class="analysis-section">
         <span class="analysis-title">🍙 먹밥이 분석한 충동구매</span>
         <span class="analysis-result">
-            <span th:text="${impulseCount}">3</span>회
+            <span th:text="${impulseCount != null ? impulseCount : 0}">3</span>회
         </span>
     </div>
 
@@ -77,21 +107,18 @@
             <div class="weekday">토</div>
         </div>
         <div class="days-grid">
-            <div class="day empty"></div> <div class="day">
-            <span class="day-num">1</span>
-            <span class="day-emoji">😊</span>
-        </div>
-            <div class="day">
-                <span class="day-num">2</span>
-                <span class="day-emoji">💸</span>
-            </div>
-            <div class="day today">
-                <span class="day-num">3</span>
-                <span class="day-emoji">😋</span>
-            </div>
-            <div class="day" th:each="day : ${calendarList}">
-                <span class="day-num" th:text="${day.date}"></span>
-                <span class="day-emoji" th:text="${day.emoji}"></span>
+            <div class="day" th:each="i : ${#numbers.sequence(1, 31)}"
+                 th:classappend="${i == 3} ? 'today' : ''">
+
+                <span class="day-num" th:text="${i}"></span>
+
+                <th:block th:each="day : ${calendarList}">
+                    <span class="day-emoji" th:if="${day.date == i}" th:text="${day.emoji}"></span>
+                </th:block>
+
+                <span class="day-emoji" th:if="${i == 1}">😊</span>
+                <span class="day-emoji" th:if="${i == 2}">💸</span>
+                <span class="day-emoji" th:if="${i == 3}">😋</span>
             </div>
         </div>
     </div>
