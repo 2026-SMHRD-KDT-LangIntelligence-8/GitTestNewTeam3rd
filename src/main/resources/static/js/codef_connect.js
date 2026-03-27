@@ -40,15 +40,14 @@ function renderOrganizationOptions() {
     `;
 }
 
-// ===== 계정 연결 =====
+// ===== 카드 연결 =====
 function connectAccount() {
     const data = {
         accountType: "card",
         organization: document.getElementById("organization").value,
         loginId: document.getElementById("loginId").value.trim(),
         password: document.getElementById("password").value.trim(),
-        accountAlias: document.getElementById("accountAlias").value.trim(),
-        loginType: "1"
+        accountAlias: document.getElementById("accountAlias").value.trim()
     };
 
     if (!data.organization) {
@@ -92,9 +91,8 @@ function connectAccount() {
             const organizationName = organizationMap[data.organization] || data.organization;
 
             alert(
-                result.message +
-                "\n카드사: " + organizationName +
-                "\nconnectedId: " + result.connectedId
+                (result.message || "카드 연결이 완료되었습니다.") +
+                "\n카드사: " + organizationName
             );
 
             resetForm();
@@ -108,13 +106,13 @@ function connectAccount() {
 
 // ===== 입력 초기화 =====
 function resetForm() {
-    renderOrganizationOptions();
+    document.getElementById("organization").value = "";
     document.getElementById("loginId").value = "";
     document.getElementById("password").value = "";
     document.getElementById("accountAlias").value = "";
 }
 
-// ===== 목록 조회 =====
+// ===== 연결된 카드 목록 조회 =====
 function loadMyAccounts() {
     fetch("/codef/my-accounts", {
         method: "GET",
@@ -129,7 +127,7 @@ function loadMyAccounts() {
         .then(accounts => {
             const accountList = document.getElementById("accountList");
 
-            if (!accounts.length) {
+            if (!accounts || accounts.length === 0) {
                 accountList.innerHTML = "<p>아직 연결된 카드가 없습니다.</p>";
                 return;
             }
@@ -141,7 +139,7 @@ function loadMyAccounts() {
                     <div class="account-item">
                         <p><strong>별칭:</strong> ${account.accountAlias ?? "-"}</p>
                         <p><strong>카드사:</strong> ${organizationName}</p>
-                        <p><strong>connectedId:</strong> ${account.connectedId}</p>
+                        <p><strong>로그인 아이디:</strong> ${account.loginId ?? "-"}</p>
                     </div>
                 `;
             }).join("");

@@ -1,7 +1,9 @@
 package com.smhrd.jumeokbap.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -10,46 +12,41 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class UserCodefAccount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 우리 서비스 사용자 아이디
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private String userId;
 
-    // CODEF에서 발급받은 connectedId
-    @Column(nullable = false, length = 300)
+    @Column(name = "connected_id", nullable = false)
     private String connectedId;
 
-    // 카드사 기관코드
-    @Column(nullable = false, length = 50)
+    @Column(name = "organization", nullable = false)
     private String organization;
 
-    // 화면에 보여줄 별칭 (예: 신한카드, 국민카드)
-    @Column(length = 100)
+    @Column(name = "business_type", nullable = false)
+    private String businessType;
+
+    @Column(name = "client_type", nullable = false)
+    private String clientType;
+
+    @Column(name = "login_type", nullable = false)
+    private String loginType;
+
+    @Column(name = "login_id", nullable = false)
+    private String loginId;
+
+    @Column(name = "account_alias")
     private String accountAlias;
 
-    // 생성일시
-    @Column(nullable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // 수정일시
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-
     @PrePersist
-    public void prePersist() {
+    protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
     }
 }

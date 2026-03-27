@@ -12,24 +12,29 @@ public class CodefConnectedIdService {
 
     private final CodefApiService codefApiService;
     private final CodefCryptoService codefCryptoService;
+    private final UserCodefAccountService userCodefAccountService;
 
     public String createConnectedId(CodefConnectedIdRequest dto) {
         validate(dto);
 
         try {
-            String encryptedPassword = codefCryptoService.encryptPassword(dto.getPassword());
+            String businessType = "CD";
+            String clientType = "P";
+            String loginType = "1";
 
-            System.out.println("businessType = " + dto.getBusinessType());
-            System.out.println("clientType = " + dto.getClientType());
-            System.out.println("organization = " + dto.getOrganization());
-            System.out.println("loginType = " + dto.getLoginType());
-            System.out.println("loginId = " + dto.getLoginId());
-            System.out.println("encryptedPassword length = " + encryptedPassword.length());
-            System.out.println("PUBLIC_KEY prefix = " + CodefProperties.PUBLIC_KEY.substring(0, 20));
+            String encryptedPassword = codefCryptoService.encryptPassword(dto.getPassword());
 
             if (encryptedPassword == null || encryptedPassword.isBlank()) {
                 throw new RuntimeException("비밀번호 암호화 실패");
             }
+
+            System.out.println("businessType = " + businessType);
+            System.out.println("clientType = " + clientType);
+            System.out.println("organization = " + dto.getOrganization());
+            System.out.println("loginType = " + loginType);
+            System.out.println("loginId = " + dto.getLoginId());
+            System.out.println("encryptedPassword length = " + encryptedPassword.length());
+            System.out.println("PUBLIC_KEY prefix = " + CodefProperties.PUBLIC_KEY.substring(0, 20));
 
             String requestBody = """
             {
@@ -46,10 +51,10 @@ public class CodefConnectedIdService {
               ]
             }
             """.formatted(
-                    dto.getBusinessType(),
-                    dto.getClientType(),
+                    businessType,
+                    clientType,
                     dto.getOrganization(),
-                    dto.getLoginType(),
+                    loginType,
                     dto.getLoginId(),
                     encryptedPassword
             );
@@ -76,9 +81,13 @@ public class CodefConnectedIdService {
                                 + " | message=" + message
                                 + " | extraMessage=" + extraMessage
                 );
-
-
             }
+
+            // 임시 사용자 ID - 나중에 세션으로 변경해야함!!!!
+            String userId = "testUser";
+
+            // connectedId DB 저장
+            userCodefAccountService.saveConnectedId(userId, connectedId, dto);
 
             return connectedId;
 
@@ -100,19 +109,9 @@ public class CodefConnectedIdService {
         if (isBlank(dto.getPassword())) {
             throw new IllegalArgumentException("password는 필수입니다.");
         }
-        if (isBlank(dto.getBusinessType())) {
-            throw new IllegalArgumentException("businessType은 필수입니다.");
-        }
-        if (isBlank(dto.getClientType())) {
-            throw new IllegalArgumentException("clientType은 필수입니다.");
-        }
-        if (isBlank(dto.getLoginType())) {
-            throw new IllegalArgumentException("loginType은 필수입니다.");
-        }
     }
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
     }
 }
-
