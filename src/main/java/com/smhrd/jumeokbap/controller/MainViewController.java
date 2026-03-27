@@ -11,4 +11,8 @@ public class MainViewController {
         // 타임리프가 알아서 templates/index.html을 찾아줌
         return "index";
     }
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login"; // 👉 templates/login.html
+    }
 }

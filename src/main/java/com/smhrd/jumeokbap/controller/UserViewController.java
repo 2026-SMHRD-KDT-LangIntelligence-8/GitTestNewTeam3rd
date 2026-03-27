@@ -12,10 +12,6 @@ public class UserViewController {
         return "signup";
     }
 
-    @GetMapping("/login")
-    public String loginPage() {
-        return "login";
-    }
 
     @GetMapping("/codef/connect-page")
     public String codefConnectPage(HttpSession session) {
