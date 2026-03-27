@@ -2,54 +2,89 @@ package com.smhrd.jumeokbap.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
 @Service
+@RequiredArgsConstructor
 public class CodefApiService {
 
     private final CodefTokenService codefTokenService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public CodefApiService(CodefTokenService codefTokenService) {
-        this.codefTokenService = codefTokenService;
-    }
-
-    /**
-     * CODEF API 공통 호출 메서드
-     */
-    public JsonNode callPostApi(String url, String requestBody) {
-
-        String accessToken = codefTokenService.getAccessToken();
-
-        RestTemplate restTemplate = new RestTemplate();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                requestEntity,
-                String.class
-        );
-
-        System.out.println("CODEF raw response = " + response.getBody());
+    public JsonNode post(String endpoint, String jsonBody) {
+        System.out.println("------------");
+        System.out.println(endpoint);
+        System.out.println("---------");
+        HttpURLConnection conn = null;
 
         try {
-            String decoded = URLDecoder.decode(response.getBody(), StandardCharsets.UTF_8);
-            System.out.println("디코딩 응답 = " + decoded);
+            String accessToken = codefTokenService.getAccessToken();
 
-            return objectMapper.readTree(decoded);
+
+            //String baseUrl = "https://development.codef.io";
+
+            URL url = new URL(endpoint);
+            conn = (HttpURLConnection) url.openConnection();
+
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + accessToken);
+            conn.setDoOutput(true);
+
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
+            }
+
+            String responseBody = readAll(conn);
+            String decodedBody = URLDecoder.decode(responseBody, StandardCharsets.UTF_8);
+
+            return objectMapper.readTree(decodedBody);
+
         } catch (Exception e) {
-            throw new RuntimeException("CODEF 응답 파싱 실패", e);
+            throw new RuntimeException("CODEF API 호출 실패: " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
+    }
+
+    private String readAll(HttpURLConnection conn) throws Exception {
+        InputStream is = null;
+
+        try {
+            int status = conn.getResponseCode();
+            is = (status >= 200 && status < 300)
+                    ? conn.getInputStream()
+                    : conn.getErrorStream();
+        } catch (Exception e) {
+            is = conn.getErrorStream();
+        }
+
+        if (is == null) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+        }
+
+        return sb.toString();
     }
 }

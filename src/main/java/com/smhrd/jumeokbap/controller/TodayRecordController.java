@@ -5,7 +5,6 @@ import com.smhrd.jumeokbap.domain.SpendingLog;
 import com.smhrd.jumeokbap.dto.TodayRecordRequest;
 import com.smhrd.jumeokbap.service.TodayRecordService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -52,7 +51,7 @@ public class TodayRecordController {
             String userId = log.getUserId();
             todayRecordService.deleteRecord(logId);
 
-            return "redirect:/recordMain/"+ userId;
+            return "redirect:/api/recordMain/"+ userId;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -64,11 +63,11 @@ public class TodayRecordController {
     // 메인화면
     public String getRecordMain(
             @PathVariable String userId,
-            @RequestParam(value = "date", required = false) String date,
+            @RequestParam(value = "date", required = false) LocalDate date,
             Model model) {
 
-        if (date == null || date.isEmpty()) {
-            date = LocalDate.now().toString();
+        if (date == null) {
+            date = LocalDate.now();
         }
         List<SpendingLog> logs = todayRecordService.getDailyTimeline(userId, date);
 

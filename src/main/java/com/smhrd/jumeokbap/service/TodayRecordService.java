@@ -24,6 +24,8 @@ import java.util.List;
 public class TodayRecordService {
     private final DiaryRepository diaryRepository;
     private final SpendingLogRepository spendingLogRepository;
+    // 파이썬 서버와 통신하기 위한 도구
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Transactional
     // 수동입력
@@ -34,26 +36,31 @@ public class TodayRecordService {
             fileName = imageFile.getOriginalFilename();
 
         }
-
         SpendingLog spendingLog = SpendingLog.builder()
                 .userId(dto.getUserId())
                 .amount(Integer.valueOf(dto.getAmount()))
                 .storeName(dto.getStoreName())
                 .spentAt(dto.getSpentAt())
                 .imageUrl(fileName)
-                .regDate(LocalDate.now().toString())
+                .regDate(LocalDate.now())
                 .isManual("Y")
                 .build();
 
         SpendingLog saveLog = spendingLogRepository.save(spendingLog);
+
+        String resultFromServer = analyzeText(dto.getContent());
+        // 3. 콘솔 확인용 로그
+        System.out.println("🤖 AI 분석 결과: " + resultFromServer);
+
+        boolean isImpulsive = "1".equals(resultFromServer);
 
         Diary diary = Diary.builder()
                 .userId(dto.getUserId())
                 .content(dto.getContent())
                 .emotionTag(dto.getEmotionTag())
                 .sentimentScore(0.0)
-                .isImpulsive(false)
-                .isMain(true)
+                .isImpulsive(isImpulsive)
+                .isMain(false)
                 .logId(saveLog.getLogId())
                 .build();
 
@@ -68,8 +75,16 @@ public class TodayRecordService {
     }
 
     // 날짜별 조회
-    public List<SpendingLog> getDailyTimeline(String userId, String date){
-        return spendingLogRepository.findByUserIdAndRegDate(userId, date);
+    public List<SpendingLog> getDailyTimeline(String userId, LocalDate date){
+        List<SpendingLog> logs = spendingLogRepository.findByUserIdAndRegDate(userId, date);
+
+        for(SpendingLog log : logs){
+            diaryRepository.findByLogId(log.getLogId()).ifPresent(diary -> {
+                log.setEmotionTag(diary.getEmotionTag());
+                log.setIsImpulsive(diary.getIsImpulsive());
+            });
+        }
+        return logs;
     }
 
     // 특정 내역 건의 상세페이지로 이동!
@@ -92,11 +107,18 @@ public class TodayRecordService {
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
 
         try {
-            String result = restTemplate.postForObject(url, entity, String.class);
-            return result;
+            // Map으로 받아서 "label" 키의 값을 추출
+            Map<String, Object> response = restTemplate.postForObject(url, entity, Map.class);
+
+            // 플라스크의 label이 숫자 1이면 "1", 아니면 "0"을 확실히 반환
+            if (response != null && response.get("label") != null) {
+                String label = String.valueOf(response.get("label")); // "1" 또는 "1.0" 등 대응
+                return label.startsWith("1") ? "1" : "0";
+            }
+            return "0";
         } catch (Exception e) {
             e.printStackTrace();
-            return "분석 서버 연결 실패";
+            return "0";
         }
 
     }

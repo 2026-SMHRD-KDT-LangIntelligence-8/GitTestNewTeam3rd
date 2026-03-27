@@ -13,28 +13,25 @@ import java.util.Base64;
 @Service
 public class CodefCryptoService {
 
-    private static final String ENCRYPT_TYPE_RSA = "RSA";
-
     public String encryptPassword(String plainText) {
         try {
-            String base64PublicKey = CodefProperties.PUBLIC_KEY;
+            String publicKey = CodefProperties.PUBLIC_KEY;
 
-            if (base64PublicKey == null || base64PublicKey.isBlank()) {
-                throw new IllegalStateException("CODEF public key가 설정되지 않았습니다.");
-            }
+            X509EncodedKeySpec keySpec =
+                    new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey));
 
-            byte[] bytePublicKey = Base64.getDecoder().decode(base64PublicKey);
-            KeyFactory keyFactory = KeyFactory.getInstance(ENCRYPT_TYPE_RSA);
-            PublicKey publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(bytePublicKey));
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey pubKey = keyFactory.generatePublic(keySpec);
 
-            Cipher cipher = Cipher.getInstance(ENCRYPT_TYPE_RSA);
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, pubKey);
 
-            byte[] bytePlain = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(bytePlain);
+            byte[] encryptedBytes = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(encryptedBytes);
 
         } catch (Exception e) {
-            throw new RuntimeException("CODEF 비밀번호 RSA 암호화 실패", e);
+            throw new RuntimeException("RSA 암호화 실패: " + e.getMessage(), e);
         }
+
     }
 }
