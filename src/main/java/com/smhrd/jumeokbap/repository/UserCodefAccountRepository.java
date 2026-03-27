@@ -8,7 +8,9 @@ import java.util.Optional;
 
 public interface UserCodefAccountRepository extends JpaRepository<UserCodefAccount, Long> {
 
-    List<UserCodefAccount> findByUserId(String userId);
+    Optional<UserCodefAccount> findByUserIdAndOrganizationAndBusinessType(
+            String userId, String organization, String businessType
+    );
 
-    Optional<UserCodefAccount> findByUserIdAndOrganization(String userId, String organization);
+    List<UserCodefAccount> findByUserId(String userId);
 }

@@ -25,7 +25,6 @@ cardOrganizations.forEach(org => {
 // ===== 초기 실행 =====
 document.addEventListener("DOMContentLoaded", () => {
     renderOrganizationOptions();
-    loadMyAccounts();
 });
 
 // ===== 카드사 목록 렌더링 =====
@@ -40,15 +39,14 @@ function renderOrganizationOptions() {
     `;
 }
 
-// ===== 계정 연결 =====
+// ===== 카드 연결 =====
 function connectAccount() {
     const data = {
         accountType: "card",
         organization: document.getElementById("organization").value,
         loginId: document.getElementById("loginId").value.trim(),
         password: document.getElementById("password").value.trim(),
-        accountAlias: document.getElementById("accountAlias").value.trim(),
-        loginType: "1"
+        accountAlias: document.getElementById("accountAlias").value.trim()
     };
 
     if (!data.organization) {
@@ -57,12 +55,12 @@ function connectAccount() {
     }
 
     if (!data.loginId) {
-        alert("로그인 아이디를 입력해주세요.");
+        alert("카드사 로그인 아이디를 입력해주세요.");
         return;
     }
 
     if (!data.password) {
-        alert("비밀번호를 입력해주세요.");
+        alert("카드사 로그인 비밀번호를 입력해주세요.");
         return;
     }
 
@@ -81,7 +79,7 @@ function connectAccount() {
                 const errorMessage =
                     typeof result === "string"
                         ? result
-                        : (result && result.message ? result.message : "연결 실패");
+                        : (result && result.message ? result.message : "connectedId 발급 실패");
 
                 throw new Error(errorMessage);
             }
@@ -92,13 +90,12 @@ function connectAccount() {
             const organizationName = organizationMap[data.organization] || data.organization;
 
             alert(
-                result.message +
+                (result.message || "connectedId 발급 성공") +
                 "\n카드사: " + organizationName +
-                "\nconnectedId: " + result.connectedId
+                "\nconnectedId: " + (result.connectedId || "-")
             );
 
             resetForm();
-            loadMyAccounts();
         })
         .catch(error => {
             console.error(error);
@@ -108,47 +105,8 @@ function connectAccount() {
 
 // ===== 입력 초기화 =====
 function resetForm() {
-    renderOrganizationOptions();
+    document.getElementById("organization").value = "";
     document.getElementById("loginId").value = "";
     document.getElementById("password").value = "";
     document.getElementById("accountAlias").value = "";
-}
-
-// ===== 목록 조회 =====
-function loadMyAccounts() {
-    fetch("/codef/my-accounts", {
-        method: "GET",
-        credentials: "include"
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("목록 조회 실패");
-            }
-            return response.json();
-        })
-        .then(accounts => {
-            const accountList = document.getElementById("accountList");
-
-            if (!accounts.length) {
-                accountList.innerHTML = "<p>아직 연결된 카드가 없습니다.</p>";
-                return;
-            }
-
-            accountList.innerHTML = accounts.map(account => {
-                const organizationName = organizationMap[account.organization] || account.organization;
-
-                return `
-                    <div class="account-item">
-                        <p><strong>별칭:</strong> ${account.accountAlias ?? "-"}</p>
-                        <p><strong>카드사:</strong> ${organizationName}</p>
-                        <p><strong>connectedId:</strong> ${account.connectedId}</p>
-                    </div>
-                `;
-            }).join("");
-        })
-        .catch(error => {
-            console.error(error);
-            document.getElementById("accountList").innerHTML =
-                "<p>카드 목록을 불러오지 못했습니다.</p>";
-        });
 }
