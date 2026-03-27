@@ -16,7 +16,7 @@ public class SpendingLog {
     @Column(updatable = false)
     private Long logId;
 
-
+    private String regDate;
     private Integer amount;
     private String storeName;
     private String spentAt;
@@ -26,6 +26,8 @@ public class SpendingLog {
     @Column(nullable = false)
     private String userId;
     private Long accountId;
+    @Column(length = 1)
+    private String isFixed = "N";
 
 
 

@@ -12,6 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -25,13 +27,21 @@ public class TodayRecordService {
 
     @Transactional
     // 수동입력
-    public void manualRecord(TodayRecordRequest dto) {
+    public void manualRecord(TodayRecordRequest dto, org.springframework.web.multipart.MultipartFile imageFile) {
+
+        String fileName = "";
+        if (imageFile != null && !imageFile.isEmpty()) {
+            fileName = imageFile.getOriginalFilename();
+
+        }
+
         SpendingLog spendingLog = SpendingLog.builder()
                 .userId(dto.getUserId())
                 .amount(Integer.valueOf(dto.getAmount()))
                 .storeName(dto.getStoreName())
                 .spentAt(dto.getSpentAt())
-                .imageUrl(dto.getImageUrl())
+                .imageUrl(fileName)
+                .regDate(LocalDate.now().toString())
                 .isManual("Y")
                 .build();
 
@@ -55,6 +65,11 @@ public class TodayRecordService {
     // 조회기능
     public List<SpendingLog> getDailyTimeline(String userId) {
         return spendingLogRepository.findByUserIdOrderBySpentAtDesc(userId);
+    }
+
+    // 날짜별 조회
+    public List<SpendingLog> getDailyTimeline(String userId, String date){
+        return spendingLogRepository.findByUserIdAndRegDate(userId, date);
     }
 
     // 특정 내역 건의 상세페이지로 이동!
@@ -85,5 +100,18 @@ public class TodayRecordService {
         }
 
     }
+
+    public Diary getDiaryByLogId(Long logId){
+        return diaryRepository.findByLogId(logId)
+                .orElse(new Diary());
+    }
+
+    @Transactional
+    public void deleteRecord(Long logId) {
+        diaryRepository.deleteByLogId(logId);
+        spendingLogRepository.deleteById(logId);
+    }
+
+
 }
 

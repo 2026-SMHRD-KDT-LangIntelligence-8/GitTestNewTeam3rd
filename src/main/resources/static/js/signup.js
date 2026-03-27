@@ -1,3 +1,8 @@
+// 상태 변수
+let isIdChecked = false;
+let isIdAvailable = false;
+let isPasswordMatched = false;
+
 function signup() {
     const data = {
         userId: document.getElementById("userId").value.trim(),
@@ -8,16 +13,33 @@ function signup() {
         email: document.getElementById("email").value.trim()
     };
 
-    // 전체 입력값 체크
-    if (
-        !data.userId ||
-        !data.password ||
-        !data.birthDate ||
-        !data.nickname ||
-        !data.phoneNumber ||
-        !data.email
-    ) {
-        alert("모든 항목을 입력해주세요.");
+    if (!data.userId) {
+        alert("아이디를 입력해주세요.");
+        return;
+    }
+
+    if (!data.password) {
+        alert("비밀번호를 입력해주세요.");
+        return;
+    }
+
+    if (!data.birthDate) {
+        alert("생년월일을 입력해주세요.");
+        return;
+    }
+
+    if (!data.nickname) {
+        alert("닉네임을 입력해주세요.");
+        return;
+    }
+
+    if (!data.phoneNumber) {
+        alert("전화번호를 입력해주세요.");
+        return;
+    }
+
+    if (!data.email) {
+        alert("이메일을 입력해주세요.");
         return;
     }
 
@@ -84,28 +106,28 @@ function signup() {
         headers: {
             "Content-Type": "application/json"
         },
+        credentials: "include",
         body: JSON.stringify(data)
     })
-        .then(response => {
+        .then(async response => {
+            const result = await response.text();
+
             if (!response.ok) {
-                throw new Error("회원가입 실패");
+                throw new Error(result || "회원가입 실패");
             }
-            return response.text();
+
+            return result;
         })
         .then(result => {
             alert(result);
-            window.location.href = "/login";
+            // 회원가입 후 자동 로그인 상태로 연결 페이지 이동
+            window.location.href = "/codef/connect-page";
         })
         .catch(error => {
             console.error(error);
-            alert("회원가입 중 오류 발생");
+            alert("회원가입 중 오류 발생: " + error.message);
         });
 }
-
-// 상태 변수
-let isIdChecked = false;
-let isIdAvailable = false;
-let isPasswordMatched = false;
 
 // 아이디 중복 확인 함수
 function checkId() {
@@ -116,8 +138,16 @@ function checkId() {
         return;
     }
 
-    fetch(`/user/check-id?userId=${userId}`)
-        .then(response => response.json())
+    fetch(`/user/check-id?userId=${encodeURIComponent(userId)}`, {
+        method: "GET",
+        credentials: "include"
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("중복 확인 실패");
+            }
+            return response.json();
+        })
         .then(isDuplicate => {
             isIdChecked = true;
             isIdAvailable = !isDuplicate;
@@ -134,7 +164,7 @@ function checkId() {
         })
         .catch(error => {
             console.error(error);
-            alert("중복 확인 실패");
+            alert("중복 확인 실패: " + error.message);
         });
 }
 
@@ -149,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
     userIdInput.addEventListener("input", () => {
         userIdInput.value = userIdInput.value.replace(/[^a-zA-Z0-9]/g, "");
 
-        // 아이디가 바뀌면 중복확인 다시 해야 함
+        // 아이디 변경 시 중복확인 다시 필요
         isIdChecked = false;
         isIdAvailable = false;
         document.getElementById("idCheckResult").innerText = "";
@@ -158,8 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // 비밀번호: 영문 + 숫자만 허용
     passwordInput.addEventListener("input", () => {
         passwordInput.value = passwordInput.value.replace(/[^a-zA-Z0-9]/g, "");
-
-        // 비밀번호 변경 시 확인값과 다시 비교
         validatePasswordMatch();
     });
 

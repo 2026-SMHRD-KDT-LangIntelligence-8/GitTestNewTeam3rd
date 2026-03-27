@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# CODEF 설정 파일
+src/main/java/com/smhrd/jumeokbap/config/CodefProperties.java

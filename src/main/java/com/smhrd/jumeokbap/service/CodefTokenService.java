@@ -20,15 +20,9 @@ import com.smhrd.jumeokbap.dto.CodefTokenResponse;
 @Service
 public class CodefTokenService {
 
-    private final CodefProperties codefProperties;
-
     // 토큰 캐싱
     private String cachedAccessToken;
     private LocalDateTime tokenExpiresAt;
-
-    public CodefTokenService(CodefProperties codefProperties) {
-        this.codefProperties = codefProperties;
-    }
 
     /**
      * Access Token 반환 (있으면 재사용, 없으면 발급)
@@ -53,7 +47,7 @@ public class CodefTokenService {
         RestTemplate restTemplate = new RestTemplate();
 
         // 1. clientId:clientSecret
-        String auth = codefProperties.getClientId() + ":" + codefProperties.getClientSecret();
+        String auth = CodefProperties.CLIENT_ID + ":" + CodefProperties.CLIENT_SECRET;
 
         // 2. Base64 인코딩
         String encodedAuth = Base64.getEncoder()
@@ -76,7 +70,7 @@ public class CodefTokenService {
         // 5. 요청
         ResponseEntity<CodefTokenResponse> response =
                 restTemplate.postForEntity(
-                        codefProperties.getTokenUrl(),
+                        CodefProperties.TOKEN_URL,
                         request,
                         CodefTokenResponse.class
                 );
@@ -94,7 +88,7 @@ public class CodefTokenService {
                 ? tokenResponse.getExpiresIn()
                 : 604800L; // 기본 1주일
 
-        // 만료 1분 전에 재발급하도록 설정
+        // 만료 1분 전에 재발급
         this.tokenExpiresAt = LocalDateTime.now().plusSeconds(expiresIn - 60);
 
         return this.cachedAccessToken;

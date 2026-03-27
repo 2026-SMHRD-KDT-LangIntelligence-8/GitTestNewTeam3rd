@@ -1,13 +1,105 @@
-<div class="info-box">
-    <h2 th:text="${detail.storeName}">가게이름</h2>
-    <p>결제 금액: <span th:text="${detail.amount}">0</span>원</p>
-    <p>결제 시간: <span th:text="${detail.spentAt}">시간</span></p>
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>오늘의 기록 상세</title>
+    <style>
+        body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; min-height: 100vh; align-items: center; }
+        .container { background-color: white; width: 360px; padding: 40px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); box-sizing: border-box; }
+
+        .header { color: #888; font-size: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { cursor: pointer; border: none; background: none; font-size: 18px; color: #888; }
+
+        /* 상단 정보 (시간, 장소, 금액) */
+        .info-row { display: flex; justify-content: space-around; align-items: center; font-size: 18px; font-weight: bold; margin-bottom: 30px; color: #333; }
+        .info-item { flex: 1; text-align: center; }
+        .amount-text { color: #ffcc00; }
+
+        /* 사진 & 메모 영역 */
+        .box { background-color: #fafff0; border: 1px solid #e0e7d0; border-radius: 10px; width: 100%; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .photo-box { height: 180px; }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .no-image { color: #bbb; font-size: 14px; }
+
+        .memo-box { height: 120px; border: 1px solid #e0e7d0; resize: none; text-align: center; font-size: 16px; padding: 15px; box-sizing: border-box; background-color: #fafff0; width: 100%; border-radius: 10px; outline: none; margin-bottom: 20px; }
+
+        /* 이모티콘 & 구분 영역 (두 칸 유지) */
+        .options-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 30px; }
+        .option-item {
+            background-color: #fafff0;
+            border: 1px solid #e0e7d0;
+            flex: 1;
+            padding: 15px 5px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80px; /* 박스 높이 균형 유지 */
+        }
+
+        /* 왼쪽 이모티콘 크기 강조 */
+        .emoji-large { font-size: 50px !important; margin: 0 !important; line-height: 1; }
+        .emoji-val { font-size: 24px; display: block; margin-top: 5px; }
+
+        /* 하단 버튼 */
+        .btn-group { display: flex; justify-content: space-between; gap: 10px; }
+        .btn { flex: 1; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-back { background-color: #eee; color: #666; }
+        .btn-delete { background-color: #ffcc00; color: black; }
+        .btn:hover { opacity: 0.8; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <span class="back-btn" onclick="history.back()">←</span>
+        <span>오늘의 기록 상세</span>
+        <span></span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-item" th:text="${#strings.length(detail.spentAt) > 5 ? #strings.substring(detail.spentAt, 11, 16) : detail.spentAt}">시간</span>
+        <span class="info-item" th:text="${detail.storeName}">장소</span>
+        <span class="info-item amount-text" th:text="${#numbers.formatInteger(detail.amount, 0, 'COMMA') + '원'}">금액</span>
+    </div>
+
+    <div class="box photo-box">
+        <img th:if="${detail.imageUrl != null and detail.imageUrl != ''}"
+             th:src="@{'/upload/' + ${detail.imageUrl}}" alt="지출 사진">
+        <span th:unless="${detail.imageUrl != null and detail.imageUrl != ''}" class="no-image">등록된 사진이 없습니다.</span>
+    </div>
+
+    <textarea class="memo-box" th:text="${diary.content}" readonly>메모가 없습니다.</textarea>
+
+    <div class="options-row">
+        <div class="option-item">
+            <span class="emoji-large" th:text="${diary.emotionTag}">😊</span>
+        </div>
+
+        <div class="option-item">
+            구분
+            <span class="emoji-val" style="font-size: 16px; margin-top: 12px;"
+                  th:text="${detail.isManual == 'Y' ? '수동입력' : '자동입력'}">입력방식</span>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button type="button" class="btn btn-back" onclick="history.back()">뒤로가기</button>
+        <button type="button" class="btn btn-delete" th:onclick="|deleteRecord(${detail.logId})|">내역 삭제</button>
+    </div>
 </div>
 
-<hr>
+<script th:inline="javascript">
+    function deleteRecord(logId) {
+        if(confirm("이 기록을 정말 삭제하시겠습니까?")) {
+            // 실제 삭제 요청 시 주석 해제하여 사용하세요
+            location.href = '/api/delete/' + logId;
+        }
+    }
+</script>
 
-<form action="/api/analyze" method="post">
-    <input type="hidden" name="logId" th:value="${detail.logId}">
-    <textarea name="content" placeholder="오늘의 소비는 어땠나요?"></textarea>
-    <button type="submit">감정 분석 시작</button>
-</form>
+</body>
+</html>
