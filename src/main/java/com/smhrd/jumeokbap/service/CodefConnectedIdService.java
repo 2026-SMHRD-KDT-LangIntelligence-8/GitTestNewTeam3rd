@@ -14,13 +14,13 @@ public class CodefConnectedIdService {
     private final CodefCryptoService codefCryptoService;
     private final UserCodefAccountService userCodefAccountService;
 
-    public String createConnectedId(CodefConnectedIdRequest dto) {
+    public String createConnectedId(String userId, CodefConnectedIdRequest dto) {
         validate(dto);
 
         try {
-            String businessType = "CD";
-            String clientType = "P";
-            String loginType = "1";
+            String businessType = dto.getBusinessType();
+            String clientType = dto.getClientType();
+            String loginType = dto.getLoginType();
 
             String encryptedPassword = codefCryptoService.encryptPassword(dto.getPassword());
 
@@ -83,10 +83,6 @@ public class CodefConnectedIdService {
                 );
             }
 
-            // 임시 사용자 ID - 나중에 세션으로 변경해야함!!!!
-            String userId = "testUser";
-
-            // connectedId DB 저장
             userCodefAccountService.saveConnectedId(userId, connectedId, dto);
 
             return connectedId;
