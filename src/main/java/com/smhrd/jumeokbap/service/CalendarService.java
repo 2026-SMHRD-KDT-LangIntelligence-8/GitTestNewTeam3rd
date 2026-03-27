@@ -23,9 +23,10 @@ public class CalendarService {
     public Map<String, Object> getCalendarData(String userId) {
         Map<String, Object> data = new HashMap<>();
 
+        // 기준 날짜 설정
         LocalDate now = LocalDate.now();
-        LocalDate startOfMonth = now.withDayOfMonth(1);
-        LocalDate endOfMonth = now.withDayOfMonth(now.lengthOfMonth());
+        LocalDate startDate = now.withDayOfMonth(1);
+        LocalDate endDate = now.withDayOfMonth(now.lengthOfMonth());
 
         // 소비 목표
         Optional<Budget> budget = budgetRepository.findByUser_UserIdAndIsActiveTrue(userId);
