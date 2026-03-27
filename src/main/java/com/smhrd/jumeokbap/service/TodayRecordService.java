@@ -81,7 +81,7 @@ public class TodayRecordService {
         for(SpendingLog log : logs){
             diaryRepository.findByLogId(log.getLogId()).ifPresent(diary -> {
                 log.setEmotionTag(diary.getEmotionTag());
-                log.isImpulsive(diary.isImpulsive());
+                log.setIsImpulsive(diary.getIsImpulsive());
             });
         }
         return logs;

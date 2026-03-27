@@ -18,6 +18,11 @@ public class SpendingLog {
     @Column(updatable = false)
     private Long logId;
 
+    @Transient
+    private Boolean isImpulsive;
+    @Transient
+    private String emotionTag;
+
     private LocalDate regDate;
     private Integer amount;
     private String storeName;
