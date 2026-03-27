@@ -1,28 +1,4 @@
-// ===== 은행 목록 =====
-const bankOrganizations = [
-    { code: "0002", name: "산업은행" },
-    { code: "0003", name: "기업은행" },
-    { code: "0004", name: "국민은행" },
-    { code: "0007", name: "수협은행" },
-    { code: "0011", name: "농협은행" },
-    { code: "0020", name: "우리은행" },
-    { code: "0023", name: "SC은행" },
-    { code: "0027", name: "씨티은행" },
-    { code: "0031", name: "대구은행" },
-    { code: "0032", name: "부산은행" },
-    { code: "0034", name: "광주은행" },
-    { code: "0035", name: "제주은행" },
-    { code: "0037", name: "전북은행" },
-    { code: "0039", name: "경남은행" },
-    { code: "0045", name: "새마을금고" },
-    { code: "0048", name: "신협은행" },
-    { code: "0071", name: "우체국" },
-    { code: "0081", name: "KEB하나은행" },
-    { code: "0088", name: "신한은행" },
-    { code: "0089", name: "K뱅크" }
-];
-
-// ===== 카드사 목록 (이미지 기준 반영) =====
+// ===== 카드사 목록 =====
 const cardOrganizations = [
     { code: "0301", name: "KB카드" },
     { code: "0302", name: "현대카드" },
@@ -42,41 +18,23 @@ const cardOrganizations = [
 
 // ===== 코드 → 이름 매핑 =====
 const organizationMap = {};
-
-// 은행 등록
-bankOrganizations.forEach(org => {
-    organizationMap[org.code] = org.name;
-});
-
-// 카드 등록
 cardOrganizations.forEach(org => {
     organizationMap[org.code] = org.name;
 });
 
 // ===== 초기 실행 =====
 document.addEventListener("DOMContentLoaded", () => {
-    const accountTypeSelect = document.getElementById("accountType");
-
-    renderOrganizationOptions(accountTypeSelect.value);
-
-    accountTypeSelect.addEventListener("change", () => {
-        renderOrganizationOptions(accountTypeSelect.value);
-    });
-
+    renderOrganizationOptions();
     loadMyAccounts();
 });
 
-// ===== 기관 목록 렌더링 =====
-function renderOrganizationOptions(accountType) {
+// ===== 카드사 목록 렌더링 =====
+function renderOrganizationOptions() {
     const organizationSelect = document.getElementById("organization");
 
-    const organizations = accountType === "bank"
-        ? bankOrganizations
-        : cardOrganizations;
-
     organizationSelect.innerHTML = `
-        <option value="">선택하세요</option>
-        ${organizations.map(org => `
+        <option value="">카드사를 선택하세요</option>
+        ${cardOrganizations.map(org => `
             <option value="${org.code}">${org.name}</option>
         `).join("")}
     `;
@@ -84,9 +42,8 @@ function renderOrganizationOptions(accountType) {
 
 // ===== 계정 연결 =====
 function connectAccount() {
-
     const data = {
-        accountType: document.getElementById("accountType").value,
+        accountType: "card",
         organization: document.getElementById("organization").value,
         loginId: document.getElementById("loginId").value.trim(),
         password: document.getElementById("password").value.trim(),
@@ -94,14 +51,8 @@ function connectAccount() {
         loginType: "1"
     };
 
-    // ✅ 사용자 입력 검증
-    if (!data.accountType) {
-        alert("구분을 선택해주세요.");
-        return;
-    }
-
     if (!data.organization) {
-        alert("은행 또는 카드사를 선택해주세요.");
+        alert("카드사를 선택해주세요.");
         return;
     }
 
@@ -142,7 +93,7 @@ function connectAccount() {
 
             alert(
                 result.message +
-                "\n기관명: " + organizationName +
+                "\n카드사: " + organizationName +
                 "\nconnectedId: " + result.connectedId
             );
 
@@ -157,9 +108,7 @@ function connectAccount() {
 
 // ===== 입력 초기화 =====
 function resetForm() {
-    const accountType = document.getElementById("accountType").value;
-
-    renderOrganizationOptions(accountType);
+    renderOrganizationOptions();
     document.getElementById("loginId").value = "";
     document.getElementById("password").value = "";
     document.getElementById("accountAlias").value = "";
@@ -181,22 +130,17 @@ function loadMyAccounts() {
             const accountList = document.getElementById("accountList");
 
             if (!accounts.length) {
-                accountList.innerHTML = "<p>아직 연결된 계정이 없습니다.</p>";
+                accountList.innerHTML = "<p>아직 연결된 카드가 없습니다.</p>";
                 return;
             }
 
             accountList.innerHTML = accounts.map(account => {
                 const organizationName = organizationMap[account.organization] || account.organization;
 
-                const typeName = account.organization.startsWith("03")
-                    ? "카드"
-                    : "계좌";
-
                 return `
                     <div class="account-item">
-                        <p><strong>구분:</strong> ${typeName}</p>
                         <p><strong>별칭:</strong> ${account.accountAlias ?? "-"}</p>
-                        <p><strong>은행/카드사:</strong> ${organizationName}</p>
+                        <p><strong>카드사:</strong> ${organizationName}</p>
                         <p><strong>connectedId:</strong> ${account.connectedId}</p>
                     </div>
                 `;
@@ -205,6 +149,6 @@ function loadMyAccounts() {
         .catch(error => {
             console.error(error);
             document.getElementById("accountList").innerHTML =
-                "<p>계정 목록을 불러오지 못했습니다.</p>";
+                "<p>카드 목록을 불러오지 못했습니다.</p>";
         });
 }
