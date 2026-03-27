@@ -9,9 +9,29 @@
         .container { background-color: white; width: 360px; height: 640px; padding: 20px; border-radius: 20px; position: relative; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
 
         /* 상단 입력부 */
-        .top-inputs { display: flex; justify-content: space-around; align-items: center; margin: 20px 0; gap: 10px; }
-        .top-inputs input { width: 30%; border: none; border-bottom: 2px solid #eee; padding: 8px 0; text-align: center; font-size: 16px; font-weight: bold; outline: none; }
+        .top-inputs { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; gap: 8px; }
+        .top-inputs input { border: none; border-bottom: 2px solid #eee; padding: 8px 0; text-align: center; font-size: 15px; font-weight: bold; outline: none; box-sizing: border-box; }
         .top-inputs input:focus { border-bottom-color: #ffcc00; }
+
+        /* 시간 입력창: 아이콘은 숨기고 클릭 영역은 확장 */
+        .time-input-container { position: relative; width: 38%; }
+        .time-input { width: 100% !important; cursor: pointer; }
+
+        /* 투명한 아이콘을 입력창 전체에 덮어서 클릭 유도 */
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            opacity: 0; /* 투명하게 숨김 */
+        }
+
+        .store-input { width: 30% !important; }
+        .amount-input { width: 32% !important; }
 
         /* 사진 및 메모 박스 */
         .content-area { flex-grow: 1; display: flex; flex-direction: column; gap: 15px; }
@@ -48,13 +68,14 @@
 <div class="container">
     <form th:action="@{/api/save}" method="post" enctype="multipart/form-data">
         <input type="hidden" name="userId" th:value="${userId}">
-
         <input type="hidden" name="emotionTag" id="emotionTagInput" value="">
 
         <div class="top-inputs">
-            <input type="time" name="spentAt" required>
-            <input type="text" name="storeName" placeholder="장소" required>
-            <input type="number" name="amount" id="amountInput" placeholder="금액" step="1000" min="0" required>
+            <div class="time-input-container">
+                <input type="time" name="spentAt" class="time-input" required>
+            </div>
+            <input type="text" name="storeName" class="store-input" placeholder="장소" required>
+            <input type="number" name="amount" id="amountInput" class="amount-input" placeholder="금액" step="1000" min="0" required>
         </div>
 
         <div class="content-area">
@@ -113,21 +134,12 @@
     // 3. 이모티콘 선택 기능
     function toggleEmojiPicker() {
         const picker = document.getElementById('emojiPicker');
-        // display가 flex이면 숨기고, 아니면 flex로 보이기
         picker.style.display = (picker.style.display === 'flex') ? 'none' : 'flex';
     }
 
     function selectEmoji(emoji) {
-        // [중요] 사용자가 클릭한 이모티콘(문자)을 그대로 UI와 Hidden Input에 반영합니다.
-        console.log("선택된 이모티콘:", emoji);
-
-        // 버튼 글자를 선택한 이모티콘으로 변경
         document.getElementById('emojiBtn').innerText = emoji;
-
-        // 숨겨진 input(name="emotionTag")에 이모티콘 문자 저장
         document.getElementById('emotionTagInput').value = emoji;
-
-        // 선택창 닫기
         toggleEmojiPicker();
     }
 </script>
