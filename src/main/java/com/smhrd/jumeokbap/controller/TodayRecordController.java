@@ -109,7 +109,7 @@ public class TodayRecordController {
         else return "잘 사셨어요!🍙";
     }
 
-    @GetMapping("/daily-calendar/{userId}")
+    @GetMapping("/dailyCaleandar/{userId}")
     public String showCalendar(@PathVariable("userId") String userId, Model model) {
         // 임시 소비 캘린더 확인용
         model.addAttribute("userId", userId);
