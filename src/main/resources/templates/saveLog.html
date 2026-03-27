@@ -8,7 +8,7 @@
         body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .container { background-color: white; width: 360px; height: 640px; padding: 20px; border-radius: 20px; position: relative; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
 
-        /* 날짜 표시 헤더 추가 */
+        /* 날짜 표시 헤더 */
         .date-header { text-align: center; font-size: 14px; color: #888; margin-bottom: 5px; font-weight: bold; }
 
         /* 상단 입력부 */
@@ -56,16 +56,23 @@
 <body>
 
 <div class="container">
-    <div class="date-header" th:text="${selectedDate} + ' 기록 추가'">2026-03-26 기록 추가</div>
+    <div class="date-header"
+         th:text="${selectedDate != null ? selectedDate : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')} + ' 기록 추가'">
+        2026-03-27 기록 추가
+    </div>
 
     <form th:action="@{/api/save}" method="post" enctype="multipart/form-data">
         <input type="hidden" name="userId" th:value="${userId}">
-        <input type="hidden" name="regDate" th:value="${selectedDate}">
+
+        <input type="hidden" name="regDate"
+               th:value="${selectedDate != null ? selectedDate : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+
         <input type="hidden" name="emotionTag" id="emotionTagInput" value="">
 
         <div class="top-inputs">
             <div class="time-input-container">
-                <input type="time" name="spentAt" class="time-input" required>
+                <input type="time" name="spentAt" class="time-input"
+                       th:value="${#temporals.format(#temporals.createNow(), 'HH:mm')}" required>
             </div>
             <input type="text" name="storeName" class="store-input" placeholder="장소" required>
             <input type="number" name="amount" id="amountInput" class="amount-input" placeholder="금액" step="1000" min="0" required>
