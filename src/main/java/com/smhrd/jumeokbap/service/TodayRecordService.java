@@ -143,9 +143,24 @@ public class TodayRecordService {
     }
 
     @Transactional
+    // 기록 삭제
     public void deleteRecord(Long logId) {
         diaryRepository.deleteByLogId(logId);
         spendingLogRepository.deleteById(logId);
+    }
+
+    @Transactional
+    // 오늘의 대표 지출 건
+    public void setAsMainRecord(Long logId) {
+        Diary targetDiary = diaryRepository.findByLogId(logId)
+                .orElseThrow(() -> new RuntimeException("해당 기록의 일기 정보를 찾을 수 없습니다."));
+
+        List<Diary> dailyDiaries = diaryRepository.findByUserIdAndRegDate(targetDiary.getUserId(), targetDiary.getRegDate());
+
+        for (Diary d : dailyDiaries) {
+            d.setIsMain(false);
+        }
+        targetDiary.setIsMain(true);
     }
 
 

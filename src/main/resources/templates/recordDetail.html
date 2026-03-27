@@ -5,7 +5,7 @@
     <title>오늘의 기록 상세</title>
     <style>
         body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; min-height: 100vh; align-items: center; }
-        .container { background-color: white; width: 360px; padding: 40px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); box-sizing: border-box; }
+        .container { background-color: white; width: 360px; padding: 40px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; }
 
         .header { color: #888; font-size: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .back-btn { cursor: pointer; border: none; background: none; font-size: 18px; color: #888; }
@@ -23,8 +23,8 @@
 
         .memo-box { height: 120px; border: 1px solid #e0e7d0; resize: none; text-align: center; font-size: 16px; padding: 15px; box-sizing: border-box; background-color: #fafff0; width: 100%; border-radius: 10px; outline: none; margin-bottom: 20px; }
 
-        /* 이모티콘 & 구분 영역 (두 칸 유지) */
-        .options-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 30px; }
+        /* 이모티콘 & 구분 영역 */
+        .options-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
         .option-item {
             background-color: #fafff0;
             border: 1px solid #e0e7d0;
@@ -36,18 +36,27 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 80px; /* 박스 높이 균형 유지 */
+            min-height: 80px;
         }
 
-        /* 왼쪽 이모티콘 크기 강조 */
         .emoji-large { font-size: 50px !important; margin: 0 !important; line-height: 1; }
         .emoji-val { font-size: 24px; display: block; margin-top: 5px; }
+
+        /* 대표 설정 버튼 스타일 */
+        .main-btn-wrapper { margin-bottom: 20px; }
+        .btn-set-main {
+            width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #ffcc00;
+            background-color: white; color: #333; font-weight: bold; cursor: pointer;
+            transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-set-main:hover { background-color: #fff9e6; }
+        .is-main-active { background-color: #ffcc00 !important; color: white !important; border: none; cursor: default; }
 
         /* 하단 버튼 */
         .btn-group { display: flex; justify-content: space-between; gap: 10px; }
         .btn { flex: 1; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-back { background-color: #eee; color: #666; }
-        .btn-delete { background-color: #ffcc00; color: black; }
+        .btn-delete { background-color: #ff4d4d; color: white; } /* 삭제 버튼 색상 강조 */
         .btn:hover { opacity: 0.8; }
     </style>
 </head>
@@ -86,6 +95,15 @@
         </div>
     </div>
 
+    <div class="main-btn-wrapper">
+        <button type="button" id="mainSetBtn"
+                th:classappend="${diary.isMain} ? 'is-main-active' : ''"
+                class="btn-set-main"
+                th:onclick="${diary.isMain} ? '' : |updateMainRecord(${detail.logId})|">
+            <span th:text="${diary.isMain} ? '🌟 오늘의 대표 지출' : '🍙 대표 지출로 설정하기'">대표 설정</span>
+        </button>
+    </div>
+
     <div class="btn-group">
         <button type="button" class="btn btn-back" onclick="history.back()">뒤로가기</button>
         <button type="button" class="btn btn-delete" th:onclick="|deleteRecord(${detail.logId})|">내역 삭제</button>
@@ -93,9 +111,30 @@
 </div>
 
 <script th:inline="javascript">
+    // 💡 대표 지출 업데이트 함수
+    function updateMainRecord(logId) {
+        if(confirm("이 기록을 오늘의 대표 지출로 설정하시겠습니까?\n(다른 대표 기록은 자동으로 해제됩니다.)")) {
+            fetch('/api/record/updateMain/' + logId, {
+                method: 'POST'
+            })
+                .then(response => response.text())
+                .then(data => {
+                    if(data === "success") {
+                        alert("대표 지출로 설정되었습니다! 🍙");
+                        location.reload(); // 변경된 상태 반영
+                    } else {
+                        alert("설정에 실패했습니다. 다시 시도해 주세요.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("오류가 발생했습니다.");
+                });
+        }
+    }
+
     function deleteRecord(logId) {
         if(confirm("이 기록을 정말 삭제하시겠습니까?")) {
-            // 실제 삭제 요청 시 주석 해제하여 사용하세요
             location.href = '/api/delete/' + logId;
         }
     }
