@@ -1,93 +1,118 @@
 package com.smhrd.jumeokbap.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.smhrd.jumeokbap.domain.UserCodefAccount;
-import com.smhrd.jumeokbap.dto.CodefConnectRequest;
-import com.smhrd.jumeokbap.repository.UserCodefAccountRepository;
+import com.smhrd.jumeokbap.config.CodefProperties;
+import com.smhrd.jumeokbap.dto.CodefConnectedIdRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CodefConnectedIdService {
 
     private final CodefApiService codefApiService;
-    private final UserCodefAccountRepository repository;
-    private final CodefCryptoService codefCryptoService;   // 추가
+    private final CodefCryptoService codefCryptoService;
 
-    public String connectAccount(String userId, CodefConnectRequest dto) {
+    public String createConnectedId(CodefConnectedIdRequest dto) {
+        validate(dto);
 
-        if (dto.getAccountType() != null &&
-                !dto.getAccountType().isBlank() &&
-                !"card".equalsIgnoreCase(dto.getAccountType()) &&
-                !"CD".equalsIgnoreCase(dto.getAccountType())) {
-            throw new IllegalArgumentException("카드 연결만 지원합니다.");
-        }
+        try {
+            String encryptedPassword = codefCryptoService.encryptPassword(dto.getPassword());
 
-        String businessType = "CD";
-        String loginType = "1";
+            System.out.println("businessType = " + dto.getBusinessType());
+            System.out.println("clientType = " + dto.getClientType());
+            System.out.println("organization = " + dto.getOrganization());
+            System.out.println("loginType = " + dto.getLoginType());
+            System.out.println("loginId = " + dto.getLoginId());
+            System.out.println("encryptedPassword length = " + encryptedPassword.length());
+            System.out.println("PUBLIC_KEY prefix = " + CodefProperties.PUBLIC_KEY.substring(0, 20));
 
-
-        // 여기서 평문 비밀번호를 RSA 암호화
-        String encryptedPassword = codefCryptoService.encryptPassword(dto.getPassword());
-
-        String requestBody = """
-        {
-          "accountList": [
-            {
-              "countryCode": "KR",
-              "businessType": "%s",
-              "clientType": "P",
-              "organization": "%s",
-              "loginType": "%s",
-              "id": "%s",
-              "password": "%s"
+            if (encryptedPassword == null || encryptedPassword.isBlank()) {
+                throw new RuntimeException("비밀번호 암호화 실패");
             }
-          ]
+
+            String requestBody = """
+            {
+              "accountList": [
+                {
+                  "countryCode": "KR",
+                  "businessType": "%s",
+                  "clientType": "%s",
+                  "organization": "%s",
+                  "loginType": "%s",
+                  "id": "%s",
+                  "password": "%s"
+                }
+              ]
+            }
+            """.formatted(
+                    dto.getBusinessType(),
+                    dto.getClientType(),
+                    dto.getOrganization(),
+                    dto.getLoginType(),
+                    dto.getLoginId(),
+                    encryptedPassword
+            );
+
+            System.out.println("connectedId 요청 바디 = " + requestBody);
+
+            JsonNode response = codefApiService.post(
+                    "https://development.codef.io/v1/account/create",
+                    requestBody
+            );
+
+            System.out.println("connectedId 응답 = " + response.toPrettyString());
+
+            String connectedId = response.path("data").path("connectedId").asText();
+
+            if (connectedId == null || connectedId.isBlank()) {
+                String code = response.path("result").path("code").asText();
+                String message = response.path("result").path("message").asText();
+                String extraMessage = response.path("result").path("extraMessage").asText();
+
+                throw new RuntimeException(
+                        "connectedId 발급 실패"
+                                + " | code=" + code
+                                + " | message=" + message
+                                + " | extraMessage=" + extraMessage
+                );
+
+
+            }
+
+            return connectedId;
+
+        } catch (Exception e) {
+            throw new RuntimeException("connectedId 생성 중 오류: " + e.getMessage(), e);
         }
-        """.formatted(
-                businessType,
-                dto.getOrganization(),
-                loginType,
-                dto.getLoginId(),
-                encryptedPassword
-        );
-
-        JsonNode response = codefApiService.callPostApi(
-                "https://api.codef.io/v1/account/create",
-                requestBody
-        );
-
-        System.out.println("CODEF 응답 = " + response.toPrettyString());
-        System.out.println("CODEF 요청 바디 = " + requestBody);
-
-        String connectedId = response.path("data").path("connectedId").asText();
-
-        if (connectedId.isBlank()) {
-            String resultCode = response.path("result").path("code").asText();
-            String resultMessage = response.path("result").path("message").asText();
-            throw new RuntimeException("connectedId 발급 실패 - code: " + resultCode + ", message: " + resultMessage);
-        }
-
-        String alias = (dto.getAccountAlias() == null || dto.getAccountAlias().isBlank())
-                ? "내 카드"
-                : dto.getAccountAlias();
-
-        UserCodefAccount account = UserCodefAccount.builder()
-                .userId(userId)
-                .connectedId(connectedId)
-                .organization(dto.getOrganization())
-                .accountAlias(alias)
-                .build();
-
-        repository.save(account);
-
-        return connectedId;
     }
 
-    public List<UserCodefAccount> getMyAccounts(String userId) {
-        return repository.findByUserId(userId);
+    private void validate(CodefConnectedIdRequest dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("요청값이 없습니다.");
+        }
+        if (isBlank(dto.getOrganization())) {
+            throw new IllegalArgumentException("organization은 필수입니다.");
+        }
+        if (isBlank(dto.getLoginId())) {
+            throw new IllegalArgumentException("loginId는 필수입니다.");
+        }
+        if (isBlank(dto.getPassword())) {
+            throw new IllegalArgumentException("password는 필수입니다.");
+        }
+        if (isBlank(dto.getBusinessType())) {
+            throw new IllegalArgumentException("businessType은 필수입니다.");
+        }
+        if (isBlank(dto.getClientType())) {
+            throw new IllegalArgumentException("clientType은 필수입니다.");
+        }
+        if (isBlank(dto.getLoginType())) {
+            throw new IllegalArgumentException("loginType은 필수입니다.");
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 }
+
