@@ -1,260 +1,273 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>주먹밥 - 메인 대시보드</title>
+  <title>주먹밥 - 메인</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
-      background-color: #f0f2f5;
+      background-color: #e9e9e9;
+      font-family: 'Pretendard', sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      font-family: 'Pretendard', -apple-system, sans-serif;
+      margin: 0;
     }
 
-    .mobile-container {
+    .container {
+      background-color: white;
       width: 360px;
-      height: 740px;
-      background-color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      height: 640px;
+      padding: 20px;
+      border-radius: 20px;
       position: relative;
-    }
-
-    /* 헤더 영역 */
-    .header {
-      flex: 1.2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-bottom: 1px solid #f9f9f9;
-      position: relative;
-    }
-
-    #headerTitle {
-      font-size: 20px;
-      font-weight: 800;
-      color: #333;
-      letter-spacing: -0.5px;
-    }
-
-    .header-right {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
+      box-sizing: border-box;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
-      z-index: 10;
     }
 
-    .login-move-btn {
-      border: none;
-      background: #333;
-      color: white;
-      padding: 8px 14px;
-      border-radius: 8px;
+    /* 통합 헤더 (닉네임 - 타이틀 - 로그아웃) */
+    .integrated-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 15px;
+      margin-top: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .user-nickname {
       font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      min-width: 76px;
-    }
-
-    .login-user-text {
-      font-size: 12px;
-      font-weight: 600;
+      font-weight: bold;
       color: #333;
-      text-align: center;
-      min-height: 14px;
+      flex: 1;
     }
 
-    /* 주먹밥 및 메뉴 영역 */
-    .character-area {
-      flex: 5.8;
+    .top-title {
+      font-size: 17px;
+      font-weight: bold;
+      flex: 2;
+      text-align: center;
+    }
+
+    .logout-area {
+      flex: 1;
+      text-align: right;
+    }
+
+    .logout-btn {
+      font-size: 11px;
+      color: #bbb;
+      text-decoration: none;
+      border: 1px solid #eee;
+      padding: 3px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    /* 주먹밥 메뉴 버튼 (우측 상단 위치 하향) */
+    .menu-trigger {
+      position: absolute;
+      top: 130px;
+      right: 20px;
+      background: #ffcc00;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      position: relative; /* 메뉴 배치를 위해 필수 */
-    }
-
-    /* 햄버거 메뉴 */
-    .menu-wrapper {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       z-index: 100;
     }
 
-    .trigger-btn {
-      width: 48px;
-      height: 48px;
-      background: #333;
-      border: none;
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      transition: all 0.3s;
+    .menu-trigger span {
+      font-size: 22px;
     }
 
-    .trigger-btn .bar { width: 20px; height: 2px; background: white; border-radius: 2px; transition: 0.3s; }
-
-    /* 클릭 시 메인 햄버거 버튼 변화 로직 */
-    .menu-wrapper.active .trigger-btn { transform: rotate(90deg); background: #FFD233; }
-    .menu-wrapper.active .bar:nth-child(1) { transform: translateY(6px) rotate(45deg); background: #333; }
-    .menu-wrapper.active .bar:nth-child(2) { opacity: 0; }
-    .menu-wrapper.active .bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); background: #333; }
-
-    .drop-menu {
-      margin-top: 12px;
+    .menu-wrapper {
+      position: absolute;
+      top: 190px;
+      right: 20px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      pointer-events: none;
+      gap: 12px;
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .menu-wrapper.active {
+      transform: scaleY(1);
     }
 
     .sub-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: 2px solid #FFD233;
+      width: 42px;
+      height: 42px;
       background: white;
-      font-size: 20px;
-      cursor: pointer;
-      opacity: 0;
-      transform: translateY(-20px) scale(0.5);
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border-radius: 50%;
       display: flex;
       justify-content: center;
       align-items: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-size: 18px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border: 1px solid #f5f5f5;
+      cursor: pointer;
     }
 
-    /* 메뉴 활성화 상태 */
-    .menu-wrapper.active .sub-btn { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
-    .menu-wrapper.active .sub-btn:nth-child(1) { transition-delay: 0.05s; }
-    .menu-wrapper.active .sub-btn:nth-child(2) { transition-delay: 0.15s; }
-    .menu-wrapper.active .sub-btn:nth-child(3) { transition-delay: 0.25s; }
-    .menu-wrapper.active .sub-btn:nth-child(4) { transition-delay: 0.35s; }
-
-    .bubble-container {
-      background: #F2F2F2;
-      padding: 20px;
-      border-radius: 25px;
-      margin-bottom: 25px;
-      position: relative;
-      width: 85%;
-      text-align: center;
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 1.6;
-      word-break: keep-all;
-    }
-
-    .bubble-container::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-left: 12px solid transparent;
-      border-right: 12px solid transparent;
-      border-top: 12px solid #F2F2F2;
-    }
-
-    .jumeok-img {
-      width: 220px;
-      height: auto;
-    }
-
-    /* 하단 정보 영역 */
-    .info-area {
-      flex: 3;
-      padding: 0 30px;
-      background-color: #ffffff;
+    /* 중앙 캐릭터 영역 */
+    .character-section {
+      flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      align-items: center;
     }
 
-    .progress-section { width: 100%; }
-    .progress-text-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    #challengeNameDisplay { font-size: 15px; font-weight: 700; color: #333; }
-    #progressPercent { font-size: 16px; font-weight: 800; color: #FFD233; }
-    .progress-bar-bg { width: 100%; height: 16px; background: #EBEBEB; border-radius: 10px; overflow: hidden; }
-    .progress-bar-fill { width: 0%; height: 100%; background: #FFD233; border-radius: 10px; transition: width 1s ease-in-out; }
-    .accumulated-text { margin-top: 15px; font-size: 13px; color: #aaaaaa; text-align: right; }
+    .bubble-container {
+      position: relative;
+      margin-bottom: 10px;
+    }
 
-    /* 예산 초과 시 스타일 변화 */
-    .is-over .progress-bar-fill { background: #FF5A5A; }
-    .is-over #progressPercent { color: #FF5A5A; }
-    .is-over .bubble-container { background: #FFEAEA; }
-    .is-over .bubble-container::after { border-top-color: #FFEAEA; }
+    .bubble {
+      background: #f9f9f9;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      border: 1px solid #eee;
+      position: relative;
+      text-align: center;
+    }
+
+    .bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 8px 8px 0;
+      border-style: solid;
+      border-color: #f9f9f9 transparent transparent;
+    }
+
+    .character-img {
+      width: 90px;
+      height: auto;
+      margin-top: 5px;
+    }
+
+    /* 최하단 챌린지 영역 (슬림형) */
+    .dashboard-card {
+      width: 100%;
+      padding: 15px 5px;
+      border-top: 1px solid #f0f0f0;
+      box-sizing: border-box;
+      margin-top: auto;
+    }
+
+    .card-label {
+      font-size: 11px;
+      color: #ffcc00;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .challenge-name {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .progress-bar {
+      background: #f0f0f0;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 5px;
+    }
+
+    .progress-fill {
+      background: #ffcc00;
+      height: 100%;
+      width: 0%;
+      transition: 0.5s;
+    }
+
+    .progress-info {
+      font-size: 10px;
+      color: #ccc;
+      text-align: right;
+    }
+
+    .usage-section {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .usage-label {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .usage-amount {
+      font-size: 15px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
-<div class="mobile-container" id="mainDashboard">
-  <header class="header">
-    <h1 id="headerTitle">🍙 주먹밥 🍙</h1>
-    <div class="header-right">
-      <button id="loginMoveBtn" class="login-move-btn" type="button">로그인</button>
-      <span id="loginUserText" class="login-user-text"></span>
+<div class="container">
+  <div class="integrated-header">
+    <div class="user-nickname">
+      <span id="nicknameDisplay">냠냠</span>님
     </div>
-  </header>
-
-  <main class="character-area">
-    <div class="menu-wrapper" id="menuWrapper">
-      <button class="trigger-btn" id="menuTrigger" type="button">
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-      </button>
-
-      <div class="drop-menu">
-        <button class="sub-btn" onclick="location.href='/expense/today'" title="오늘의 소비">💰</button>
-        <button class="sub-btn" onclick="location.href='/calendar'" title="소비 캘린더">📅</button>
-        <button class="sub-btn" onclick="location.href='/budget/create'" title="챌린지 설정">🏆</button>
-        <button class="sub-btn" onclick="location.href='/mypage'" title="마이페이지">⚙️</button>
-      </div>
+    <div class="top-title">🍙 주먹밥 🍙</div>
+    <div class="logout-area">
+      <span class="logout-btn" id="loginMoveBtn">로그아웃</span>
     </div>
+  </div>
 
+  <div class="menu-trigger" id="menuTrigger">
+    <span>🍙</span>
+  </div>
+
+  <div class="menu-wrapper" id="menuWrapper">
+    <div class="sub-btn" title="오늘의 소비">💰</div>
+    <div class="sub-btn" title="소비 캘린더">📅</div>
+    <div class="sub-btn" title="챌린지 설정">🏆</div>
+    <div class="sub-btn" title="마이페이지">⚙️</div>
+  </div>
+
+  <div class="character-section">
     <div class="bubble-container">
-      <p id="bubbleMessage">데이터를 불러오고 있어요! 🍙</p>
+      <div class="bubble" id="bubbleMessage">
+        오늘은 0원을 사용했어요!
+      </div>
     </div>
-    <img src="/images/jumeok_default.png" alt="주먹밥 캐릭터" class="jumeok-img" id="jumeokImg">
-  </main>
+    <img src="/img/jumeokbap_main.png" alt="주먹밥 캐릭터" class="character-img">
+  </div>
 
-  <footer class="info-area">
-    <div class="progress-section">
-      <div class="progress-text-row">
-        <span id="challengeNameDisplay">챌린지 확인 중...</span>
-        <span id="progressPercent">0%</span>
-      </div>
-      <div class="progress-bar-bg">
-        <div id="progressBarFill" class="progress-bar-fill"></div>
-      </div>
-      <div class="accumulated-text">
-        총 누적: <span id="accumulatedUsage">0</span>원
-      </div>
+  <div class="dashboard-card" id="mainDashboard">
+    <div class="card-label">현재 진행 중인 챌린지</div>
+    <div class="challenge-name" id="challengeNameDisplay">진행 중인 챌린지가 없어요</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressBarFill"></div>
     </div>
-  </footer>
+    <div class="progress-info" id="progressPercent">0.0%</div>
+    <div class="usage-section">
+      <span class="usage-label">누적 소비 금액</span>
+      <span class="usage-amount"><span id="accumulatedUsage">0</span>원</span>
+    </div>
+  </div>
 </div>
 
 <script src="/js/index.js"></script>
