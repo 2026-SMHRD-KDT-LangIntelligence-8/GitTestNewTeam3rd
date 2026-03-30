@@ -29,6 +29,7 @@ public class Diary {
     private String userId;
     @Column(nullable = false)
     private Boolean isMain;
+    @Column(nullable = false)
     private Boolean isFixed;
 
     private LocalDate regDate;
