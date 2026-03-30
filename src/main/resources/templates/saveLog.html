@@ -34,7 +34,10 @@
         .memo-box { height: 140px; }
 
         .sub-buttons { display: flex; gap: 15px; margin-bottom: 20px; position: relative; }
-        .btn-small { flex: 1; background-color: #fafff0; border: none; border-radius: 8px; padding: 12px; font-size: 13px; color: #444; cursor: pointer; text-align: center; }
+        .btn-small { flex: 1; background-color: #fafff0; border: none; border-radius: 8px; padding: 12px; font-size: 13px; color: #444; cursor: pointer; text-align: center; transition: 0.3s; }
+
+        /* 📌 고정비 활성화 스타일 */
+        .btn-fixed-active { background-color: #5fb1f7 !important; color: white !important; font-weight: bold; }
 
         .emoji-picker {
             display: none; position: absolute; bottom: 50px; left: 0; width: 100%;
@@ -67,7 +70,7 @@
         <input type="hidden" name="regDate"
                th:value="${selectedDate != null ? selectedDate : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
 
-        <input type="hidden" name="emotionTag" id="emotionTagInput" value="">
+        <input type="hidden" name="emotionTag" id="emotionTagInput" value="😊">
 
         <div class="top-inputs">
             <div class="time-input-container">
@@ -90,8 +93,10 @@
         </div>
 
         <div class="sub-buttons">
-            <button type="button" class="btn-small" id="emojiBtn" onclick="toggleEmojiPicker()">이모티콘 선택</button>
-            <button type="button" class="btn-small">고정비 등록</button>
+            <button type="button" class="btn-small" id="emojiBtn" onclick="toggleEmojiPicker()">😊 이모티콘</button>
+
+            <button type="button" class="btn-small" id="fixedBtn" onclick="toggleFixedInput()">📌 고정비 등록</button>
+            <input type="checkbox" name="isFixed" id="isFixedCheckbox" style="display: none;">
 
             <div class="emoji-picker" id="emojiPicker">
                 <span class="emoji-item" onclick="selectEmoji('😊')">😊</span>
@@ -138,9 +143,25 @@
     }
 
     function selectEmoji(emoji) {
-        document.getElementById('emojiBtn').innerText = emoji;
+        document.getElementById('emojiBtn').innerText = emoji + " 이모티콘";
         document.getElementById('emotionTagInput').value = emoji;
         toggleEmojiPicker();
+    }
+
+    // 4. 고정비 토글 기능
+    function toggleFixedInput() {
+        const checkbox = document.getElementById('isFixedCheckbox');
+        const fixedBtn = document.getElementById('fixedBtn');
+
+        checkbox.checked = !checkbox.checked;
+
+        if(checkbox.checked) {
+            fixedBtn.classList.add('btn-fixed-active');
+            fixedBtn.innerText = "📌 고정비 등록됨";
+        } else {
+            fixedBtn.classList.remove('btn-fixed-active');
+            fixedBtn.innerText = "📌 고정비 등록";
+        }
     }
 </script>
 

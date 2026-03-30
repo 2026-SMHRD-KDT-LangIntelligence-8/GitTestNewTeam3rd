@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -47,10 +48,10 @@ public class TodayRecordService {
         }
 
         String resultFromServer = analyzeText(dto.getContent());
-        Boolean isImpulsive = "1".equals(resultFromServer);
+        boolean isImpulsive = "1".equals(resultFromServer);
 
         boolean existsDiary = diaryRepository.existsByUserIdAndRegDate(dto.getUserId(), recordDate);
-        Boolean isMain = !existsDiary;
+        boolean isMain = !existsDiary;
 
         SpendingLog spendingLog = SpendingLog.builder()
                 .userId(dto.getUserId())
@@ -84,6 +85,34 @@ public class TodayRecordService {
 
         diaryRepository.save(diary);
 
+    }
+
+    // 고정비 등록
+    public Map<String, Long> getMonthlyTotal(String userId, String yearMonthStr) {
+        YearMonth ym = YearMonth.parse(yearMonthStr);
+        LocalDate startDate = ym.atDay(1);
+        LocalDate endDate = ym.atEndOfMonth();
+
+        List<Diary> diaries = diaryRepository.findMonthlyDiaries(userId, startDate, endDate);
+
+        long totalWithFixed = 0;
+        long totalWithoutFixed = 0;
+
+        for (Diary d : diaries) {
+            long amount = spendingLogRepository.findById(d.getLogId())
+                    .map(SpendingLog::getAmount)
+                    .orElse(0);
+
+            totalWithFixed += amount;
+
+            if (!Boolean.TRUE.equals(d.getIsFixed())) {
+                totalWithoutFixed += amount;
+            }
+        }
+        Map<String, Long> result = new HashMap<>();
+        result.put("totalWithFixed", totalWithFixed);
+        result.put("totalWithoutFixed", totalWithoutFixed);
+        return result;
     }
 
     @Transactional(readOnly = true)
@@ -168,6 +197,17 @@ public class TodayRecordService {
 
         targetDiary.setIsMain(true);
         spendingLogRepository.findById(logId).ifPresent(log -> log.setIsMain(true));
+    }
+
+    @Transactional
+    // 고정비 등록
+    public void toggleFixedStatus(Long diaryId) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new RuntimeException("해당 기록을 찾을 수 없습니다."));
+
+        boolean currentStatus = (diary.getIsFixed() != null) ? diary.getIsFixed() : false;
+        diary.setIsFixed(!currentStatus);
+
     }
 
 

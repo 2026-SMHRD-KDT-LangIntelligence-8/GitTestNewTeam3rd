@@ -122,6 +122,17 @@ public class TodayRecordController {
         else return "잘 사셨어요!🍙";
     }
 
+    @PostMapping("/record/toggleFixed/{diaryId}")
+    @ResponseBody
+    // 고정비 등록
+    public String toggleFixed(@PathVariable Long diaryId) {
+        try {
+            todayRecordService.toggleFixedStatus(diaryId);
+            return "success";
+        } catch (Exception e) {
+            return "fail";
+        }
+    }
 
 
 
