@@ -22,7 +22,7 @@ public class CodefConnectedIdService {
             String clientType = dto.getClientType();
             String loginType = dto.getLoginType();
 
-            String encryptedPassword = codefCryptoService.encryptPassword(dto.getPassword());
+            String encryptedPassword = codefCryptoService.encrypt(dto.getPassword());
 
             if (encryptedPassword == null || encryptedPassword.isBlank()) {
                 throw new RuntimeException("비밀번호 암호화 실패");
