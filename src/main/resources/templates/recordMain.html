@@ -3,11 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오늘의 기록 메인</title>
+    <title>주먹밥 - 오늘의 기록</title>
     <style>
         body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .container { background-color: white; width: 360px; height: 640px; padding: 20px; border-radius: 20px; position: relative; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .header-title { color: #888; font-size: 12px; margin-bottom: 20px; text-align: left; }
+
+        /* 닫기 버튼 */
+        .close-btn {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #888;
+            cursor: pointer;
+            text-decoration: none;
+            line-height: 1;
+            z-index: 10;
+        }
+        .close-btn:hover { color: #333; }
+
+        /* 제목 위치 조정 */
+        .header-title { color: #bbb; font-size: 12px; margin-bottom: 20px; text-align: center; width: 100%; }
+
         .date-selector { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; position: relative; }
         .date-text { font-size: 20px; font-weight: bold; min-width: 120px; text-align: center; }
         .arrow { color: #ccc; cursor: pointer; font-size: 28px; border: none; background: none; outline: none; padding: 0 10px; }
@@ -45,7 +64,9 @@
 <body>
 
 <div class="container">
-    <div class="header-title">오늘의 기록 메인</div>
+    <a href="/main" class="close-btn">✕</a>
+
+    <div class="header-title">오늘의 기록</div>
 
     <div class="date-selector">
         <button type="button" class="arrow" onclick="moveDate(-1)">&lt;</button>
