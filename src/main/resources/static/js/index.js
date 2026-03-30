@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', async function () {
-    // 1. 로그인 상태 확인 (await로 userId를 확실히 기다림 ㅋ)
+    // 1. 로그인 상태 확인
     const userId = await checkLoginStatus();
 
     // 2. 메인 데이터 로드
     await fetchMainData();
 
-    // 3. 햄버거 메뉴 초기화 (userId를 인자로 넘김)
+    // 3. 햄버거 메뉴 초기화
     initWaraakMenu(userId);
 });
 
@@ -29,7 +29,6 @@ function initWaraakMenu(userId) {
         const subButtons = document.querySelectorAll('.sub-btn');
 
         if (subButtons.length >= 4) {
-            // 오늘의 소비 (💰)
             subButtons[0].onclick = function() {
                 if (userId) {
                     window.location.href = `/api/recordMain/${userId}`;
@@ -39,7 +38,6 @@ function initWaraakMenu(userId) {
                 }
             };
 
-            // 소비 캘린더 (📅)
             subButtons[1].onclick = function() {
                 if (userId) {
                     window.location.href = `/api/dailyCalendar/${userId}`;
@@ -49,7 +47,6 @@ function initWaraakMenu(userId) {
                 }
             };
 
-            // 챌린지 설정 (🏆)
             subButtons[2].onclick = function() {
                 if (userId) {
                     window.location.href = '/api/budget/create-page';
@@ -59,7 +56,6 @@ function initWaraakMenu(userId) {
                 }
             };
 
-            // 마이페이지 (⚙️)
             subButtons[3].onclick = function() {
                 window.location.href = '/mypage';
             };
@@ -91,7 +87,6 @@ async function checkLoginStatus() {
             }
         }
 
-        // 비로그인 상태
         if (nicknameDisplay) nicknameDisplay.innerText = '손님';
         if (loginBtn) {
             loginBtn.innerText = '로그인';
@@ -129,10 +124,15 @@ async function fetchMainData() {
         document.getElementById('challengeNameDisplay').innerText =
             data.challengeName || "진행 중인 챌린지가 없어요!";
 
-        // 말풍선 메시지
+        // 말풍선 메시지 및 캐릭터 이미지 변경
+        const charImg = document.getElementById('characterImg');
         let message = `오늘은 ${data.todayUsage.toLocaleString()}원을 사용했어요!`;
+
         if (data.overBudget) {
             message += "<br><span style='color: #FF5A5A;'>내일은 지출을 줄여야 해요!</span>";
+            if (charImg) charImg.src = '/img/sad_meokbap.png'; // 예산 초과 시 슬픈 표정
+        } else {
+            if (charImg) charImg.src = '/img/normal_meokbap.png'; // 정상일 때 일반 표정
         }
         document.getElementById('bubbleMessage').innerHTML = message;
 

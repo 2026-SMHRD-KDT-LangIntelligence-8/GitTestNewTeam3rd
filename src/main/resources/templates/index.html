@@ -30,7 +30,7 @@
       align-items: center;
     }
 
-    /* 통합 헤더 (닉네임 - 타이틀 - 로그아웃) */
+    /* 헤더 영역 */
     .integrated-header {
       width: 100%;
       display: flex;
@@ -70,7 +70,7 @@
       cursor: pointer;
     }
 
-    /* 주먹밥 메뉴 버튼 (우측 상단 위치 하향) */
+    /* 플로팅 메뉴 버튼 */
     .menu-trigger {
       position: absolute;
       top: 130px;
@@ -87,10 +87,6 @@
       z-index: 100;
     }
 
-    .menu-trigger span {
-      font-size: 22px;
-    }
-
     .menu-wrapper {
       position: absolute;
       top: 190px;
@@ -101,6 +97,7 @@
       transform: scaleY(0);
       transform-origin: top;
       transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 99;
     }
 
     .menu-wrapper.active {
@@ -121,7 +118,7 @@
       cursor: pointer;
     }
 
-    /* 중앙 캐릭터 영역 */
+    /* 캐릭터 및 말풍선 */
     .character-section {
       flex: 1;
       display: flex;
@@ -143,6 +140,7 @@
       border: 1px solid #eee;
       position: relative;
       text-align: center;
+      min-width: 150px;
     }
 
     .bubble::after {
@@ -157,12 +155,12 @@
     }
 
     .character-img {
-      width: 90px;
+      width: 160px;
       height: auto;
       margin-top: 5px;
     }
 
-    /* 최하단 챌린지 영역 (슬림형) */
+    /* 대시보드 카드 (하단) */
     .dashboard-card {
       width: 100%;
       padding: 15px 5px;
@@ -228,11 +226,11 @@
 <div class="container">
   <div class="integrated-header">
     <div class="user-nickname">
-      <span id="nicknameDisplay">냠냠</span>님
+      <span id="nicknameDisplay">유저</span>님
     </div>
     <div class="top-title">🍙 주먹밥 🍙</div>
     <div class="logout-area">
-      <span class="logout-btn" id="loginMoveBtn">로그아웃</span>
+      <span class="logout-btn" id="loginMoveBtn">로그인</span>
     </div>
   </div>
 
@@ -250,22 +248,27 @@
   <div class="character-section">
     <div class="bubble-container">
       <div class="bubble" id="bubbleMessage">
-        오늘은 0원을 사용했어요!
+        반가워요! 🍙
       </div>
     </div>
-    <img src="/img/jumeokbap_main.png" alt="주먹밥 캐릭터" class="character-img">
+    <img id="characterImg" src="/img/normal_meokbap.png" alt="주먹밥 마스코트" class="character-img">
   </div>
 
-  <div class="dashboard-card" id="mainDashboard">
+  <div class="dashboard-card">
     <div class="card-label">현재 진행 중인 챌린지</div>
     <div class="challenge-name" id="challengeNameDisplay">진행 중인 챌린지가 없어요</div>
+
     <div class="progress-bar">
       <div class="progress-fill" id="progressBarFill"></div>
     </div>
+
     <div class="progress-info" id="progressPercent">0.0%</div>
+
     <div class="usage-section">
       <span class="usage-label">누적 소비 금액</span>
-      <span class="usage-amount"><span id="accumulatedUsage">0</span>원</span>
+      <span class="usage-amount">
+        <span id="accumulatedUsage">0</span>원
+      </span>
     </div>
   </div>
 </div>
