@@ -2,7 +2,9 @@ package com.smhrd.jumeokbap.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class UserViewController {
@@ -15,6 +17,22 @@ public class UserViewController {
     @GetMapping("/signup")
     public String signupPage() {
         return "signup";
+    }
+
+    // 회원정보 페이지
+    @GetMapping("/account_settings/{userId}")
+    public String accountSettingsPage(@PathVariable("userId") String userId, Model model){
+
+        model.addAttribute("userId", userId);
+        return "accountSettings";
+    }
+
+    // 회원 정보 수정 페이지
+    @GetMapping("/edit-profile/{userId}")
+    public String userEditPage(@PathVariable("userId") String userId, Model model){
+
+        model.addAttribute("userId", userId);
+        return "userEdit";
     }
 
     @GetMapping("/codef/connect-page")

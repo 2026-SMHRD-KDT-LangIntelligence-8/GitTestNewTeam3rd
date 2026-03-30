@@ -6,6 +6,7 @@ import com.smhrd.jumeokbap.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -71,5 +72,17 @@ public class UserController {
     public ResponseEntity<String> logout(HttpSession session) {
         session.invalidate();
         return ResponseEntity.ok("로그아웃 성공");
+    }
+
+    // 회원정보 수정 - 탈퇴하기
+    @DeleteMapping("/delete/{userId}")
+    public ResponseEntity<String> deleteUser(@PathVariable("userId") String userId, HttpSession session){
+        try{
+            userService.deleteUser(userId);
+            session.invalidate();
+            return ResponseEntity.ok("success");
+        }catch (Exception e){
+            return ResponseEntity.status(500).body("fail");
+        }
     }
 }

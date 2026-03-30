@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주먹밥 - 계정 설정</title>
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Pretendard', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            width: 360px;
+            height: 640px;
+            padding: 40px 20px;
+            border-radius: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 닉네임 표시 구역 */
+        .welcome-section {
+            margin-top: 80px;
+            margin-bottom: 60px;
+            text-align: center;
+        }
+        .welcome-text {
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+        }
+        .user-id {
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* 버튼 그룹 */
+        .btn-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .btn-black { background-color: #000; color: #fff; }
+        .btn-black:hover { background-color: #333; }
+
+        .btn-red { background-color: #e74c3c; color: #fff; margin-top: 5px; }
+        .btn-red:hover { background-color: #c0392b; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="welcome-section">
+        <p class="welcome-text">
+            <span class="user-id" th:text="${userId}">guest</span>님 환영합니다!
+        </p>
+    </div>
+
+    <div class="btn-group">
+        <a th:href="@{/codef/connect-page}" class="btn btn-black">계좌 및 카드 연동</a>
+
+        <a th:href="@{/edit-profile/{userId}(userId=${userId})}" class="btn btn-black">회원정보 수정</a>
+
+        <a href="javascript:void(0);" onclick="confirmDelete()" class="btn btn-red">탈퇴하기</a>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    function confirmDelete() {
+        if (confirm("정말로 주먹밥 서비스를 탈퇴하시겠어요? 🥺🍙\n탈퇴 시 모든 정보가 삭제됩니다")) {
+            const userId = [[${userId}]];
+
+            // 📌 브라우저 주소 이동 대신 fetch(DELETE)를 사용합니다.
+            fetch('/user/delete/' + userId, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert("탈퇴가 완료되었습니다. 이용해주셔서 감사합니다. 🍙");
+                        // 📌 탈퇴 성공 시 로그인 페이지로 이동
+                        location.href = "/login";
+                    } else {
+                        alert("탈퇴 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("서버 통신 중 오류가 발생했습니다.");
+                });
+        }
+    }
+</script>
+
+</body>
+</html>
