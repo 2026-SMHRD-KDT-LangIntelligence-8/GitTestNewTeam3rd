@@ -30,7 +30,6 @@ public class SpendingLog {
 
     @Column(nullable = false)
     private String userId;
-    private Long accountId;
     private Boolean isFixed;
     private Boolean isMain;
 
