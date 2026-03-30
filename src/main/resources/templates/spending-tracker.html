@@ -13,8 +13,17 @@
 
 
     <style>
+        @font-face {
+            font-family: 'BMJUA';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
 
-
+        @font-face {
+            font-family: 'CookieRun';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/CookieRun-Regular.woff') format('woff');
+        }
 
 
 
@@ -100,19 +109,43 @@
             border-color: #FFC107;
         }
 
+
+        .fc .fc-button-primary,
+        .fc .fc-button-primary:hover,
+        .fc .fc-button-primary:active,
+        .fc .fc-button-primary:focus,
+        .fc .fc-button-primary.fc-button-active {
+            background-color: #f8f9fa !important; /* 항상 같은 색 */
+            color: black !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+
+
+
         /* today 버튼 */
         .fc .fc-button-primary {
-            background-color: #e9e9e9;
+            background-color: #FFD233 !important;
+            color: black;                /* 글자도 부드럽게 */
             border: none;
-            color: black;
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-weight: bold;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-family: 'BMJUA', sans-serif;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08); /* 더 자연스럽게 */
+            transition: all 0.1s ease;
         }
 
         /* hover */
         .fc .fc-button-primary:hover {
-            background-color: #e0a800;
+            background-color: #f1f3f5 !important;
+        }
+
+        /* 클릭 느낌 */
+        .fc .fc-button-primary:active {
+            transform: scale(0.95);        /* 눌리는 느낌 */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         /* 이전/다음 버튼 */
@@ -154,11 +187,11 @@
             width: 90px;
             white-space: normal;
             text-align: center;
-            font-size: 30px;
+            font-size: 35px;
             color: #FFCC00;
             font-family: 'BMJUA', sans-serif;
         }
-        }
+
 
 
         .fc .fc-daygrid-day {
@@ -177,6 +210,10 @@
         }
 
 
+        /* 요일칸 높이 늘리기 */
+        .fc .fc-col-header-cell {
+            padding: 3px 0; /* 위아래 여백 증가 */
+        }
 
         /* 요일 이름 (Sun) */
         .fc .fc-col-header-cell.fc-day-sun {
@@ -201,8 +238,38 @@
             color: blue;
         }
 
+        /* 요일 (Sun Mon Tue...) */
+        .fc .fc-col-header-cell-cushion {
+            font-family: 'CookieRun';
+            font-size: 14px;
 
+        }
 
+        /* 일요일 */
+        .fc .fc-col-header-cell.fc-day-sun {
+            background-color: #ffe4ec;
+        }
+
+        /* 토요일 */
+        .fc .fc-col-header-cell.fc-day-sat {
+            background-color: #e3f2fd;
+        }
+
+        /* 평일 */
+        .fc .fc-col-header-cell.fc-day-mon,
+        .fc .fc-col-header-cell.fc-day-tue,
+        .fc .fc-col-header-cell.fc-day-wed,
+        .fc .fc-col-header-cell.fc-day-thu,
+        .fc .fc-col-header-cell.fc-day-fri {
+            background-color: #fff9db;
+        }
+
+        /* 날짜 숫자 */
+        .fc .fc-daygrid-day-number {
+            font-family: 'CookieRun';
+            font-size: 14px;
+            color: black;
+        }
 
 
 
