@@ -7,6 +7,7 @@ import com.smhrd.jumeokbap.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -61,5 +62,15 @@ public class UserService {
     // 아이디 중복 확인
     public boolean isUserIdDuplicate(String userId) {
         return userRepository.existsById(userId);
+    }
+
+    // 탈퇴하기
+    @Transactional
+    public void deleteUser(String userId){
+        if(userRepository.existsByUserId(userId)){
+            userRepository.deleteById(userId);
+        }else{
+            throw new RuntimeException("존재하지 않는 사용자입니다!");
+        }
     }
 }

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주먹밥 - 정보 수정</title>
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Pretendard', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            width: 360px;
+            height: 640px;
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 헤더 부분 */
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .back-btn {
+            text-decoration: none;
+            color: #333;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 입력 폼 스타일 */
+        .form-group { margin-bottom: 20px; }
+        .label {
+            display: block;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background-color: #f9f9f9;
+            outline: none;
+            transition: 0.3s;
+        }
+        .input-field:focus {
+            border-color: #000;
+            background-color: #fff;
+        }
+        /* 아이디는 수정 불가 스타일 */
+        .readonly-field {
+            background-color: #f1f1f1;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+
+        /* 하단 완료 버튼 */
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: auto; /* 최하단 배치 */
+            transition: 0.2s;
+        }
+        .btn-submit:hover { background-color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <a th:href="@{/account_settings/{userId}(userId=${userId})}" class="back-btn">←</a>
+        <span class="title">회원정보 수정</span>
+    </div>
+
+    <div class="form-group">
+        <span class="label">아이디 (변경 불가)</span>
+        <input type="text" class="input-field readonly-field" th:value="${userId}" readonly>
+    </div>
+
+    <div class="form-group">
+        <span class="label">새 닉네임</span>
+        <input type="text" id="nickname" class="input-field" placeholder="변경할 닉네임을 입력하세요">
+    </div>
+
+    <div class="form-group">
+        <span class="label">새 비밀번호</span>
+        <input type="password" id="password" class="input-field" placeholder="새 비밀번호 입력">
+    </div>
+
+    <div class="form-group">
+        <span class="label">비밀번호 확인</span>
+        <input type="password" id="passwordCheck" class="input-field" placeholder="비밀번호 확인">
+    </div>
+
+    <button type="button" class="btn-submit" onclick="requestUpdate()">수정 완료</button>
+</div>
+
+<script th:inline="javascript">
+    function requestUpdate() {
+        const userId = [[${userId}]];
+        const nickname = document.getElementById('nickname').value;
+        const password = document.getElementById('password').value;
+        const passwordCheck = document.getElementById('passwordCheck').value;
+
+        // 유효성 검사
+        if (!nickname) { alert("닉네임을 입력해주세요! 🍙"); return; }
+        if (password !== passwordCheck) { alert("비밀번호가 일치하지 않습니다! 🍙"); return; }
+
+        // 실제 수정 로직은 나중에 JS 파일에서 API(fetch) 호출로 처리하면 됩니다!
+        console.log("수정 요청:", { userId, nickname, password });
+        alert("정보가 성공적으로 수정되었습니다! 🍙");
+
+        // 수정 완료 후 다시 계정 설정 페이지로 이동
+        location.href = "/account_settings/" + userId;
+    }
+</script>
+
+</body>
+</html>
