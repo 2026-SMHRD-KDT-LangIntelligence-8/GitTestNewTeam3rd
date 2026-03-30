@@ -45,8 +45,21 @@ public class UserCodefAccount {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    // 🔥 추가
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    // 🔥 생성 시
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now; // ⭐ 이거 핵심
+    }
+
+    // 🔥 수정 시
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

@@ -1,6 +1,4 @@
-/**
- * 챌린지 설정 (budget_create.html) 전용 스크립트
- */
+// 챌린지 설정 JS
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
 
@@ -23,6 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 시작하기 버튼
     document.querySelector('.btn-save').addEventListener('click', handleSave);
+
+    // 뒤로가기 버튼 (메인 페이지 연동)
+    document.getElementById('backBtn').addEventListener('click', function() {
+        window.location.href = '/';
+    });
 });
 
 // 초기 날짜 설정 함수
