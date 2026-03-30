@@ -119,31 +119,59 @@ async function fetchMainData() {
         if (!response.ok) throw new Error('데이터 로드 실패');
 
         const data = await response.json();
+        console.log("서버 데이터 확인:", data); // 서버에서 넘어오는 실제 값 확인용
 
-        // 챌린지 이름 표시
-        document.getElementById('challengeNameDisplay').innerText =
-            data.challengeName || "진행 중인 챌린지가 없어요!";
+        // 1. 챌린지 이름 표시
+        const challengeNameDisplay = document.getElementById('challengeNameDisplay');
+        if (challengeNameDisplay) {
+            challengeNameDisplay.innerText = data.challengeName || "진행 중인 챌린지가 없어요!";
+        }
 
-        // 말풍선 메시지 및 캐릭터 이미지 변경
+        // 2. 말풍선 메시지 및 캐릭터 이미지 변경
         const charImg = document.getElementById('characterImg');
-        let message = `오늘은 ${data.todayUsage.toLocaleString()}원을 사용했어요!`;
+        const bubbleMsg = document.getElementById('bubbleMessage');
+
+        // 데이터가 없을 경우를 대비한 기본값 처리 (toLocaleString은 숫자에만 작동함)
+        const todayUsage = data.todayUsage || 0;
+        let message = `오늘은 ${todayUsage.toLocaleString()}원을 사용했어요!`;
 
         if (data.overBudget) {
             message += "<br><span style='color: #FF5A5A;'>내일은 지출을 줄여야 해요!</span>";
-            if (charImg) charImg.src = '/img/sad_meokbap.png'; // 예산 초과 시 슬픈 표정
+            if (charImg) charImg.src = '/img/sad_meokbap.png';
         } else {
-            if (charImg) charImg.src = '/img/normal_meokbap.png'; // 정상일 때 일반 표정
+            if (charImg) charImg.src = '/img/normal_meokbap.png';
         }
-        document.getElementById('bubbleMessage').innerHTML = message;
 
-        // 누적 금액 및 프로그레스
-        document.getElementById('accumulatedUsage').innerText = data.accumulatedUsage.toLocaleString();
+        if (bubbleMsg) {
+            bubbleMsg.innerHTML = message;
+        }
+
+        // 3. 누적 금액 및 프로그레스 바 (가장 중요한 부분!)
+        const accUsage = document.getElementById('accumulatedUsage');
+        const progPercent = document.getElementById('progressPercent');
+        const barFill = document.getElementById('progressBarFill');
+
+        if (accUsage) {
+            accUsage.innerText = (data.accumulatedUsage || 0).toLocaleString();
+        }
+
+        // progressPercent가 서버에서 오지 않을 경우를 대비해 0으로 처리
         const progress = data.progressPercent || 0;
-        document.getElementById('progressPercent').innerText = progress.toFixed(1) + '%';
-        document.getElementById('progressBarFill').style.width = Math.min(100, progress) + '%';
+
+        if (progPercent) {
+            progPercent.innerText = progress.toFixed(1) + '%';
+        }
+
+        if (barFill) {
+            // style.width에 반드시 '%' 문자를 붙여야 CSS가 인식함!
+            barFill.style.width = Math.min(100, progress) + '%';
+        }
 
     } catch (error) {
         console.error('Error:', error);
-        document.getElementById('bubbleMessage').innerText = "데이터를 가져오지 못했어요. 🍙";
+        const bubbleMsg = document.getElementById('bubbleMessage');
+        if (bubbleMsg) {
+            bubbleMsg.innerText = "데이터를 가져오지 못했어요. 🍙";
+        }
     }
 }
