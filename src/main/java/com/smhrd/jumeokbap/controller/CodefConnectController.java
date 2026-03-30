@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @RestController
@@ -18,9 +20,9 @@ import java.util.Map;
 public class CodefConnectController {
 
     private final CodefConnectedIdService codefConnectedIdService;
-    private final CodefApprovalService codefApprovalService; // ⭐ 추가
+    private final CodefApprovalService codefApprovalService;
 
-    // ✅ 기존 카드 연결
+    // 카드 연결 + 승인내역 자동 저장
     @PostMapping("/connect")
     public ResponseEntity<?> connect(@RequestBody CodefConnectedIdRequest dto, HttpSession session) {
 
@@ -32,15 +34,42 @@ public class CodefConnectController {
             ));
         }
 
+        // 1. connectedId 발급 및 저장
         String connectedId = codefConnectedIdService.createConnectedId(userId, dto);
 
+        // 2. 최근 30일 승인내역 자동 조회
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(30);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+        CodefApprovalRequest approvalRequest = new CodefApprovalRequest();
+        approvalRequest.setOrganization(dto.getOrganization());
+        approvalRequest.setStartDate(startDate.format(formatter));
+        approvalRequest.setEndDate(today.format(formatter));
+        approvalRequest.setOrderBy("0");
+        approvalRequest.setInquiryType("1");
+        approvalRequest.setMemberStoreInfoType("0");
+
+        JsonNode approvalResult = codefApprovalService.getApprovalList(userId, approvalRequest);
+
+        int savedCount = 0;
+        JsonNode dataNode = approvalResult.path("data");
+
+        if (dataNode.isArray()) {
+            savedCount = dataNode.size();
+        } else if (dataNode.path("resApprovalList").isArray()) {
+            savedCount = dataNode.path("resApprovalList").size();
+        }
+
         return ResponseEntity.ok(Map.of(
-                "message", "connectedId 발급 성공",
-                "connectedId", connectedId
+                "message", "카드 연결 및 승인내역 저장 성공",
+                "connectedId", connectedId,
+                "savedCount", savedCount
         ));
     }
 
-    // 🔥 여기 추가 (승인내역 조회)
+    // 필요하면 테스트용으로 남겨두는 승인내역 조회 API
     @PostMapping("/approval-list")
     public ResponseEntity<?> getApprovalList(@RequestBody CodefApprovalRequest dto, HttpSession session) {
 

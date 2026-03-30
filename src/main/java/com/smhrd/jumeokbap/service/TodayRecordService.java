@@ -223,7 +223,9 @@ public class TodayRecordService {
         } catch (Exception e) {
             return LocalDateTime.now();
         }
-
+    }
+    public List<SpendingLog> getTodayRecords(String userId, LocalDate regDate) {
+        return spendingLogRepository.findByUserIdAndRegDateOrderBySpentAtDesc(userId, regDate);
     }
 
 }

@@ -89,16 +89,17 @@ async function connectAccount() {
             const errorMessage =
                 result?.message ||
                 result?.error ||
-                "connectedId 발급 실패";
+                "카드 연결 실패";
             throw new Error(errorMessage);
         }
 
         const organizationName = organizationMap[data.organization] || data.organization;
 
         alert(
-            (result.message || "connectedId 발급 성공") +
+            (result.message || "카드 연결 및 승인내역 저장 성공") +
             "\n카드사: " + organizationName +
-            "\nconnectedId: " + (result.connectedId || "-")
+            "\nconnectedId: " + (result.connectedId || "-") +
+            "\n저장 건수: " + (result.savedCount ?? 0)
         );
 
         resetForm();
@@ -106,53 +107,6 @@ async function connectAccount() {
     } catch (error) {
         console.error("connectAccount 에러:", error);
         alert("연결 중 오류 발생: " + error.message);
-    }
-}
-
-// ===== 승인내역 불러오기 =====
-async function loadApproval() {
-    const organization = document.getElementById("organization").value;
-
-    if (!organization) {
-        alert("카드사를 먼저 선택해주세요.");
-        return;
-    }
-
-    try {
-        console.log("승인내역 요청 시작", organization);
-
-        const response = await fetch("/codef/approval-list", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include",
-            body: JSON.stringify({
-                organization: organization,
-                startDate: "20260301",
-                endDate: "20260330"
-            })
-        });
-
-        const result = await response.json().catch(() => null);
-
-        console.log("승인내역 응답 상태:", response.status);
-        console.log("승인내역 응답 바디:", result);
-
-        if (!response.ok) {
-            const errorMessage =
-                result?.message ||
-                result?.error ||
-                "승인내역 불러오기 실패";
-            throw new Error(errorMessage);
-        }
-
-        alert("승인내역 가져오기 완료!");
-        console.log("승인내역 결과:", result);
-
-    } catch (error) {
-        console.error("loadApproval 에러:", error);
-        alert("승인내역 불러오기 중 오류 발생: " + error.message);
     }
 }
 
