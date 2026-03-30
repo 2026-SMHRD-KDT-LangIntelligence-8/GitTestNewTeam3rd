@@ -17,8 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static java.lang.Boolean.FALSE;
-
 @Service
 @RequiredArgsConstructor
 public class CodefApprovalService {
@@ -26,18 +24,16 @@ public class CodefApprovalService {
     private final CodefApiService codefApiService;
     private final UserCodefAccountRepository userCodefAccountRepository;
     private final CodefCryptoService codefCryptoService;
-    private final SpendingLogRepository spendingLogRepository; // 추가
+    private final SpendingLogRepository spendingLogRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public JsonNode getApprovalList(String userId, CodefApprovalRequest dto) {
         validate(dto);
 
-        // 1. DB에서 connectedId 찾기
         UserCodefAccount account = userCodefAccountRepository
                 .findByUserIdAndOrganizationAndBusinessType(userId, dto.getOrganization(), "CD")
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자의 카드 connectedId가 없습니다. 먼저 카드 연결을 진행해주세요."));
 
-        // 2. 요청 바디 구성
         Map<String, Object> requestMap = new LinkedHashMap<>();
         requestMap.put("organization", dto.getOrganization());
         requestMap.put("startDate", dto.getStartDate());
@@ -47,7 +43,6 @@ public class CodefApprovalService {
         requestMap.put("connectedId", account.getConnectedId());
         requestMap.put("memberStoreInfoType", dto.getMemberStoreInfoType() == null ? "0" : dto.getMemberStoreInfoType());
 
-        // 선택값
         if (hasText(dto.getBirthDate())) {
             requestMap.put("birthDate", dto.getBirthDate());
         }
@@ -72,15 +67,26 @@ public class CodefApprovalService {
         try {
             String jsonBody = objectMapper.writeValueAsString(requestMap);
 
-            // 3. CODEF 승인내역 조회 API 호출
             JsonNode response = codefApiService.post("/v1/kr/card/p/account/approval-list", jsonBody);
 
-            // 4. 조회 결과 DB 저장
+            String resultCode = response.path("result").path("code").asText();
+            String resultMessage = response.path("result").path("message").asText();
+            String extraMessage = response.path("result").path("extraMessage").asText();
+
+            System.out.println("승인내역 resultCode = " + resultCode);
+            System.out.println("승인내역 resultMessage = " + resultMessage);
+            System.out.println("승인내역 extraMessage = " + extraMessage);
+
+            if (!"CF-00000".equals(resultCode)) {
+                throw new RuntimeException("승인내역 조회 실패: " + resultMessage);
+            }
+
             saveApprovalList(userId, response);
 
             return response;
 
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("승인내역 조회 요청 생성 중 오류가 발생했습니다.", e);
         }
     }
@@ -89,39 +95,62 @@ public class CodefApprovalService {
         JsonNode dataNode = response.path("data");
 
         if (dataNode.isMissingNode() || dataNode.isNull()) {
+            System.out.println("dataNode 없음");
             return;
         }
 
-        JsonNode approvalList = dataNode.path("resApprovalList");
+        JsonNode approvalList;
+
+        // CODEF 응답 구조 대응
+        // 1) data 자체가 배열인 경우
+        // 2) data.resApprovalList 인 경우
+        if (dataNode.isArray()) {
+            approvalList = dataNode;
+        } else {
+            approvalList = dataNode.path("resApprovalList");
+        }
 
         if (!approvalList.isArray() || approvalList.isEmpty()) {
+            System.out.println("승인내역 리스트 없음");
             return;
         }
 
+        System.out.println("승인내역 저장 시작");
+        System.out.println("리스트 개수: " + approvalList.size());
+
         for (JsonNode item : approvalList) {
-            String storeName = getText(item, "storeName");
-            String approvalAmountText = getText(item, "approvalAmount");
-            String approvalDateText = getText(item, "approvalDate");
-            String approvalTimeText = getText(item, "approvalTime");
+            try {
+                String storeName = getText(item, "resMemberStoreName");
+                String approvalAmountText = getText(item, "resUsedAmount");
+                String approvalDateText = getText(item, "resUsedDate");
+                String approvalTimeText = getText(item, "resUsedTime");
 
-            int amount = parseAmount(approvalAmountText);
-            LocalDate regDate = parseDate(approvalDateText);
-            LocalDateTime spentAt = parseDateTime(approvalDateText, approvalTimeText);
+                int amount = parseAmount(approvalAmountText);
+                LocalDate regDate = parseDate(approvalDateText);
+                LocalDateTime spentAt = parseDateTime(approvalDateText, approvalTimeText);
 
-            SpendingLog log = new SpendingLog();
-            log.setUserId(userId);
-            log.setStoreName(storeName);
-            log.setAmount(amount);
-            log.setRegDate(regDate);
-            log.setSpentAt(spentAt);
+                System.out.println("가맹점: " + storeName + ", 금액: " + amount + ", 날짜: " + regDate + ", 시간: " + spentAt);
 
-            // 자동 수집 데이터 기본값
-            log.setIsManual(false);
-            log.setIsMain(false);
-            log.setIsImpulsive(false);
-            log.setIsFixed(false);
+                SpendingLog log = new SpendingLog();
+                log.setUserId(userId);
+                log.setStoreName(storeName);
+                log.setAmount(amount);
+                log.setRegDate(regDate);
+                log.setSpentAt(spentAt);
 
-            spendingLogRepository.save(log);
+                // 자동 수집 데이터 기본값
+                log.setIsManual(false);
+                log.setIsMain(false);
+                log.setIsImpulsive(false);
+                log.setIsFixed(false);
+
+                SpendingLog saved = spendingLogRepository.save(log);
+                System.out.println("저장 성공 logId = " + saved.getLogId());
+
+            } catch (Exception e) {
+                System.out.println("한 건 저장 실패: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 

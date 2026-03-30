@@ -31,6 +31,11 @@ document.addEventListener("DOMContentLoaded", () => {
 function renderOrganizationOptions() {
     const organizationSelect = document.getElementById("organization");
 
+    if (!organizationSelect) {
+        console.error("organization select 요소를 찾지 못했습니다.");
+        return;
+    }
+
     organizationSelect.innerHTML = `
         <option value="">카드사를 선택하세요</option>
         ${cardOrganizations.map(org => `
@@ -40,9 +45,8 @@ function renderOrganizationOptions() {
 }
 
 // ===== 카드 연결 =====
-function connectAccount() {
+async function connectAccount() {
     const data = {
-        accountType: "card",
         organization: document.getElementById("organization").value,
         loginId: document.getElementById("loginId").value.trim(),
         password: document.getElementById("password").value.trim(),
@@ -64,43 +68,92 @@ function connectAccount() {
         return;
     }
 
-    fetch("/codef/connect", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        credentials: "include",
-        body: JSON.stringify(data)
-    })
-        .then(async response => {
-            const result = await response.json().catch(() => null);
+    try {
+        console.log("카드 연결 요청 시작", data);
 
-            if (!response.ok) {
-                const errorMessage =
-                    typeof result === "string"
-                        ? result
-                        : (result && result.message ? result.message : "connectedId 발급 실패");
-
-                throw new Error(errorMessage);
-            }
-
-            return result;
-        })
-        .then(result => {
-            const organizationName = organizationMap[data.organization] || data.organization;
-
-            alert(
-                (result.message || "connectedId 발급 성공") +
-                "\n카드사: " + organizationName +
-                "\nconnectedId: " + (result.connectedId || "-")
-            );
-
-            resetForm();
-        })
-        .catch(error => {
-            console.error(error);
-            alert("연결 중 오류 발생: " + error.message);
+        const response = await fetch("/codef/connect", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify(data)
         });
+
+        const result = await response.json().catch(() => null);
+
+        console.log("카드 연결 응답 상태:", response.status);
+        console.log("카드 연결 응답 바디:", result);
+
+        if (!response.ok) {
+            const errorMessage =
+                result?.message ||
+                result?.error ||
+                "connectedId 발급 실패";
+            throw new Error(errorMessage);
+        }
+
+        const organizationName = organizationMap[data.organization] || data.organization;
+
+        alert(
+            (result.message || "connectedId 발급 성공") +
+            "\n카드사: " + organizationName +
+            "\nconnectedId: " + (result.connectedId || "-")
+        );
+
+        resetForm();
+
+    } catch (error) {
+        console.error("connectAccount 에러:", error);
+        alert("연결 중 오류 발생: " + error.message);
+    }
+}
+
+// ===== 승인내역 불러오기 =====
+async function loadApproval() {
+    const organization = document.getElementById("organization").value;
+
+    if (!organization) {
+        alert("카드사를 먼저 선택해주세요.");
+        return;
+    }
+
+    try {
+        console.log("승인내역 요청 시작", organization);
+
+        const response = await fetch("/codef/approval-list", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                organization: organization,
+                startDate: "20260301",
+                endDate: "20260330"
+            })
+        });
+
+        const result = await response.json().catch(() => null);
+
+        console.log("승인내역 응답 상태:", response.status);
+        console.log("승인내역 응답 바디:", result);
+
+        if (!response.ok) {
+            const errorMessage =
+                result?.message ||
+                result?.error ||
+                "승인내역 불러오기 실패";
+            throw new Error(errorMessage);
+        }
+
+        alert("승인내역 가져오기 완료!");
+        console.log("승인내역 결과:", result);
+
+    } catch (error) {
+        console.error("loadApproval 에러:", error);
+        alert("승인내역 불러오기 중 오류 발생: " + error.message);
+    }
 }
 
 // ===== 입력 초기화 =====
