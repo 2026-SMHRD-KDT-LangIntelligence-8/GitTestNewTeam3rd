@@ -40,7 +40,7 @@ public class Budget { // 예산(소비 목표 설정) 엔터티
 
     // 외래키 (FK) : USER 테이블의 USER_ID와 연결
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "User_ID")
+    @JoinColumn(nullable = false, name = "User_ID")
     private User user;
 
 }
