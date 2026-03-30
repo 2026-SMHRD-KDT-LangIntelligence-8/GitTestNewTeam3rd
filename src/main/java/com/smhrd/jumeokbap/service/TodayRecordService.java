@@ -46,25 +46,30 @@ public class TodayRecordService {
             recordDate = LocalDate.now();
         }
 
+        String resultFromServer = analyzeText(dto.getContent());
+        Boolean isImpulsive = "1".equals(resultFromServer);
+
+        boolean existsDiary = diaryRepository.existsByUserIdAndRegDate(dto.getUserId(), recordDate);
+        Boolean isMain = !existsDiary;
+
         SpendingLog spendingLog = SpendingLog.builder()
                 .userId(dto.getUserId())
                 .amount(Integer.valueOf(dto.getAmount()))
                 .storeName(dto.getStoreName())
                 .spentAt(dto.getSpentAt())
                 .imageUrl(fileName)
+                .isImpulsive(isImpulsive)
+                .isMain(isMain)
                 .regDate(recordDate)
                 .isManual("Y")
                 .build();
 
         SpendingLog saveLog = spendingLogRepository.save(spendingLog);
 
-        String resultFromServer = analyzeText(dto.getContent());
-        boolean isImpulsive = "1".equals(resultFromServer);
+
         // 3. 콘솔 확인용 로그
         System.out.println("🤖 AI 분석 결과: " + resultFromServer);
 
-        boolean existsDiary = diaryRepository.existsByUserIdAndRegDate(dto.getUserId(), recordDate);
-        boolean isMain = !existsDiary;
 
         Diary diary = Diary.builder()
                 .userId(dto.getUserId())
@@ -156,11 +161,13 @@ public class TodayRecordService {
                 .orElseThrow(() -> new RuntimeException("해당 기록의 일기 정보를 찾을 수 없습니다."));
 
         List<Diary> dailyDiaries = diaryRepository.findByUserIdAndRegDate(targetDiary.getUserId(), targetDiary.getRegDate());
+        List<SpendingLog> dailyLogs = spendingLogRepository.findByUserIdAndRegDate(targetDiary.getUserId(), targetDiary.getRegDate());
 
-        for (Diary d : dailyDiaries) {
-            d.setIsMain(false);
-        }
+        for (Diary d : dailyDiaries) d.setIsMain(false);
+        for (SpendingLog l : dailyLogs) l.setIsMain(false);
+
         targetDiary.setIsMain(true);
+        spendingLogRepository.findById(logId).ifPresent(log -> log.setIsMain(true));
     }
 
 
