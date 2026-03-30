@@ -27,6 +27,7 @@
       position: relative;
     }
 
+    /* 헤더 영역 */
     .header {
       flex: 1.2;
       display: flex;
@@ -67,27 +68,90 @@
       min-width: 76px;
     }
 
-    .login-move-btn:hover {
-      opacity: 0.9;
-    }
-
     .login-user-text {
       font-size: 12px;
       font-weight: 600;
       color: #333;
-      white-space: nowrap;
-      line-height: 1.2;
       text-align: center;
       min-height: 14px;
     }
 
+    /* 주먹밥 및 메뉴 영역 */
     .character-area {
       flex: 5.8;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      position: relative; /* 메뉴 배치를 위해 필수 */
     }
+
+    /* 햄버거 메뉴 */
+    .menu-wrapper {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .trigger-btn {
+      width: 48px;
+      height: 48px;
+      background: #333;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: all 0.3s;
+    }
+
+    .trigger-btn .bar { width: 20px; height: 2px; background: white; border-radius: 2px; transition: 0.3s; }
+
+    /* 클릭 시 메인 햄버거 버튼 변화 로직 */
+    .menu-wrapper.active .trigger-btn { transform: rotate(90deg); background: #FFD233; }
+    .menu-wrapper.active .bar:nth-child(1) { transform: translateY(6px) rotate(45deg); background: #333; }
+    .menu-wrapper.active .bar:nth-child(2) { opacity: 0; }
+    .menu-wrapper.active .bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); background: #333; }
+
+    .drop-menu {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .sub-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #FFD233;
+      background: white;
+      font-size: 20px;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(-20px) scale(0.5);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* 메뉴 활성화 상태 */
+    .menu-wrapper.active .sub-btn { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    .menu-wrapper.active .sub-btn:nth-child(1) { transition-delay: 0.05s; }
+    .menu-wrapper.active .sub-btn:nth-child(2) { transition-delay: 0.15s; }
+    .menu-wrapper.active .sub-btn:nth-child(3) { transition-delay: 0.25s; }
+    .menu-wrapper.active .sub-btn:nth-child(4) { transition-delay: 0.35s; }
 
     .bubble-container {
       background: #F2F2F2;
@@ -119,6 +183,7 @@
       height: auto;
     }
 
+    /* 하단 정보 영역 */
     .info-area {
       flex: 3;
       padding: 0 30px;
@@ -128,52 +193,15 @@
       justify-content: center;
     }
 
-    .progress-section {
-      width: 100%;
-    }
+    .progress-section { width: 100%; }
+    .progress-text-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    #challengeNameDisplay { font-size: 15px; font-weight: 700; color: #333; }
+    #progressPercent { font-size: 16px; font-weight: 800; color: #FFD233; }
+    .progress-bar-bg { width: 100%; height: 16px; background: #EBEBEB; border-radius: 10px; overflow: hidden; }
+    .progress-bar-fill { width: 0%; height: 100%; background: #FFD233; border-radius: 10px; transition: width 1s ease-in-out; }
+    .accumulated-text { margin-top: 15px; font-size: 13px; color: #aaaaaa; text-align: right; }
 
-    .progress-text-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    #challengeNameDisplay {
-      font-size: 15px;
-      font-weight: 700;
-      color: #333;
-    }
-
-    #progressPercent {
-      font-size: 16px;
-      font-weight: 800;
-      color: #FFD233;
-    }
-
-    .progress-bar-bg {
-      width: 100%;
-      height: 16px;
-      background: #EBEBEB;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .progress-bar-fill {
-      width: 0%;
-      height: 100%;
-      background: #FFD233;
-      border-radius: 10px;
-      transition: width 1s ease-in-out;
-    }
-
-    .accumulated-text {
-      margin-top: 15px;
-      font-size: 13px;
-      color: #aaaaaa;
-      text-align: right;
-    }
-
+    /* 예산 초과 시 스타일 변화 */
     .is-over .progress-bar-fill { background: #FF5A5A; }
     .is-over #progressPercent { color: #FF5A5A; }
     .is-over .bubble-container { background: #FFEAEA; }
@@ -185,7 +213,6 @@
 <div class="mobile-container" id="mainDashboard">
   <header class="header">
     <h1 id="headerTitle">🍙 주먹밥 🍙</h1>
-
     <div class="header-right">
       <button id="loginMoveBtn" class="login-move-btn" type="button">로그인</button>
       <span id="loginUserText" class="login-user-text"></span>
@@ -193,6 +220,21 @@
   </header>
 
   <main class="character-area">
+    <div class="menu-wrapper" id="menuWrapper">
+      <button class="trigger-btn" id="menuTrigger" type="button">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <div class="drop-menu">
+        <button class="sub-btn" onclick="location.href='/expense/today'" title="오늘의 소비">💰</button>
+        <button class="sub-btn" onclick="location.href='/calendar'" title="소비 캘린더">📅</button>
+        <button class="sub-btn" onclick="location.href='/budget/create'" title="챌린지 설정">🏆</button>
+        <button class="sub-btn" onclick="location.href='/mypage'" title="마이페이지">⚙️</button>
+      </div>
+    </div>
+
     <div class="bubble-container">
       <p id="bubbleMessage">데이터를 불러오고 있어요! 🍙</p>
     </div>
