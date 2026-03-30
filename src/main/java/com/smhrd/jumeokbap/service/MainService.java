@@ -3,7 +3,7 @@ package com.smhrd.jumeokbap.service;
 import com.smhrd.jumeokbap.domain.Budget;
 import com.smhrd.jumeokbap.dto.MainDashboardResponse;
 import com.smhrd.jumeokbap.repository.BudgetRepository;
-import com.smhrd.jumeokbap.repository.SpendingLogRepository; // 추가됨
+import com.smhrd.jumeokbap.repository.SpendingLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -16,19 +16,19 @@ public class MainService {
     private BudgetRepository budgetRepository;
 
     @Autowired
-    private SpendingLogRepository spendingLogRepository; // 추가됨
+    private SpendingLogRepository spendingLogRepository;
 
     public MainDashboardResponse getMainData(String userId) {
+        System.out.println("=== [DEBUG 1] 서비스 진입! ID: [" + userId + "] ===");
 
-        // 오늘 날짜 구하기
-        String today = LocalDate.now().toString();
+        // 1. 날짜 타입 변경 (String -> LocalDate)
+        LocalDate todayDate = LocalDate.now();
 
-        // 챌린지 정보 가져오기
-        Budget budget = budgetRepository.findTopByUser_UserIdOrderByGoalIdDesc(userId)
-                .orElse(null);
+        // 2. 챌린지 정보 가져오기 (새로 만든 findLatestBudget 사용)
+        Budget budget = budgetRepository.findLatestBudget(userId).orElse(null);
 
-        // 만약 데이터가 없으면 기본값(Empty State) 반환
         if (budget == null) {
+            System.out.println("=== [DEBUG 2] Budget 정보 없음 ===");
             return MainDashboardResponse.builder()
                     .challengeName("진행 중인 챌린지가 없어요")
                     .todayUsage(0L)
@@ -38,49 +38,46 @@ public class MainService {
                     .build();
         }
 
-        // 2. 오늘 사용 금액 계산
+        System.out.println("=== [DEBUG 3] Budget 확인 성공: " + budget.getChallengeName());
 
-        // 오늘 사용 금액: SpendingLog에서 해당 userId와 오늘 날짜의 amount를 모두 합산함
-        Long todaySum = spendingLogRepository.sumSpendingByDate(userId, LocalDate.now());
-        long todayUsage = (todaySum == null) ? 0L : todaySum; // 기록 없으면 0원
+        // 3. 오늘 사용 금액 조회 (리포지토리 변경에 맞춰 메서드명과 파라미터 수정)
+        Long todaySum = spendingLogRepository.sumSpendingByDate(userId, todayDate);
+        long todayUsage = (todaySum == null) ? 0L : todaySum;
 
-        // 누적 사용량: 일단 오늘 사용량으로 표시 (전체 누적 쿼리는 추후 추가 가능)
-        long accumulatedUsage = todayUsage;
-
+        // 4. 누적 사용량 및 예산 데이터 세팅
         long totalLimit = budget.getTotalLimit();
-
-
-        // 3. 하루 권장 예산 계산 로직
         long dailyLimit = calculateDailyLimit(budget);
 
-        // 4. 주먹밥 말풍선 메시지 결정
-        String message;
+        // 5. 초과 여부 및 말풍선 메시지 결정
         boolean isOver = todayUsage > dailyLimit;
+        String message;
 
         if (isOver) {
-            message = "내일은 소비를 줄이는 게 좋겠어요!";
+            message = "예산을 초과했어요! 내일은 조금만 아껴써볼까요? 😭";
         } else {
-            message = "오늘 " + String.format("%,d", todayUsage) + "원 썼어요!";
+            message = "오늘 " + String.format("%,d", todayUsage) + "원 사용 중! 아주 잘하고 있어요 🍙";
         }
 
-// 5. GOAL 바 진행률 계산
-        double progress = (totalLimit > 0) ? ((double) accumulatedUsage / totalLimit) * 100 : 0;
+        // 6. 진행률 계산
+        double progress = (totalLimit > 0) ? ((double) todayUsage / totalLimit) * 100 : 0;
 
-        // 6. DTO에 담아서 반환 (Response)
         return new MainDashboardResponse(
-                budget.getChallengeName(), // GOAL 자리에 들어갈 이름
-                todayUsage,                // 오늘 사용 금액
-                message,                   // 먹밥이 말풍선 메시지
-                Math.min(100.0, progress), // 목표 대비 누적 사용량 (0 ~ 100 (%))
-                accumulatedUsage,          // 챌린지 시작부터 현재까지 누적 지출액
-                isOver                     // 오늘 예산 초과 여부
+                budget.getChallengeName(),
+                todayUsage,
+                message,
+                Math.min(100.0, progress),
+                todayUsage, // 현재 리포지토리 한계로 오늘 사용량을 누적량으로 우선 표시
+                isOver
         );
     }
 
-    // 내부 계산용: 하루 권장 예산 구하기
     private long calculateDailyLimit(Budget budget) {
+        // 시작일부터 종료일까지의 총 일수 계산
         long days = ChronoUnit.DAYS.between(budget.getStartDate(), budget.getEndDate()) + 1;
         if (days <= 0) return 0;
-        return (budget.getTotalLimit() - (budget.getFixedCostSum() != null ? budget.getFixedCostSum() : 0L)) / days;
+
+        // (총 예산 - 고정 지출) / 총 일수
+        long fixed = (budget.getFixedCostSum() != null) ? budget.getFixedCostSum() : 0L;
+        return (budget.getTotalLimit() - fixed) / days;
     }
 }
