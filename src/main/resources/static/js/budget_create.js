@@ -89,17 +89,49 @@ function calculateDailyBudget() {
 
 // 저장 로직
 async function handleSave() {
-    const total = parseInt(document.getElementById('totalLimit').value) || 0;
-    const fixed = parseInt(document.getElementById('fixedCostSum').value) || 0;
+    const challengeName = document.getElementById('challengeName')?.value || "나의 챌린지"; // ID 확인 필요!
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const totalLimit = parseInt(document.getElementById('totalLimit').value) || 0;
+    const fixedCostSum = parseInt(document.getElementById('fixedCostSum').value) || 0;
 
-    if (total <= 0) {
+    // 유효성 검사
+    if (totalLimit <= 0) {
         alert("총 예산을 입력해주세요.");
         return;
     }
-    if (total < fixed) {
+    if (totalLimit < fixedCostSum) {
         alert("총 예산이 고정 지출보다 적습니다.");
         return;
     }
 
-    alert("챌린지가 설정되었습니다! 🔥");
+    // 서버로 보낼 데이터 구성 (BudgetRequest DTO와 필드명 맞춤)
+    const requestData = {
+        challengeName: challengeName,
+        startDate: startDate,
+        endDate: endDate,
+        totalLimit: totalLimit,
+        fixedCostSum: fixedCostSum
+    };
+
+    try {
+        const response = await fetch('/api/budget/budget-save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        if (response.ok) {
+            alert("챌린지가 설정되었습니다! 🔥");
+            window.location.href = '/'; // 저장 후 메인으로 이동
+        } else {
+            const errorMsg = await response.text();
+            alert("저장에 실패했습니다: " + errorMsg);
+        }
+    } catch (error) {
+        console.error("전송 오류:", error);
+        alert("서버와 통신 중 에러가 발생했습니다.");
+    }
 }
