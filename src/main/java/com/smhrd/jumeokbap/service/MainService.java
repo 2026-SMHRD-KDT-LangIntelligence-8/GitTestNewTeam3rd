@@ -41,7 +41,7 @@ public class MainService {
         // 2. 오늘 사용 금액 계산
 
         // 오늘 사용 금액: SpendingLog에서 해당 userId와 오늘 날짜의 amount를 모두 합산함
-        Long todaySum = spendingLogRepository.sumTodaySpending(userId, today);
+        Long todaySum = spendingLogRepository.sumSpendingByDate(userId, LocalDate.now());
         long todayUsage = (todaySum == null) ? 0L : todaySum; // 기록 없으면 0원
 
         // 누적 사용량: 일단 오늘 사용량으로 표시 (전체 누적 쿼리는 추후 추가 가능)

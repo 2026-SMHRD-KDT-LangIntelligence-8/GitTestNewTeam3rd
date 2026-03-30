@@ -15,7 +15,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -57,12 +59,12 @@ public class TodayRecordService {
                 .userId(dto.getUserId())
                 .amount(Integer.valueOf(dto.getAmount()))
                 .storeName(dto.getStoreName())
-                .spentAt(dto.getSpentAt())
+                .spentAt(parseSpentAt(dto.getSpentAt()))
                 .imageUrl(fileName)
                 .isImpulsive(isImpulsive)
                 .isMain(isMain)
                 .regDate(recordDate)
-                .isManual("Y")
+                .isManual(true)
                 .build();
 
         SpendingLog saveLog = spendingLogRepository.save(spendingLog);
@@ -209,7 +211,20 @@ public class TodayRecordService {
         diary.setIsFixed(!currentStatus);
 
     }
+    private LocalDateTime parseSpentAt(String spentAt) {
+        try {
+            if (spentAt == null || spentAt.isBlank()) {
+                return LocalDateTime.now();
+            }
 
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            return LocalDateTime.parse(spentAt, formatter);
+
+        } catch (Exception e) {
+            return LocalDateTime.now();
+        }
+
+    }
 
 }
 
