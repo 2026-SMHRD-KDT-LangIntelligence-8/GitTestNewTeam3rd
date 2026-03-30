@@ -13,7 +13,7 @@ import java.util.Base64;
 @Service
 public class CodefCryptoService {
 
-    public String encryptPassword(String plainText) {
+    public String encrypt(String plainText) {
         try {
             String publicKey = CodefProperties.PUBLIC_KEY;
 
