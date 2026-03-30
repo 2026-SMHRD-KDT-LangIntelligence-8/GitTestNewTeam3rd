@@ -6,6 +6,7 @@ import com.smhrd.jumeokbap.dto.TodayRecordRequest;
 import com.smhrd.jumeokbap.repository.DiaryRepository;
 import com.smhrd.jumeokbap.repository.SpendingLogRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -36,23 +38,39 @@ public class TodayRecordService {
             fileName = imageFile.getOriginalFilename();
 
         }
+        LocalDate recordDate;
+
+        if (dto.getRegDate() != null && !dto.getRegDate().isEmpty()) {
+            // 💡 문자열 "2026-03-26" 등을 LocalDate 객체로 변환
+            recordDate = LocalDate.parse(dto.getRegDate());
+        } else {
+            recordDate = LocalDate.now();
+        }
+
+        String resultFromServer = analyzeText(dto.getContent());
+        boolean isImpulsive = "1".equals(resultFromServer);
+
+        boolean existsDiary = diaryRepository.existsByUserIdAndRegDate(dto.getUserId(), recordDate);
+        boolean isMain = !existsDiary;
+
         SpendingLog spendingLog = SpendingLog.builder()
                 .userId(dto.getUserId())
                 .amount(Integer.valueOf(dto.getAmount()))
                 .storeName(dto.getStoreName())
                 .spentAt(dto.getSpentAt())
                 .imageUrl(fileName)
-                .regDate(LocalDate.now())
+                .isImpulsive(isImpulsive)
+                .isMain(isMain)
+                .regDate(recordDate)
                 .isManual("Y")
                 .build();
 
         SpendingLog saveLog = spendingLogRepository.save(spendingLog);
 
-        String resultFromServer = analyzeText(dto.getContent());
+
         // 3. 콘솔 확인용 로그
         System.out.println("🤖 AI 분석 결과: " + resultFromServer);
 
-        boolean isImpulsive = "1".equals(resultFromServer);
 
         Diary diary = Diary.builder()
                 .userId(dto.getUserId())
@@ -60,12 +78,41 @@ public class TodayRecordService {
                 .emotionTag(dto.getEmotionTag())
                 .sentimentScore(0.0)
                 .isImpulsive(isImpulsive)
-                .isMain(false)
+                .isMain(isMain)
                 .logId(saveLog.getLogId())
+                .regDate(recordDate)
                 .build();
 
         diaryRepository.save(diary);
 
+    }
+
+    // 고정비 등록
+    public Map<String, Long> getMonthlyTotal(String userId, String yearMonthStr) {
+        YearMonth ym = YearMonth.parse(yearMonthStr);
+        LocalDate startDate = ym.atDay(1);
+        LocalDate endDate = ym.atEndOfMonth();
+
+        List<Diary> diaries = diaryRepository.findMonthlyDiaries(userId, startDate, endDate);
+
+        long totalWithFixed = 0;
+        long totalWithoutFixed = 0;
+
+        for (Diary d : diaries) {
+            long amount = spendingLogRepository.findById(d.getLogId())
+                    .map(SpendingLog::getAmount)
+                    .orElse(0);
+
+            totalWithFixed += amount;
+
+            if (!Boolean.TRUE.equals(d.getIsFixed())) {
+                totalWithoutFixed += amount;
+            }
+        }
+        Map<String, Long> result = new HashMap<>();
+        result.put("totalWithFixed", totalWithFixed);
+        result.put("totalWithoutFixed", totalWithoutFixed);
+        return result;
     }
 
     @Transactional(readOnly = true)
@@ -82,6 +129,7 @@ public class TodayRecordService {
             diaryRepository.findByLogId(log.getLogId()).ifPresent(diary -> {
                 log.setEmotionTag(diary.getEmotionTag());
                 log.setIsImpulsive(diary.getIsImpulsive());
+                log.setIsMain(diary.getIsMain());
             });
         }
         return logs;
@@ -129,9 +177,37 @@ public class TodayRecordService {
     }
 
     @Transactional
+    // 기록 삭제
     public void deleteRecord(Long logId) {
         diaryRepository.deleteByLogId(logId);
         spendingLogRepository.deleteById(logId);
+    }
+
+    @Transactional
+    // 오늘의 대표 지출 건
+    public void setAsMainRecord(Long logId) {
+        Diary targetDiary = diaryRepository.findByLogId(logId)
+                .orElseThrow(() -> new RuntimeException("해당 기록의 일기 정보를 찾을 수 없습니다."));
+
+        List<Diary> dailyDiaries = diaryRepository.findByUserIdAndRegDate(targetDiary.getUserId(), targetDiary.getRegDate());
+        List<SpendingLog> dailyLogs = spendingLogRepository.findByUserIdAndRegDate(targetDiary.getUserId(), targetDiary.getRegDate());
+
+        for (Diary d : dailyDiaries) d.setIsMain(false);
+        for (SpendingLog l : dailyLogs) l.setIsMain(false);
+
+        targetDiary.setIsMain(true);
+        spendingLogRepository.findById(logId).ifPresent(log -> log.setIsMain(true));
+    }
+
+    @Transactional
+    // 고정비 등록
+    public void toggleFixedStatus(Long diaryId) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new RuntimeException("해당 기록을 찾을 수 없습니다."));
+
+        boolean currentStatus = (diary.getIsFixed() != null) ? diary.getIsFixed() : false;
+        diary.setIsFixed(!currentStatus);
+
     }
 
 

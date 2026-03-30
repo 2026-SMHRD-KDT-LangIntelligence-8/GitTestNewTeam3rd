@@ -3,6 +3,8 @@ package com.smhrd.jumeokbap.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Setter
 @Getter
@@ -27,6 +29,9 @@ public class Diary {
     private String userId;
     @Column(nullable = false)
     private Boolean isMain;
+    private Boolean isFixed;
+
+    private LocalDate regDate;
 
 
 }
