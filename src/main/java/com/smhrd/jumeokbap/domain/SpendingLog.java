@@ -18,9 +18,7 @@ public class SpendingLog {
     @Column(updatable = false)
     private Long logId;
 
-    @Transient
     private Boolean isImpulsive;
-    @Transient
     private String emotionTag;
 
     private LocalDate regDate;
@@ -33,13 +31,7 @@ public class SpendingLog {
     @Column(nullable = false)
     private String userId;
     private Long accountId;
-    @Column(length = 1)
-    private String isFixed = "N";
-
-
-
-
-
-
+    private Boolean isFixed;
+    private Boolean isMain;
 
 }

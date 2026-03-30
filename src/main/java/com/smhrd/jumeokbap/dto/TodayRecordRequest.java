@@ -23,5 +23,6 @@ public class TodayRecordRequest {
     private Boolean isImpulsive;
 
     private String regDate;
+    private Boolean isFixed;
 
 }

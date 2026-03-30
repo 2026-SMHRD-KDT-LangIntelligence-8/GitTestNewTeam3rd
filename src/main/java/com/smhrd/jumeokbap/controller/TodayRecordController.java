@@ -22,9 +22,23 @@ public class TodayRecordController {
 
     @GetMapping("/saveLog")
     // 수동 입력 페이지
-    public String showSaveLog(@RequestParam("userId") String userId, Model model) {
+    public String showSaveLog(@RequestParam("userId") String userId, @RequestParam("date") String date, Model model) {
         model.addAttribute("userId", userId);
+        model.addAttribute("selectedDate", date);
         return "saveLog";
+    }
+
+    @PostMapping("/record/updateMain/{logId}")
+    @ResponseBody
+    // 대표지출 건 저장
+    public String updateMainRecord(@PathVariable("logId") Long logId) {
+        try {
+            todayRecordService.setAsMainRecord(logId);
+            return "success";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
+        }
     }
 
     @PostMapping("/save")
@@ -32,10 +46,9 @@ public class TodayRecordController {
     public String saveRecord(@ModelAttribute TodayRecordRequest dto,
                              @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
         try {
-
             todayRecordService.manualRecord(dto, imageFile);
 
-            return "redirect:/api/recordMain/" + dto.getUserId();
+            return "redirect:/api/recordMain/" + dto.getUserId() + "?date=" + dto.getRegDate();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -49,9 +62,10 @@ public class TodayRecordController {
         try {
             SpendingLog log = todayRecordService.getLogDetail(logId);
             String userId = log.getUserId();
+            LocalDate regDate = log.getRegDate();
             todayRecordService.deleteRecord(logId);
 
-            return "redirect:/api/recordMain/"+ userId;
+            return "redirect:/api/recordMain/"+ userId + "?date=" + regDate;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -106,6 +120,18 @@ public class TodayRecordController {
 
         if(emotion.equals("1")) return "충동구매!!!💥";
         else return "잘 사셨어요!🍙";
+    }
+
+    @PostMapping("/record/toggleFixed/{diaryId}")
+    @ResponseBody
+    // 고정비 등록
+    public String toggleFixed(@PathVariable Long diaryId) {
+        try {
+            todayRecordService.toggleFixedStatus(diaryId);
+            return "success";
+        } catch (Exception e) {
+            return "fail";
+        }
     }
 
 
