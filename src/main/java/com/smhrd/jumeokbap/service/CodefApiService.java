@@ -22,18 +22,23 @@ public class CodefApiService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public JsonNode post(String endpoint, String jsonBody) {
-        System.out.println("------------");
-        System.out.println(endpoint);
-        System.out.println("---------");
         HttpURLConnection conn = null;
 
         try {
             String accessToken = codefTokenService.getAccessToken();
 
+            String baseUrl = "https://development.codef.io";
 
-            //String baseUrl = "https://development.codef.io";
+            // endpoint가 전체 URL이면 그대로 사용
+            // endpoint가 /v1/... 같은 경로면 baseUrl 붙여서 사용
+            String requestUrl;
+            if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
+                requestUrl = endpoint;
+            } else {
+                requestUrl = baseUrl + endpoint;
+            }
 
-            URL url = new URL(endpoint);
+            URL url = new URL(requestUrl);
             conn = (HttpURLConnection) url.openConnection();
 
             conn.setRequestMethod("POST");
@@ -48,6 +53,9 @@ public class CodefApiService {
 
             String responseBody = readAll(conn);
             String decodedBody = URLDecoder.decode(responseBody, StandardCharsets.UTF_8);
+
+            System.out.println("CODEF 요청 URL = " + requestUrl);
+            System.out.println("CODEF 응답 = " + decodedBody);
 
             return objectMapper.readTree(decodedBody);
 

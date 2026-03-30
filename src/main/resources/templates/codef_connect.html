@@ -2,112 +2,325 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>카드/계좌 연결</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 0;
+        * {
+            box-sizing: border-box;
         }
 
-        .container {
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f6f8;
+            font-family: Arial, sans-serif;
+        }
+
+        .mobile-container {
             width: 400px;
-            height: 874px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 14px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            min-height: 874px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 30px 24px;
         }
 
         h1 {
+            margin: 0 0 10px;
+            font-size: 26px;
             text-align: center;
-            margin-bottom: 80px;
-            margin-top: 50px;
+        }
+
+        .sub-text {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            margin: 24px 0 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
         }
 
         .input-box {
-            margin-bottom: 33px;
+            margin-bottom: 16px;
         }
 
         .input-box label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            font-size: 14px;
             font-weight: bold;
+            color: #333;
         }
 
         .input-box input,
         .input-box select {
-            width: 90%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
+            width: 100%;
+            height: 46px;
+            padding: 0 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
         }
 
-        .btn {
+        .input-box input:focus,
+        .input-box select:focus {
+            border-color: #4CAF50;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
             width: 100%;
-            padding: 14px;
+            height: 48px;
             border: none;
-            border-radius: 8px;
-            background: black;
-            color: white;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 50px;
         }
 
-        .sub-title {
-            margin-top: 30px;
-            margin-bottom: 12px;
+        .connect-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .approval-btn {
+            background-color: #2f80ed;
+            color: white;
+        }
+
+        .home-btn {
+            background-color: #f1f3f5;
+            color: #333;
+        }
+
+        .message-box {
+            margin-top: 20px;
+            padding: 14px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            font-size: 14px;
+            color: #333;
+            white-space: pre-wrap;
+            word-break: break-word;
+            min-height: 50px;
+        }
+
+        .result-title {
+            margin-top: 24px;
+            margin-bottom: 8px;
             font-size: 16px;
             font-weight: bold;
-            color: #403F3F;
+            color: #333;
         }
 
-        .account-item {
-            border: 1px solid #ddd;
+        pre {
+            margin: 0;
+            padding: 14px;
+            background-color: #111827;
+            color: #f9fafb;
             border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 10px;
-            background: #fafafa;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+            min-height: 180px;
+            overflow-x: auto;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>카드 연결</h1>
+<div class="mobile-container">
+    <h1>카드/계좌 연결</h1>
+    <div class="sub-text">
+        카드 정보를 입력하고 connectedId를 발급받은 뒤<br>
+        승인내역 조회까지 테스트할 수 있습니다.
+    </div>
+
+    <div class="section-title">카드 연결 정보 입력</div>
 
     <div class="input-box">
         <label for="organization">카드사 선택</label>
         <select id="organization">
-            <!-- JS가 accountType에 따라 자동으로 채움 -->
+            <option value="">카드사를 선택하세요</option>
+            <option value="0301">KB카드</option>
+            <option value="0302">현대카드</option>
+            <option value="0303">삼성카드</option>
+            <option value="0304">NH카드</option>
+            <option value="0305">BC카드</option>
+            <option value="0306">신한카드</option>
+            <option value="0307">씨티카드</option>
+            <option value="0309">우리카드</option>
+            <option value="0311">롯데카드</option>
+            <option value="0313">하나카드</option>
+            <option value="0315">전북카드</option>
+            <option value="0316">광주카드</option>
+            <option value="0320">수협카드</option>
+            <option value="0321">제주카드</option>
         </select>
     </div>
 
     <div class="input-box">
         <label for="loginId">카드사 로그인 아이디</label>
-        <input type="text" id="loginId" placeholder="앱/홈페이지 로그인 아이디 입력">
+        <input type="text" id="loginId" placeholder="카드사 홈페이지 아이디 입력">
     </div>
 
     <div class="input-box">
         <label for="password">카드사 로그인 비밀번호</label>
-        <input type="password" id="password" placeholder="로그인 비밀번호 입력">
+        <input type="password" id="password" placeholder="카드사 비밀번호 입력">
     </div>
 
     <div class="input-box">
-        <label for="accountAlias">별명 (선택)</label>
+        <label for="accountAlias">별칭 (선택)</label>
         <input type="text" id="accountAlias" placeholder="예: 주사용 카드">
     </div>
 
-    <button class="btn" onclick="connectAccount()">연결하기</button>
+    <div class="section-title">승인내역 조회 기간</div>
 
-    <div class="sub-title">내 연결 계정</div>
-    <div id="accountList"></div>
+    <div class="input-box">
+        <label for="startDate">시작일</label>
+        <input type="text" id="startDate" placeholder="예: 20260301">
+    </div>
+
+    <div class="input-box">
+        <label for="endDate">종료일</label>
+        <input type="text" id="endDate" placeholder="예: 20260330">
+    </div>
+
+    <div class="button-group">
+        <button class="connect-btn" onclick="connectCodef()">카드 연결하기</button>
+        <button class="approval-btn" onclick="testApprovalList()">승인내역 확인하기</button>
+        <button class="home-btn" onclick="location.href='/'">메인으로 가기</button>
+    </div>
+
+    <div class="result-title">처리 결과</div>
+    <div id="messageBox" class="message-box">아직 실행된 작업이 없습니다.</div>
+
+    <div class="result-title">응답 JSON</div>
+    <pre id="approvalResult">{}</pre>
 </div>
 
-<script src="/js/codef_connect.js"></script>
+<script>
+    async function connectCodef() {
+        const organization = document.getElementById("organization").value;
+        const loginId = document.getElementById("loginId").value;
+        const password = document.getElementById("password").value;
+        const accountAlias = document.getElementById("accountAlias").value;
+
+        if (!organization || !loginId || !password) {
+            showMessage("카드사, 아이디, 비밀번호를 모두 입력해주세요.");
+            return;
+        }
+
+        try {
+            showMessage("카드 연결 요청 중입니다...");
+
+            const response = await fetch("/codef/connect", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    organization: organization,
+                    loginId: loginId,
+                    password: password,
+                    clientType: "P",
+                    businessType: "CD",
+                    loginType: "1",
+                    accountAlias: accountAlias
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                showMessage("연결 실패\n" + JSON.stringify(data, null, 2));
+                document.getElementById("approvalResult").textContent = JSON.stringify(data, null, 2);
+                return;
+            }
+
+            showMessage("카드 연결 성공\nconnectedId가 정상적으로 저장되었는지 확인해보세요.");
+            document.getElementById("approvalResult").textContent = JSON.stringify(data, null, 2);
+
+        } catch (error) {
+            console.error(error);
+            showMessage("연결 중 오류 발생: " + error.message);
+        }
+    }
+
+    async function testApprovalList() {
+        const organization = document.getElementById("organization").value;
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+
+        if (!organization || !startDate || !endDate) {
+            showMessage("카드사, 시작일, 종료일을 입력해주세요.");
+            return;
+        }
+
+        try {
+            showMessage("승인내역 조회 요청 중입니다...");
+
+            const response = await fetch("/codef/approval-list", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    organization: organization,
+                    startDate: startDate,
+                    endDate: endDate,
+                    orderBy: "0",
+                    inquiryType: "1",
+                    memberStoreInfoType: "0"
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                showMessage("승인내역 조회 실패\n" + JSON.stringify(data, null, 2));
+                document.getElementById("approvalResult").textContent = JSON.stringify(data, null, 2);
+                return;
+            }
+
+            console.log("승인내역 응답:", data);
+            showMessage("승인내역 조회 성공\n아래 응답 JSON을 확인해주세요.");
+            document.getElementById("approvalResult").textContent = JSON.stringify(data, null, 2);
+
+        } catch (error) {
+            console.error(error);
+            showMessage("승인내역 조회 중 오류 발생: " + error.message);
+        }
+    }
+
+    function showMessage(message) {
+        document.getElementById("messageBox").textContent = message;
+    }
+
+    window.addEventListener("load", () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const day = String(today.getDate()).padStart(2, "0");
+
+        document.getElementById("endDate").value = `${year}${month}${day}`;
+        document.getElementById("startDate").value = `${year}${month}01`;
+    });
+</script>
 </body>
 </html>
