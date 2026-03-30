@@ -16,6 +16,6 @@ public interface SpendingLogRepository extends JpaRepository<SpendingLog, Long> 
     List<SpendingLog> findByUserIdAndRegDateBetween(String userId, LocalDate startDate, LocalDate endDate);
 
     // 특정 유저(userId)가 특정 날짜(date)에 쓴 금액의 총합
-    @Query("SELECT SUM(s.amount) FROM SpendingLog s WHERE s.userId = :userId AND s.spentAt LIKE :date%")
-    Long sumTodaySpending(@Param("userId") String userId, @Param("date") String date);
+    @Query("SELECT COALESCE(SUM(s.amount), 0) FROM SpendingLog s WHERE s.userId = :userId AND s.regDate = :regDate")
+    Long sumSpendingByDate(@Param("userId") String userId, @Param("regDate") LocalDate regDate);
 }

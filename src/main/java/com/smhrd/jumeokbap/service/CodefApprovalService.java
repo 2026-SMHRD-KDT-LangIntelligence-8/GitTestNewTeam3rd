@@ -2,14 +2,22 @@ package com.smhrd.jumeokbap.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smhrd.jumeokbap.domain.SpendingLog;
 import com.smhrd.jumeokbap.domain.UserCodefAccount;
 import com.smhrd.jumeokbap.dto.CodefApprovalRequest;
+import com.smhrd.jumeokbap.repository.SpendingLogRepository;
 import com.smhrd.jumeokbap.repository.UserCodefAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static java.lang.Boolean.FALSE;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +26,7 @@ public class CodefApprovalService {
     private final CodefApiService codefApiService;
     private final UserCodefAccountRepository userCodefAccountRepository;
     private final CodefCryptoService codefCryptoService;
+    private final SpendingLogRepository spendingLogRepository; // 추가
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public JsonNode getApprovalList(String userId, CodefApprovalRequest dto) {
@@ -56,7 +65,6 @@ public class CodefApprovalService {
         }
 
         if (hasText(dto.getCardPassword())) {
-            // 일부 카드사는 카드비밀번호 RSA 암호화 필요
             String encryptedCardPassword = codefCryptoService.encrypt(dto.getCardPassword());
             requestMap.put("cardPassword", encryptedCardPassword);
         }
@@ -65,11 +73,107 @@ public class CodefApprovalService {
             String jsonBody = objectMapper.writeValueAsString(requestMap);
 
             // 3. CODEF 승인내역 조회 API 호출
-            return codefApiService.post("/v1/kr/card/p/account/approval-list", jsonBody);
+            JsonNode response = codefApiService.post("/v1/kr/card/p/account/approval-list", jsonBody);
+
+            // 4. 조회 결과 DB 저장
+            saveApprovalList(userId, response);
+
+            return response;
 
         } catch (Exception e) {
             throw new RuntimeException("승인내역 조회 요청 생성 중 오류가 발생했습니다.", e);
         }
+    }
+
+    private void saveApprovalList(String userId, JsonNode response) {
+        JsonNode dataNode = response.path("data");
+
+        if (dataNode.isMissingNode() || dataNode.isNull()) {
+            return;
+        }
+
+        JsonNode approvalList = dataNode.path("resApprovalList");
+
+        if (!approvalList.isArray() || approvalList.isEmpty()) {
+            return;
+        }
+
+        for (JsonNode item : approvalList) {
+            String storeName = getText(item, "storeName");
+            String approvalAmountText = getText(item, "approvalAmount");
+            String approvalDateText = getText(item, "approvalDate");
+            String approvalTimeText = getText(item, "approvalTime");
+
+            int amount = parseAmount(approvalAmountText);
+            LocalDate regDate = parseDate(approvalDateText);
+            LocalDateTime spentAt = parseDateTime(approvalDateText, approvalTimeText);
+
+            SpendingLog log = new SpendingLog();
+            log.setUserId(userId);
+            log.setStoreName(storeName);
+            log.setAmount(amount);
+            log.setRegDate(regDate);
+            log.setSpentAt(spentAt);
+
+            // 자동 수집 데이터 기본값
+            log.setIsManual(false);
+            log.setIsMain(false);
+            log.setIsImpulsive(false);
+            log.setIsFixed(false);
+
+            spendingLogRepository.save(log);
+        }
+    }
+
+    private String getText(JsonNode node, String fieldName) {
+        JsonNode value = node.get(fieldName);
+        if (value == null || value.isNull()) {
+            return "";
+        }
+        return value.asText().trim();
+    }
+
+    private int parseAmount(String amountText) {
+        if (!hasText(amountText)) {
+            return 0;
+        }
+
+        String numberOnly = amountText.replaceAll("[^0-9]", "");
+        if (!hasText(numberOnly)) {
+            return 0;
+        }
+
+        return Integer.parseInt(numberOnly);
+    }
+
+    private LocalDate parseDate(String dateText) {
+        if (!hasText(dateText)) {
+            return LocalDate.now();
+        }
+
+        return LocalDate.parse(dateText, DateTimeFormatter.ofPattern("yyyyMMdd"));
+    }
+
+    private LocalDateTime parseDateTime(String dateText, String timeText) {
+        LocalDate date = parseDate(dateText);
+
+        if (!hasText(timeText)) {
+            return date.atStartOfDay();
+        }
+
+        String normalized = timeText.replaceAll("[^0-9]", "");
+
+        if (normalized.length() == 6) {
+            LocalTime time = LocalTime.parse(normalized, DateTimeFormatter.ofPattern("HHmmss"));
+            return LocalDateTime.of(date, time);
+        }
+
+        if (normalized.length() == 4) {
+            LocalTime time = LocalTime.parse(normalized, DateTimeFormatter.ofPattern("HHmm"));
+            return LocalDateTime.of(date, time);
+        }
+
+        return date.atStartOfDay();
     }
 
     private void validate(CodefApprovalRequest dto) {
