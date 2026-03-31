@@ -57,7 +57,7 @@ function initWaraakMenu(userId) {
             };
 
             subButtons[3].onclick = function() {
-                window.location.href = '/mypage';
+                window.location.href = '/account_settings';
             };
         }
     }
