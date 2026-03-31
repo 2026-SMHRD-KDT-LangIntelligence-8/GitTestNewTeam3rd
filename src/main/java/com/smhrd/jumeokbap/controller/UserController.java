@@ -2,11 +2,11 @@ package com.smhrd.jumeokbap.controller;
 
 import com.smhrd.jumeokbap.dto.UserLoginRequest;
 import com.smhrd.jumeokbap.dto.UserSignupRequest;
+import com.smhrd.jumeokbap.dto.UserUpdateRequest;
 import com.smhrd.jumeokbap.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -67,6 +67,23 @@ public class UserController {
         return ResponseEntity.ok(exists);
     }
 
+    // 회원정보 수정
+    @PutMapping("/update")
+    public ResponseEntity<String> updateUser(@RequestBody UserUpdateRequest dto, HttpSession session) {
+        String userId = (String) session.getAttribute("loginUserId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        try {
+            userService.updateUser(userId, dto.getNickname(), dto.getEmail(), dto.getPhoneNumber());
+            return ResponseEntity.ok("회원정보 수정 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("회원정보 수정 실패");
+        }
+    }
+
     // 로그아웃
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpSession session) {
@@ -74,14 +91,20 @@ public class UserController {
         return ResponseEntity.ok("로그아웃 성공");
     }
 
-    // 회원정보 수정 - 탈퇴하기
-    @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable("userId") String userId, HttpSession session){
-        try{
+    // 탈퇴하기
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteUser(HttpSession session) {
+        String userId = (String) session.getAttribute("loginUserId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        try {
             userService.deleteUser(userId);
             session.invalidate();
             return ResponseEntity.ok("success");
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(500).body("fail");
         }
     }
