@@ -30,6 +30,8 @@ public class CalendarService {
         LocalDate now = LocalDate.now();
         LocalDate startDate = now.withDayOfMonth(1);
         LocalDate endDate = now.withDayOfMonth(now.lengthOfMonth());
+        System.out.println("조회 시작일: " + startDate);
+        System.out.println("조회 종료일: " + endDate);
 
         // 소비 목표
         Optional<Budget> budget = budgetRepository.findByUser_UserIdAndIsActiveTrue(userId);

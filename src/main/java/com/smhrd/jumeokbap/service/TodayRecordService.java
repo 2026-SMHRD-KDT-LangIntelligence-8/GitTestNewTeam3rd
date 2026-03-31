@@ -95,19 +95,22 @@ public class TodayRecordService {
         LocalDate startDate = ym.atDay(1);
         LocalDate endDate = ym.atEndOfMonth();
 
-        List<Diary> diaries = diaryRepository.findMonthlyDiaries(userId, startDate, endDate);
+        // 지출내
+        List<SpendingLog> monthLogs = spendingLogRepository.findByUserIdAndRegDateBetween(userId, startDate, endDate);
 
         long totalWithFixed = 0;
         long totalWithoutFixed = 0;
 
-        for (Diary d : diaries) {
-            long amount = spendingLogRepository.findById(d.getLogId())
-                    .map(SpendingLog::getAmount)
-                    .orElse(0);
+        for (SpendingLog log : monthLogs) {
+            long amount = (log.getAmount() != null) ? log.getAmount() : 0;
 
             totalWithFixed += amount;
 
-            if (!Boolean.TRUE.equals(d.getIsFixed())) {
+            boolean isFixed = diaryRepository.findByLogId(log.getLogId())
+                    .map(Diary::getIsFixed)
+                    .orElse(false); // 일기가 없으면 고정비가 아니라고 판단
+
+            if (!isFixed) {
                 totalWithoutFixed += amount;
             }
         }
