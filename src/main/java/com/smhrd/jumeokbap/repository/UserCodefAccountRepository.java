@@ -13,4 +13,6 @@ public interface UserCodefAccountRepository extends JpaRepository<UserCodefAccou
     );
 
     List<UserCodefAccount> findByUserId(String userId);
+
+    void deleteByUserId(String userId);
 }

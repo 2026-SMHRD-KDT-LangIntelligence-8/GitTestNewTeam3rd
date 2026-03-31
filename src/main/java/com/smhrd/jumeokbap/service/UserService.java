@@ -3,6 +3,10 @@ package com.smhrd.jumeokbap.service;
 import com.smhrd.jumeokbap.domain.User;
 import com.smhrd.jumeokbap.dto.UserLoginRequest;
 import com.smhrd.jumeokbap.dto.UserSignupRequest;
+import com.smhrd.jumeokbap.repository.BudgetRepository;
+import com.smhrd.jumeokbap.repository.DiaryRepository;
+import com.smhrd.jumeokbap.repository.SpendingLogRepository;
+import com.smhrd.jumeokbap.repository.UserCodefAccountRepository;
 import com.smhrd.jumeokbap.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BudgetRepository budgetRepository;
+    private final SpendingLogRepository spendingLogRepository;
+    private final DiaryRepository diaryRepository;
+    private final UserCodefAccountRepository userCodefAccountRepository;
     private final PasswordEncoder passwordEncoder;
 
     public void signup(UserSignupRequest dto) {
@@ -92,7 +100,7 @@ public class UserService {
             user.setPhoneNumber(phoneNumber.trim());
         }
 
-        // ⭐ 비밀번호 (조건부 변경)
+        // 비밀번호 (조건부 변경)
         if (password != null && !password.isEmpty()) {
 
             if (passwordCheck == null || !password.equals(passwordCheck)) {
@@ -110,11 +118,15 @@ public class UserService {
 
     // 탈퇴하기
     @Transactional
-    public void deleteUser(String userId){
-        if(userRepository.existsByUserId(userId)){
-            userRepository.deleteById(userId);
-        }else{
-            throw new RuntimeException("존재하지 않는 사용자입니다!");
-        }
+    public void deleteUser(String userId) {
+
+        // 1. 자식 데이터 먼저 삭제
+        budgetRepository.deleteByUser_UserId(userId);
+        spendingLogRepository.deleteByUserId(userId);
+        diaryRepository.deleteByUserId(userId);
+        userCodefAccountRepository.deleteByUserId(userId);
+
+        // 2. 마지막에 부모 삭제
+        userRepository.deleteById(userId);
     }
 }
