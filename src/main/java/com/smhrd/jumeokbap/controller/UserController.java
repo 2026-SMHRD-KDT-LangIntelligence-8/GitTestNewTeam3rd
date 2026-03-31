@@ -77,8 +77,17 @@ public class UserController {
         }
 
         try {
-            userService.updateUser(userId, dto.getNickname(), dto.getEmail(), dto.getPhoneNumber());
+            userService.updateUser(
+                    userId,
+                    dto.getNickname(),
+                    dto.getEmail(),
+                    dto.getPhoneNumber(),
+                    dto.getPassword(),
+                    dto.getPasswordCheck()
+            );
             return ResponseEntity.ok("회원정보 수정 성공");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("회원정보 수정 실패");
         }

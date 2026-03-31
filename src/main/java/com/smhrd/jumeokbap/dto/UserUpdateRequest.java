@@ -9,4 +9,6 @@ public class UserUpdateRequest {
     private String nickname;
     private String email;
     private String phoneNumber;
+    private String password;
+    private String passwordCheck;
 }
