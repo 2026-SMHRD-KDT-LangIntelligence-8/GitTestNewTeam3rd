@@ -16,5 +16,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
     Optional<Budget> findLatestBudget(@Param("userId") String userId);
 
     Optional<Budget> findByUser_UserIdAndIsActiveTrue(String userId);
+
+    void deleteByUser_UserId(String userId);
 }
 

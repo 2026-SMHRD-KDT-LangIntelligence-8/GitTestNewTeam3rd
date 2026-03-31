@@ -6,6 +6,8 @@ import com.smhrd.jumeokbap.repository.UserCodefAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserCodefAccountService {
@@ -32,5 +34,15 @@ public class UserCodefAccountService {
         entity.setAccountAlias(dto.getAccountAlias());
 
         repository.save(entity);
+    }
+
+    // 연결된 카드 계정 목록 조회
+    public List<UserCodefAccount> getAccounts(String userId) {
+        return repository.findByUserId(userId);
+    }
+
+    // 연결된 카드 계정 삭제
+    public void deleteAccount(Long id) {
+        repository.deleteById(id);
     }
 }

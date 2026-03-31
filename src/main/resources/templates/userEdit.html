@@ -14,6 +14,7 @@
             min-height: 100vh;
             margin: 0;
         }
+
         .container {
             background-color: white;
             width: 360px;
@@ -24,14 +25,17 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         /* 헤더 부분 */
         .header {
             display: flex;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
         }
+
         .back-btn {
             text-decoration: none;
             color: #333;
@@ -40,14 +44,30 @@
             margin-right: 15px;
             cursor: pointer;
         }
+
         .title {
             font-size: 18px;
             font-weight: bold;
             color: #333;
         }
 
+        /* 폼 영역만 스크롤 */
+        .form-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* 크롬에서 스크롤바 숨기기 */
+        .form-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
         /* 입력 폼 스타일 */
-        .form-group { margin-bottom: 20px; }
+        .form-group {
+            margin-bottom: 20px;
+        }
+
         .label {
             display: block;
             font-size: 13px;
@@ -55,6 +75,7 @@
             margin-bottom: 8px;
             padding-left: 5px;
         }
+
         .input-field {
             width: 100%;
             padding: 16px;
@@ -66,10 +87,12 @@
             outline: none;
             transition: 0.3s;
         }
+
         .input-field:focus {
             border-color: #000;
             background-color: #fff;
         }
+
         /* 아이디는 수정 불가 스타일 */
         .readonly-field {
             background-color: #f1f1f1;
@@ -88,10 +111,13 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: auto; /* 최하단 배치 */
+            margin-top: 10px;
             transition: 0.2s;
         }
-        .btn-submit:hover { background-color: #333; }
+
+        .btn-submit:hover {
+            background-color: #333;
+        }
     </style>
 </head>
 <body>
@@ -102,41 +128,59 @@
         <span class="title">회원정보 수정</span>
     </div>
 
-    <div class="form-group">
-        <span class="label">아이디 (변경 불가)</span>
-        <input type="text" class="input-field readonly-field" th:value="${user.userId}" readonly>
-    </div>
+    <div class="form-wrapper">
+        <div class="form-group">
+            <span class="label">아이디 (변경 불가)</span>
+            <input type="text" class="input-field readonly-field" th:value="${user.userId}" readonly>
+        </div>
 
-    <div class="form-group">
-        <span class="label">새 닉네임</span>
-        <input type="text" id="nickname" class="input-field" placeholder="변경할 닉네임을 입력하세요">
-    </div>
+        <div class="form-group">
+            <span class="label">새 닉네임</span>
+            <input type="text" id="nickname" class="input-field" placeholder="변경할 닉네임을 입력하세요">
+        </div>
 
-    <div class="form-group">
-        <span class="label">새 비밀번호</span>
-        <input type="password" id="password" class="input-field" placeholder="새 비밀번호 입력">
-    </div>
+        <div class="form-group">
+            <span class="label">이메일</span>
+            <input type="email" id="email" class="input-field"
+                   th:value="${user.email}" placeholder="이메일을 입력하세요">
+        </div>
 
-    <div class="form-group">
-        <span class="label">비밀번호 확인</span>
-        <input type="password" id="passwordCheck" class="input-field" placeholder="비밀번호 확인">
-    </div>
+        <div class="form-group">
+            <span class="label">전화번호</span>
+            <input type="text" id="phoneNumber" class="input-field"
+                   th:value="${user.phoneNumber}" placeholder="전화번호를 입력하세요">
+        </div>
 
-    <button type="button" class="btn-submit" onclick="requestUpdate()">수정 완료</button>
+        <div class="form-group">
+            <span class="label">새 비밀번호</span>
+            <input type="password" id="password" class="input-field" placeholder="새 비밀번호 입력">
+        </div>
+
+        <div class="form-group">
+            <span class="label">비밀번호 확인</span>
+            <input type="password" id="passwordCheck" class="input-field" placeholder="비밀번호 확인">
+        </div>
+
+        <button type="button" class="btn-submit" onclick="requestUpdate()">수정 완료</button>
+    </div>
 </div>
 
 <script th:inline="javascript">
     function requestUpdate() {
-        const nickname = document.getElementById('nickname').value;
+        const nickname = document.getElementById('nickname').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
         const password = document.getElementById('password').value;
         const passwordCheck = document.getElementById('passwordCheck').value;
 
-        if (!nickname) {
-            alert("닉네임을 입력해주세요! 🍙");
+// 아무것도 안 입력했으면 막기
+        if (!nickname && !email && !phoneNumber && !password && !passwordCheck) {
+            alert("수정할 정보를 하나 이상 입력해주세요! 🍙");
             return;
         }
 
-        if (password !== passwordCheck) {
+// 비밀번호 입력했으면 체크
+        if (password && password !== passwordCheck) {
             alert("비밀번호가 일치하지 않습니다! 🍙");
             return;
         }
@@ -149,7 +193,10 @@
             credentials: 'include',
             body: JSON.stringify({
                 nickname: nickname,
-                password: password
+                email: email,
+                phoneNumber: phoneNumber,
+                password: password,
+                passwordCheck: passwordCheck
             })
         })
             .then(response => response.text().then(text => ({

@@ -25,6 +25,7 @@ cardOrganizations.forEach(org => {
 // ===== 초기 실행 =====
 document.addEventListener("DOMContentLoaded", () => {
     renderOrganizationOptions();
+    loadAccounts();
 });
 
 // ===== 카드사 목록 렌더링 =====
@@ -89,24 +90,90 @@ async function connectAccount() {
             const errorMessage =
                 result?.message ||
                 result?.error ||
-                "카드 연결 실패";
+                "카드 연결 실패. 다시 시도해주세요.";
             throw new Error(errorMessage);
         }
 
-        const organizationName = organizationMap[data.organization] || data.organization;
-
-        alert(
-            (result.message || "카드 연결 및 승인내역 저장 성공") +
-            "\n카드사: " + organizationName +
-            "\nconnectedId: " + (result.connectedId || "-") +
-            "\n저장 건수: " + (result.savedCount ?? 0)
-        );
+        alert("카드 연결 성공!");
 
         resetForm();
+        loadAccounts();
 
     } catch (error) {
         console.error("connectAccount 에러:", error);
-        alert("연결 중 오류 발생: " + error.message);
+        alert(error.message || "연결 중 오류 발생. 다시 시도해주세요.");
+    }
+}
+
+// ===== 연결된 계정 목록 조회 =====
+async function loadAccounts() {
+    try {
+        const response = await fetch("/codef/accounts", {
+            method: "GET",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error("계정 목록 조회 실패");
+        }
+
+        const list = await response.json();
+        const accountList = document.getElementById("accountList");
+
+        if (!accountList) {
+            console.error("accountList 요소를 찾지 못했습니다.");
+            return;
+        }
+
+        accountList.innerHTML = "";
+
+        if (!list || list.length === 0) {
+            accountList.innerHTML = `<div class="account-item">연결된 계정이 없습니다.</div>`;
+            return;
+        }
+
+        list.forEach(account => {
+            const item = document.createElement("div");
+            item.className = "account-item";
+
+            item.innerHTML = `
+                <span>${account.loginId || "-"}</span>
+                <span 
+                    style="float: right; cursor: pointer; color: #e74c3c; font-weight: bold;"
+                    onclick="deleteAccount(${account.id})"
+                >✕</span>
+            `;
+
+            accountList.appendChild(item);
+        });
+
+    } catch (error) {
+        console.error("loadAccounts 에러:", error);
+    }
+}
+
+// ===== 연결된 계정 삭제 =====
+async function deleteAccount(id) {
+    if (!confirm("이 계정을 삭제하시겠습니까?")) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/codef/account/${id}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            throw new Error("계정 삭제 실패");
+        }
+
+        alert("계정이 삭제되었습니다.");
+        loadAccounts();
+
+    } catch (error) {
+        console.error("deleteAccount 에러:", error);
+        alert("계정 삭제 중 오류가 발생했습니다.");
     }
 }
 

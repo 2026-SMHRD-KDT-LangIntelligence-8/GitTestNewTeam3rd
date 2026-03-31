@@ -26,13 +26,15 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         /* 헤더 */
         .header {
             display: flex;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
         }
 
         .back-btn {
@@ -47,6 +49,18 @@
         .title {
             font-size: 18px;
             font-weight: bold;
+        }
+
+        /* 스크롤 영역 */
+        .scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* 크롬 스크롤바 숨기기 */
+        .scroll-area::-webkit-scrollbar {
+            display: none;
         }
 
         /* 입력 폼 */
@@ -71,7 +85,7 @@
             background-color: #f9f9f9;
             outline: none;
             transition: 0.3s;
-            box-sizing: border-box; /* ⭐ 핵심 */
+            box-sizing: border-box;
         }
 
         .input-field:focus {
@@ -81,9 +95,8 @@
 
         /* select 전용 */
         select.input-field {
-            height: 46px; /* input이랑 높이 맞추기 */
+            height: 46px;
         }
-
 
         /* 버튼 */
         .btn-submit {
@@ -119,6 +132,15 @@
             margin-bottom: 8px;
             background: #fafafa;
             font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .delete-btn {
+            color: #e74c3c;
+            font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -129,41 +151,45 @@
 
     <!-- 헤더 -->
     <div class="header">
-        <a href="#" class="back-btn">←</a>
+        <a href="#" onclick="history.back(); return false;" class="back-btn">←</a>
         <span class="title">카드 연결</span>
     </div>
 
-    <!-- 카드사 선택 -->
-    <div class="form-group">
-        <span class="label">카드사 선택</span>
-        <select id="organization" class="input-field"></select>
+    <!-- 스크롤 영역 -->
+    <div class="scroll-area">
+
+        <!-- 카드사 선택 -->
+        <div class="form-group">
+            <span class="label">카드사 선택</span>
+            <select id="organization" class="input-field"></select>
+        </div>
+
+        <!-- 아이디 -->
+        <div class="form-group">
+            <span class="label">로그인 아이디</span>
+            <input type="text" id="loginId" class="input-field" placeholder="아이디 입력">
+        </div>
+
+        <!-- 비밀번호 -->
+        <div class="form-group">
+            <span class="label">비밀번호</span>
+            <input type="password" id="password" class="input-field" placeholder="비밀번호 입력">
+        </div>
+
+        <!-- 별명 -->
+        <div class="form-group">
+            <span class="label">별명 (선택)</span>
+            <input type="text" id="accountAlias" class="input-field" placeholder="예: 주사용 카드">
+        </div>
+
+        <!-- 버튼 -->
+        <button class="btn-submit" onclick="connectAccount()">연결하기</button>
+
+        <!-- 계정 목록 -->
+        <div class="sub-title">내 연결 계정</div>
+        <div id="accountList"></div>
+
     </div>
-
-    <!-- 아이디 -->
-    <div class="form-group">
-        <span class="label">로그인 아이디</span>
-        <input type="text" id="loginId" class="input-field" placeholder="아이디 입력">
-    </div>
-
-    <!-- 비밀번호 -->
-    <div class="form-group">
-        <span class="label">비밀번호</span>
-        <input type="password" id="password" class="input-field" placeholder="비밀번호 입력">
-    </div>
-
-    <!-- 별명 -->
-    <div class="form-group">
-        <span class="label">별명 (선택)</span>
-        <input type="text" id="accountAlias" class="input-field" placeholder="예: 주사용 카드">
-    </div>
-
-    <!-- 버튼 -->
-    <button class="btn-submit" onclick="connectAccount()">연결하기</button>
-
-    <!-- 계정 목록 -->
-    <div class="sub-title">내 연결 계정</div>
-    <div id="accountList"></div>
-
 </div>
 
 <script src="/js/codef_connect.js"></script>

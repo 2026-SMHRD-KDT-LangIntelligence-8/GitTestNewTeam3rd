@@ -19,4 +19,6 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     List<Diary> findMonthlyDiaries(@Param("userId") String userId,
                                    @Param("startDate") LocalDate startDate,
                                    @Param("endDate") LocalDate endDate);
+
+    void deleteByUserId(String userId);
 }
