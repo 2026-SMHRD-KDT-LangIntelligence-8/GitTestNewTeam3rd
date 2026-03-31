@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>주먹밥 - 계정 설정</title>
+    <title>주먹밥 - 회원 정보</title>
     <style>
         body {
             background-color: #f5f5f5;
@@ -14,11 +14,12 @@
             min-height: 100vh;
             margin: 0;
         }
+
         .container {
             background-color: white;
             width: 360px;
             height: 640px;
-            padding: 40px 20px;
+            padding: 30px 20px;
             border-radius: 20px;
             box-sizing: border-box;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
@@ -27,17 +28,47 @@
             align-items: center;
         }
 
+        /* 헤더 */
+        .header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #000;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            color: #000;
+            text-decoration: none;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
         /* 닉네임 표시 구역 */
         .welcome-section {
-            margin-top: 80px;
+            margin-top: 40px;
             margin-bottom: 60px;
             text-align: center;
         }
+
         .welcome-text {
             font-size: 20px;
             font-weight: 500;
             color: #333;
         }
+
         .user-id {
             font-weight: bold;
             color: #000;
@@ -50,6 +81,7 @@
             flex-direction: column;
             gap: 15px;
         }
+
         .btn {
             width: 100%;
             padding: 18px;
@@ -64,16 +96,36 @@
             box-sizing: border-box;
         }
 
-        .btn-black { background-color: #000; color: #fff; }
-        .btn-black:hover { background-color: #333; }
+        .btn-black {
+            background-color: #000;
+            color: #fff;
+        }
 
-        .btn-red { background-color: #e74c3c; color: #fff; margin-top: 5px; }
-        .btn-red:hover { background-color: #c0392b; }
+        .btn-black:hover {
+            background-color: #333;
+        }
+
+        .btn-red {
+            background-color: #e74c3c;
+            color: #fff;
+            margin-top: 5px;
+        }
+
+        .btn-red:hover {
+            background-color: #c0392b;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
+
+    <!-- 헤더 -->
+    <div class="header">
+        <a href="/" class="back-btn">←</a>
+        <span class="title">회원 정보</span>
+    </div>
+
     <div class="welcome-section">
         <p class="welcome-text">
             <span class="user-id" th:text="${user.userId}">guest</span>님 환영합니다!
@@ -82,9 +134,7 @@
 
     <div class="btn-group">
         <a th:href="@{/codef/connect-page}" class="btn btn-black">계좌 및 카드 연동</a>
-
         <a th:href="@{/edit-profile}" class="btn btn-black">회원정보 수정</a>
-
         <a href="javascript:void(0);" onclick="confirmDelete()" class="btn btn-red">탈퇴하기</a>
     </div>
 </div>
