@@ -76,7 +76,7 @@
 <div class="container">
     <div class="welcome-section">
         <p class="welcome-text">
-            <span class="user-id" th:text="${userId}">guest</span>님 환영합니다!
+            <span class="user-id" th:text="${user.userId}">guest</span>님 환영합니다!
         </p>
     </div>
 
@@ -89,19 +89,20 @@
     </div>
 </div>
 
-<script th:inline="javascript">
+<script>
     function confirmDelete() {
         if (confirm("정말로 주먹밥 서비스를 탈퇴하시겠어요? 🥺🍙\n탈퇴 시 모든 정보가 삭제됩니다")) {
-            const userId = [[${userId}]];
-
-            // 📌 브라우저 주소 이동 대신 fetch(DELETE)를 사용합니다.
-            fetch('/user/delete/' + userId, {
-                method: 'DELETE'
+            fetch('/user/delete', {
+                method: 'DELETE',
+                credentials: 'include'
             })
-                .then(response => {
-                    if (response.ok) {
+                .then(response => response.text().then(text => ({
+                    ok: response.ok,
+                    text: text
+                })))
+                .then(result => {
+                    if (result.ok && result.text === "success") {
                         alert("탈퇴가 완료되었습니다. 이용해주셔서 감사합니다. 🍙");
-                        // 📌 탈퇴 성공 시 로그인 페이지로 이동
                         location.href = "/login";
                     } else {
                         alert("탈퇴 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
