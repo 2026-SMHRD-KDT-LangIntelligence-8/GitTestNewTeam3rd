@@ -5,6 +5,7 @@ import com.smhrd.jumeokbap.dto.CodefApprovalRequest;
 import com.smhrd.jumeokbap.dto.CodefConnectedIdRequest;
 import com.smhrd.jumeokbap.service.CodefApprovalService;
 import com.smhrd.jumeokbap.service.CodefConnectedIdService;
+import com.smhrd.jumeokbap.service.UserCodefAccountService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ public class CodefConnectController {
 
     private final CodefConnectedIdService codefConnectedIdService;
     private final CodefApprovalService codefApprovalService;
+    private final UserCodefAccountService userCodefAccountService;
 
     // 카드 연결 + 승인내역 자동 저장
     @PostMapping("/connect")
@@ -83,5 +85,24 @@ public class CodefConnectController {
 
         JsonNode result = codefApprovalService.getApprovalList(userId, dto);
         return ResponseEntity.ok(result);
+    }
+
+    // 연결 카드 조회
+    @GetMapping("/accounts")
+    public ResponseEntity<?> getAccounts(HttpSession session) {
+        String userId = (String) session.getAttribute("loginUserId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body("연결된 카드가 없습니다.");
+        }
+
+        return ResponseEntity.ok(userCodefAccountService.getAccounts(userId));
+    }
+
+    // 연결 카드 삭제
+    @DeleteMapping("/account/{id}")
+    public ResponseEntity<?> deleteAccount(@PathVariable Long id) {
+        userCodefAccountService.deleteAccount(id);
+        return ResponseEntity.ok("삭제 완료");
     }
 }
