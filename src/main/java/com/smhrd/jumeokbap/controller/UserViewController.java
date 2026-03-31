@@ -20,8 +20,13 @@ public class UserViewController {
     }
 
     // 회원정보 페이지
-    @GetMapping("/account_settings/{userId}")
-    public String accountSettingsPage(@PathVariable("userId") String userId, Model model){
+    @GetMapping("/account_settings")
+    public String accountSettingsPage(HttpSession session, Model model) {
+        String userId = (String) session.getAttribute("loginUserId");
+
+        if (userId == null) {
+            return "redirect:/login";
+        }
 
         model.addAttribute("userId", userId);
         return "accountSettings";
