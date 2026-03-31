@@ -62,23 +62,18 @@
             <span class="value highlight" id="totalSpentValue"
                   th:data-fixed="${totalWithFixed ?: 0}"
                   th:data-none="${totalWithoutFixed ?: 0}"
-                  th:text="${totalWithFixed != null ? #numbers.formatInteger(totalWithFixed, 0, 'COMMA') + '원' : '0원'}">
-                0원
-            </span>
+                  th:text="${(totalWithFixed ?: 0) + '원'}">0원</span>
         </div>
         <div class="summary-item">
             <span class="label">소비 목표</span>
-            <span class="value"
-                  th:text="${totalAmount != null and totalAmount > 0 ? #numbers.formatInteger(totalAmount, 0, 'COMMA') + '원' : '목표 없음'}">
-                목표 없음
-            </span>
+            <span class="value" th:text="${(totalAmount ?: 0) + '원'}">0원</span>
         </div>
     </div>
 
     <div class="analysis-section">
         <span class="analysis-title">🍙 먹밥이 분석한 충동구매</span>
         <span class="analysis-result">
-            <span th:text="${impulseCount != null ? impulseCount : 0}">0</span>회
+            <span th:text="${impulseCount ?: 0}">0</span>회
         </span>
     </div>
 
@@ -89,26 +84,26 @@
             <div class="weekday">토</div>
         </div>
         <div class="days-grid">
-            <a th:each="i : ${#numbers.sequence(1, daysInMonth ?: 31)}"
-               th:href="@{|/api/recordMain/${userId}?date=2026-03-${i < 10 ? '0' + i : i}|}"
-               class="day"
-               th:classappend="${i == 31} ? 'today' : ''">
+            <th:block th:each="i : ${#numbers.sequence(1, daysInMonth ?: 31)}">
+                <a th:href="@{|/api/recordMain/${userId}?date=2026-03-${i < 10 ? '0' + i : i}|}"
+                   class="day"
+                   th:classappend="${i == 31} ? 'today' : ''">
 
-                <span class="day-num" th:text="${i}"></span>
+                    <span class="day-num" th:text="${i}"></span>
 
-                <span class="day-emoji"
-                      th:if="${dailyEmojis != null}"
-                      th:text="${dailyEmojis[i.toString()]}">
-                </span>
-
-            </a>
+                    <span class="day-emoji"
+                          th:if="${dailyEmojis != null}"
+                          th:text="${dailyEmojis.get(T(java.lang.String).valueOf(i))}">
+                    </span>
+                </a>
+            </th:block>
         </div>
     </div>
 
     <div class="footer-btns">
         <button class="btn-goal"
                 th:data-user-id="${userId}"
-                onclick="location.href='/api/setGoal?userId=' + this.getAttribute('data-user-id')">
+                onclick="location.href='/api/budget/create-page?userId=' + this.getAttribute('data-user-id')">
             소비 목표 설정하기
         </button>
     </div>
@@ -121,19 +116,21 @@
         const labelElement = document.getElementById('spending-label');
         const toggleLabel = document.getElementById('toggle-label');
 
+        if (!valueElement) return;
+
         const withFixed = parseInt(valueElement.getAttribute('data-fixed')) || 0;
         const noneFixed = parseInt(valueElement.getAttribute('data-none')) || 0;
 
-        if (toggle.checked) {
-            valueElement.innerText = withFixed.toLocaleString() + "원";
-            labelElement.innerText = "이번 달 지출 (포함)";
-            toggleLabel.innerText = "고정비 포함";
-        } else {
-            valueElement.innerText = noneFixed.toLocaleString() + "원";
-            labelElement.innerText = "이번 달 지출 (제외)";
-            toggleLabel.innerText = "고정비 제외";
-        }
+        const currentVal = toggle.checked ? withFixed : noneFixed;
+
+        // 콤마 포맷팅 포함하여 출력
+        valueElement.innerText = currentVal.toLocaleString() + "원";
+        labelElement.innerText = toggle.checked ? "이번 달 지출 (포함)" : "이번 달 지출 (제외)";
+        toggleLabel.innerText = toggle.checked ? "고정비 포함" : "고정비 제외";
     }
+
+    // 초기 실행
+    window.onload = updateTotalDisplay;
 </script>
 
 </body>

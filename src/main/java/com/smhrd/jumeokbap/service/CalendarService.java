@@ -54,22 +54,19 @@ public class CalendarService {
             int day = log.getRegDate().getDayOfMonth();
             String dayKey = String.valueOf(day);
 
-            // 🍙 3. 추가한 곳: 자동 데이터(Diary 없는 경우)를 위해 기본 💰 설정
-            if (!dailyEmojis.containsKey(dayKey)) {
-                dailyEmojis.put(dayKey, "💰");
-            }
+            dailyEmojis.putIfAbsent(dayKey, "💰");
 
             diaryRepository.findByLogId(log.getLogId()).ifPresent(diary -> {
-
-                // 🍙 4. 수정한 곳: 충동구매 카운트 로직을 이 안에 넣습니다.
                 if (Boolean.TRUE.equals(diary.getIsImpulsive())) {
                     impulseCount.incrementAndGet();
                 }
 
-                // 🍙 5. 수정한 곳: 이모티콘 로직 (대표 지출이거나 아직 기본값인 경우 덮어쓰기)
+                // 🍙 수정 포인트: 비교와 저장 모두 dayKey 사용
                 if (Boolean.TRUE.equals(diary.getIsMain()) || "💰".equals(dailyEmojis.get(dayKey))) {
-                    dailyEmojis.put(dayKey, diary.getEmotionTag());
-                }
+                    if (diary.getEmotionTag() != null) {
+                        dailyEmojis.put(dayKey, diary.getEmotionTag());
+                            }
+                        }
             });
         }
 
