@@ -1,13 +1,18 @@
 package com.smhrd.jumeokbap.controller;
 
+import com.smhrd.jumeokbap.domain.User;
+import com.smhrd.jumeokbap.service.UserService;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
+@RequiredArgsConstructor
 public class UserViewController {
+
+    private final UserService userService;
 
     @GetMapping("/login")
     public String loginPage() {
@@ -28,15 +33,24 @@ public class UserViewController {
             return "redirect:/login";
         }
 
-        model.addAttribute("userId", userId);
+        User user = userService.getUserById(userId);
+
+        model.addAttribute("user", user);
         return "accountSettings";
     }
 
     // 회원 정보 수정 페이지
-    @GetMapping("/edit-profile/{userId}")
-    public String userEditPage(@PathVariable("userId") String userId, Model model){
+    @GetMapping("/edit-profile")
+    public String userEditPage(HttpSession session, Model model) {
+        String userId = (String) session.getAttribute("loginUserId");
 
-        model.addAttribute("userId", userId);
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        User user = userService.getUserById(userId);
+
+        model.addAttribute("user", user);
         return "userEdit";
     }
 

@@ -98,13 +98,13 @@
 
 <div class="container">
     <div class="header">
-        <a th:href="@{/account_settings/{userId}(userId=${userId})}" class="back-btn">←</a>
+        <a th:href="@{/account_settings}" class="back-btn">←</a>
         <span class="title">회원정보 수정</span>
     </div>
 
     <div class="form-group">
         <span class="label">아이디 (변경 불가)</span>
-        <input type="text" class="input-field readonly-field" th:value="${userId}" readonly>
+        <input type="text" class="input-field readonly-field" th:value="${user.userId}" readonly>
     </div>
 
     <div class="form-group">
@@ -127,21 +127,46 @@
 
 <script th:inline="javascript">
     function requestUpdate() {
-        const userId = [[${userId}]];
         const nickname = document.getElementById('nickname').value;
         const password = document.getElementById('password').value;
         const passwordCheck = document.getElementById('passwordCheck').value;
 
-        // 유효성 검사
-        if (!nickname) { alert("닉네임을 입력해주세요! 🍙"); return; }
-        if (password !== passwordCheck) { alert("비밀번호가 일치하지 않습니다! 🍙"); return; }
+        if (!nickname) {
+            alert("닉네임을 입력해주세요! 🍙");
+            return;
+        }
 
-        // 실제 수정 로직은 나중에 JS 파일에서 API(fetch) 호출로 처리하면 됩니다!
-        console.log("수정 요청:", { userId, nickname, password });
-        alert("정보가 성공적으로 수정되었습니다! 🍙");
+        if (password !== passwordCheck) {
+            alert("비밀번호가 일치하지 않습니다! 🍙");
+            return;
+        }
 
-        // 수정 완료 후 다시 계정 설정 페이지로 이동
-        location.href = "/account_settings/" + userId;
+        fetch('/user/update', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                nickname: nickname,
+                password: password
+            })
+        })
+            .then(response => response.text().then(text => ({
+                ok: response.ok,
+                text: text
+            })))
+            .then(result => {
+                alert(result.text);
+
+                if (result.ok) {
+                    location.href = "/account_settings";
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("서버 통신 중 오류가 발생했습니다.");
+            });
     }
 </script>
 

@@ -59,6 +59,23 @@ public class UserService {
                 .getNickname();
     }
 
+    // 회원 정보 전체 조회
+    public User getUserById(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    }
+
+    // 회원정보 수정
+    @Transactional
+    public void updateUser(String userId, String nickname, String email, String phoneNumber) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        user.setNickname(nickname);
+        user.setEmail(email);
+        user.setPhoneNumber(phoneNumber);
+    }
+
     // 아이디 중복 확인
     public boolean isUserIdDuplicate(String userId) {
         return userRepository.existsById(userId);
