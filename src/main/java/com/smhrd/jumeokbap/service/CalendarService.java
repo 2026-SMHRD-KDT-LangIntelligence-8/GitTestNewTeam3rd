@@ -73,20 +73,6 @@ public class CalendarService {
             });
         }
 
-        if (monthLogs.isEmpty()) {
-            List<Diary> diaries = diaryRepository.findByUserIdAndRegDateBetween(userId, startDate, endDate);
-
-            for (Diary diary : diaries) {
-                int day = diary.getRegDate().getDayOfMonth();
-
-                if (Boolean.TRUE.equals(diary.getIsImpulsive())) {
-                    impulseCount.incrementAndGet();
-                }
-                String dayKey = String.valueOf(day);
-                dailyEmojis.put(dayKey, diary.getEmotionTag());
-            }
-        }
-
         // 결과 데이터 맵에 담기
         data.put("totalSpent",totalSpent);
         data.put("daysInMonth", now.lengthOfMonth());

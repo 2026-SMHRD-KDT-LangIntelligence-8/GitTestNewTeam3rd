@@ -23,6 +23,7 @@ public class CalendarController {
 
     @GetMapping("/dailyCalendar/{userId}")
     public String showCalendar(@PathVariable("userId") String userId, Model model) {
+        System.out.println("🔥🔥🔥 컨트롤러 진입 성공");
     Map<String, Object> calendarData = calendarService.getCalendarData(userId);
 
         String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
@@ -38,6 +39,7 @@ public class CalendarController {
 
         System.out.println("🔥 totalWithFixed = " + totalWithFixed);
         System.out.println("🔥 totalWithoutFixed = " + totalWithoutFixed);
+        System.out.println("🔥 dailyEmojis = " + calendarData.get("dailyEmojis"));
 
         //목표금액
         model.addAttribute("totalAmount", calendarData.getOrDefault("totalAmount", 0L));
