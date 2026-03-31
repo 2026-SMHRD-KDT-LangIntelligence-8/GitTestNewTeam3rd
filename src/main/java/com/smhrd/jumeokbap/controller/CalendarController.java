@@ -34,10 +34,10 @@ public class CalendarController {
         model.addAttribute("calendarMap", calendarData.get("calendarMap"));
         model.addAttribute("daysInMonth", calendarData.get("daysInMonth"));
         model.addAttribute("dailyEmojis", calendarData.get("dailyEmojis"));
+        model.addAttribute("userId", userId);
 
-        model.addAttribute("totalWithFixed", fixedSummary.get("totalWithFixed"));
-        model.addAttribute("totalWithoutFixed", fixedSummary.get("totalWithoutFixed"));
-
+        model.addAttribute("totalWithFixed", fixedSummary.getOrDefault("totalWithFixed", 0L));
+        model.addAttribute("totalWithoutFixed", fixedSummary.getOrDefault("totalWithoutFixed", 0L));
         return "dailyCalendar";
     }
 
