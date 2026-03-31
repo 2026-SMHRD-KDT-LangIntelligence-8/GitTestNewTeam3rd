@@ -93,12 +93,14 @@
                th:href="@{|/api/recordMain/${userId}?date=2026-03-${i < 10 ? '0' + i : i}|}"
                class="day"
                th:classappend="${i == 31} ? 'today' : ''">
+
                 <span class="day-num" th:text="${i}"></span>
 
                 <span class="day-emoji"
                       th:if="${dailyEmojis != null}"
-                      th:text="${dailyEmojis.get(i) ?: dailyEmojis.get(T(String).valueOf(i))}">
+                      th:text="${dailyEmojis[i.toString()]}">
                 </span>
+
             </a>
         </div>
     </div>
