@@ -93,20 +93,22 @@ public class TodayRecordService {
     }
 
     // 고정비 등록
-    public Map<String, Long> getMonthlyTotal(String userId, String yearMonthStr) {
-        YearMonth ym = YearMonth.parse(yearMonthStr);
+    public Map<String, Long> getMonthlyTotal(String userId, String month) {
+        YearMonth ym = YearMonth.parse(month);
         LocalDate startDate = ym.atDay(1);
         LocalDate endDate = ym.atEndOfMonth();
 
         // 지출내
         List<SpendingLog> monthLogs = spendingLogRepository.findByUserIdAndRegDateBetween(userId, startDate, endDate);
 
+        System.out.println("🍙 DB에서 찾으려는 ID: [" + userId + "]");
+        System.out.println("📊 실제 가져온 리스트 크기: " + monthLogs.size());
+
         long totalWithFixed = 0;
         long totalWithoutFixed = 0;
 
         for (SpendingLog log : monthLogs) {
-            long amount = (log.getAmount() != null) ? log.getAmount() : 0;
-
+            long amount = (log.getAmount() != null) ? log.getAmount().longValue() : 0L;
             totalWithFixed += amount;
 
             boolean isFixed = diaryRepository.findByLogId(log.getLogId())

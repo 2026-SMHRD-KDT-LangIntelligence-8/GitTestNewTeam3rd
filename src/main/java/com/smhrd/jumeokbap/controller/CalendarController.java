@@ -28,16 +28,22 @@ public class CalendarController {
         String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
         Map<String, Long> fixedSummary = todayRecordService.getMonthlyTotal(userId, currentMonth);
 
+        //지출합계
+        long totalWithFixed = fixedSummary.getOrDefault("totalWithFixed",
+                ((Number) calendarData.getOrDefault("totalSpent", 0L)).longValue());
+        long totalWithoutFixed = fixedSummary.getOrDefault("totalWithoutFixed", totalWithFixed);
+
+        model.addAttribute("totalWithFixed", fixedSummary.getOrDefault("totalWithFixed", 0L));
+        model.addAttribute("totalWithoutFixed", fixedSummary.getOrDefault("totalWithoutFixed", 0L));
+        //목표금액
         model.addAttribute("totalAmount", calendarData.getOrDefault("totalAmount", 0L));
-        model.addAttribute("totalSpent", calendarData.getOrDefault("totalSpent",0L));
         model.addAttribute("impulseCount", calendarData.get("impulseCount"));
         model.addAttribute("calendarMap", calendarData.get("calendarMap"));
         model.addAttribute("daysInMonth", calendarData.get("daysInMonth"));
         model.addAttribute("dailyEmojis", calendarData.get("dailyEmojis"));
         model.addAttribute("userId", userId);
 
-        model.addAttribute("totalWithFixed", fixedSummary.getOrDefault("totalWithFixed", 0L));
-        model.addAttribute("totalWithoutFixed", fixedSummary.getOrDefault("totalWithoutFixed", 0L));
+
         return "dailyCalendar";
     }
 
