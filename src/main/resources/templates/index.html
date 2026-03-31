@@ -30,7 +30,6 @@
       align-items: center;
     }
 
-    /* 헤더 영역 */
     .integrated-header {
       width: 100%;
       display: flex;
@@ -70,7 +69,6 @@
       cursor: pointer;
     }
 
-    /* 플로팅 메뉴 버튼 */
     .menu-trigger {
       position: absolute;
       top: 130px;
@@ -118,7 +116,6 @@
       cursor: pointer;
     }
 
-    /* 캐릭터 및 말풍선 */
     .character-section {
       flex: 1;
       display: flex;
@@ -160,7 +157,6 @@
       margin-top: 5px;
     }
 
-    /* 대시보드 카드 (하단) */
     .dashboard-card {
       width: 100%;
       padding: 15px 5px;
@@ -230,7 +226,7 @@
     </div>
     <div class="top-title">🍙 주먹밥 🍙</div>
     <div class="logout-area">
-      <span class="logout-btn" id="loginMoveBtn">로그인</span>
+      <a href="/logout" class="logout-btn">로그아웃</a>
     </div>
   </div>
 
@@ -239,17 +235,21 @@
   </div>
 
   <div class="menu-wrapper" id="menuWrapper">
-    <div class="sub-btn" title="오늘의 소비">💰</div>
-    <div class="sub-btn" title="소비 캘린더">📅</div>
+    <a th:href="@{/api/recordMain/{id}(id=${userId})}" style="text-decoration: none; color: inherit;">
+      <div class="sub-btn" title="오늘의 소비">💰</div>
+    </a>
+
+    <a th:href="@{/dailyCalendar/{id}(id=${userId})}" style="text-decoration: none; color: inherit;">
+      <div class="sub-btn" title="소비 캘린더">📅</div>
+    </a>
+
     <div class="sub-btn" title="챌린지 설정">🏆</div>
     <div class="sub-btn" title="마이페이지">⚙️</div>
   </div>
 
   <div class="character-section">
     <div class="bubble-container">
-      <div class="bubble" id="bubbleMessage">
-        반가워요! 🍙
-      </div>
+      <div class="bubble" id="bubbleMessage">반가워요! 🍙</div>
     </div>
     <img id="characterImg" src="/img/normal_meokbap.png" alt="주먹밥 마스코트" class="character-img">
   </div>
@@ -257,18 +257,13 @@
   <div class="dashboard-card">
     <div class="card-label">현재 진행 중인 챌린지</div>
     <div class="challenge-name" id="challengeNameDisplay">진행 중인 챌린지가 없어요</div>
-
     <div class="progress-bar">
       <div class="progress-fill" id="progressBarFill"></div>
     </div>
-
     <div class="progress-info" id="progressPercent">0.0%</div>
-
     <div class="usage-section">
       <span class="usage-label">누적 소비 금액</span>
-      <span class="usage-amount">
-        <span id="accumulatedUsage">0</span>원
-      </span>
+      <span class="usage-amount"><span id="accumulatedUsage">0</span>원</span>
     </div>
   </div>
 </div>
