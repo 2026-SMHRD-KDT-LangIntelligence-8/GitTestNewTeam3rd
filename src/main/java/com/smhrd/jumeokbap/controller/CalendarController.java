@@ -42,7 +42,6 @@ public class CalendarController {
         //목표금액
         model.addAttribute("totalAmount", calendarData.getOrDefault("totalAmount", 0L));
         model.addAttribute("impulseCount", calendarData.get("impulseCount"));
-        model.addAttribute("calendarMap", calendarData.get("calendarMap"));
         model.addAttribute("daysInMonth", calendarData.get("daysInMonth"));
         model.addAttribute("dailyEmojis", calendarData.get("dailyEmojis"));
         model.addAttribute("userId", userId);

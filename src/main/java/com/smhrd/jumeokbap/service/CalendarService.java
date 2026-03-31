@@ -90,7 +90,7 @@ public class CalendarService {
         // 결과 데이터 맵에 담기
         data.put("totalSpent",totalSpent);
         data.put("daysInMonth", now.lengthOfMonth());
-        data.put("impulseCount", impulseCount);
+        data.put("impulseCount", impulseCount.get());
         data.put("dailyEmojis", dailyEmojis);
 
         return data;
