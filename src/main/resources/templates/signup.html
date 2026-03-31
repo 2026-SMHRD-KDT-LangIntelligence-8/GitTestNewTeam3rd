@@ -5,146 +5,116 @@
     <title>회원가입</title>
 
     <style>
-
-
-
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
-
         }
 
         .container {
             width: 360px;
-            height: 800px;
-
+            height: 640px;
             margin: 60px auto;
             background: white;
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-
-
-            display: flex;
-            flex-direction: column;   /* ⭐ 핵심 */
         }
+
+        /* 스크롤 영역 */
+        .scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* 크롬 스크롤바 숨기기 */
+        .scroll-area::-webkit-scrollbar {
+            display: none;
+        }
+
 
         h1 {
             text-align: center;
-            margin-bottom: 60px;   /* 살짝 줄이기 */
-            margin-top: 50px;
-
-            font-size: 26px;       /* ⭐ 살짝 키움 */
-            font-weight: 600;      /* ⭐ bold → 세련된 두께 */
-            letter-spacing: -0.5px; /* ⭐ 요즘 느낌 */
-            color: #222;           /* ⭐ 완전 검정 대신 부드럽게 */
+            margin: 50px 0 40px;
+            font-size: 26px;
+            font-weight: 600;
+            color: #222;
         }
 
         .input-box {
-
-            margin-bottom: 23px;
-            display: flex;              /* 가로 정렬 */
-            align-items: center;        /* 세로 가운데 정렬 */
-            gap: 10px;
-
+            margin-bottom: 18px;
         }
 
         .input-box label {
-            margin-top: auto;
-            margin-bottom: auto;
-
-            width: 100px; /* 라벨 너비 고정 */
-            white-space: nowrap;
-            font-weight: 500;      /* ⭐ bold → 부드럽게 */
-            font-size: 14px;       /* ⭐ 살짝 작게 */
-            color: #888;           /* ⭐ 연한 회색 */
-
-
-            margin-left: 10px;
-        }
-
-        .id-box {
-            position: relative;   /* ⭐ 핵심 */
-            flex: 1;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #888;
         }
 
         .input-box input {
-            width: 100%;                  /* ⭐ 추가 (핵심) */
+            width: 100%;
             padding: 10px;
             border: 1px solid #e8e8e8;
             border-radius: 10px;
             background-color: #fafafa;
             font-size: 13px;
-            flex: 1;
-            box-sizing: border-box;       /* ⭐ 추가 (안깨지게) */
-
-
+            box-sizing: border-box;
         }
 
-
-
-        /* 버튼 스타일 */
-        .check-btn {
-
-            position: absolute;
-            right: 6px;
-            top: 50%;
-            transform: translateY(-50%);
-
-            height: 30px;
-            padding: 0 10px;
-
-            border: none;
-            border-radius: 8px;
-            background-color: #2196F3;
-            color: white;
-            font-size: 11px;
-            cursor: pointer;
+        /* 아이디 박스 */
+        .id-box {
+            position: relative; /* 버튼 위치 기준 */
         }
-
-
-        /* ⭐ 아이디 + 버튼 가로 정렬 */
-
 
         .id-box input {
             width: 100%;
-            padding: 10px 80px 10px 10px; /* ⭐ 버튼 공간 확보 */
+            padding: 10px;
+            padding-right: 100px; /* 버튼 공간 확보 */
+            border: 1px solid #e8e8e8;
+            border-radius: 10px;
+            font-size: 13px;
             box-sizing: border-box;
-
-            padding-right: 80px;   /* ⭐ 버튼 공간 확보 */
         }
 
-
-
-
-
-        .check-btn:hover {
-            background-color: #1976D2;
+        .id-box .check-btn {
+            position: absolute;
+            top: 50%;
+            right: 6px; /* 입력창 안쪽 끝에서 10px */
+            transform: translateY(-50%);
+            height: 28px;
+            padding: 0 12px;
+            border: none;
+            border-radius: 14px;
+            background-color: #666666;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);  /* 살짝 그림자 */
+            transition: all 0.2s ease;      /* 마우스 오버 부드럽게 */
         }
 
-        /* 결과 메시지 */
-        #idCheckResult {
+        .id-box .check-btn:hover {
+            background-color: #999999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #idCheckResult, #passwordCheckResult {
             margin-top: 5px;
             font-size: 13px;
         }
 
-        button {
-            margin-top: 80px;
+        button.signup-btn {
+            margin-top: 40px;
             width: 100%;
             padding: 12px;
-            background-color:  black !important;
+            background-color: black;
             color: white;
             border: none;
             border-radius: 6px;
             font-size: 16px;
             cursor: pointer;
-
-
-
-        }
-
-        button:hover {
-            background-color: #45a049;
         }
     </style>
 </head>
@@ -153,19 +123,19 @@
 <div class="container">
     <h1>회원가입</h1>
 
-    <!-- ⭐ 아이디 부분 수정 -->
-    <div class="input-box " >
-        <label>아이디</label>
+    <!-- 스크롤 영역 -->
+    <div class="scroll-area">
 
+    <!-- 아이디 -->
+    <div class="input-box">
+        <label>아이디</label>
         <div class="id-box">
             <input type="text" id="userId" placeholder="아이디 입력">
             <button type="button" class="check-btn" onclick="checkId()">중복체크</button>
         </div>
-
-
+        <div id="idCheckResult"></div>
     </div>
-    <!-- 결과 표시 -->
-    <div id="idCheckResult"></div>
+
     <div class="input-box">
         <label>비밀번호</label>
         <input type="password" id="password" placeholder="비밀번호 입력">
@@ -174,7 +144,7 @@
     <div class="input-box">
         <label>비밀번호 확인</label>
         <input type="password" id="passwordConfirm" placeholder="비밀번호 다시 입력">
-        <div id="passwordCheckResult" style="font-size:13px; margin-top:5px;"></div>
+        <div id="passwordCheckResult"></div>
     </div>
 
     <div class="input-box">
@@ -197,7 +167,7 @@
         <input type="email" id="email" placeholder="example@email.com">
     </div>
 
-    <button type="button" onclick="signup()">가입하기</button>
+    <button type="button" class="signup-btn" onclick="signup()">가입하기</button>
 </div>
 
 <script src="/js/signup.js"></script>
