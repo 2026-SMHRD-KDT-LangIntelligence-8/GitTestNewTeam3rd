@@ -11,27 +11,38 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
+
         }
 
         .container {
-            width: 400px;
-            height: 874px;
+            width: 360px;
+            height: 800px;
+
             margin: 60px auto;
             background: white;
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 20px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+
+            display: flex;
+            flex-direction: column;   /* ⭐ 핵심 */
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 100px;
-            margin-top: 70px;
+            margin-bottom: 60px;   /* 살짝 줄이기 */
+            margin-top: 50px;
+
+            font-size: 26px;       /* ⭐ 살짝 키움 */
+            font-weight: 600;      /* ⭐ bold → 세련된 두께 */
+            letter-spacing: -0.5px; /* ⭐ 요즘 느낌 */
+            color: #222;           /* ⭐ 완전 검정 대신 부드럽게 */
         }
 
         .input-box {
 
-            margin-bottom: 22px;
+            margin-bottom: 23px;
             display: flex;              /* 가로 정렬 */
             align-items: center;        /* 세로 가운데 정렬 */
             gap: 10px;
@@ -41,36 +52,54 @@
         .input-box label {
             margin-top: auto;
             margin-bottom: auto;
-            font-weight: bold;
+
             width: 100px; /* 라벨 너비 고정 */
             white-space: nowrap;
+            font-weight: 500;      /* ⭐ bold → 부드럽게 */
+            font-size: 14px;       /* ⭐ 살짝 작게 */
+            color: #888;           /* ⭐ 연한 회색 */
+
+
+            margin-left: 10px;
         }
 
         .id-box {
-            /*display: flex;*/
-            flex: none;                    /* 남은 공간 차지 */
-            gap: 8px;
-            width: 280px;
+            position: relative;   /* ⭐ 핵심 */
+            flex: 1;
         }
 
         .input-box input {
+            width: 100%;                  /* ⭐ 추가 (핵심) */
             padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+            border: 1px solid #e8e8e8;
+            border-radius: 10px;
+            background-color: #fafafa;
+            font-size: 13px;
+            flex: 1;
+            box-sizing: border-box;       /* ⭐ 추가 (안깨지게) */
 
-            min-width: 0;
+
         }
+
+
 
         /* 버튼 스타일 */
         .check-btn {
-            padding:  4px 2px;
+
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+
+            height: 30px;
+            padding: 0 10px;
+
             border: none;
-            border-radius: 6px;
-            background-color: black !important;
+            border-radius: 8px;
+            background-color: #2196F3;
             color: white;
+            font-size: 11px;
             cursor: pointer;
-            white-space: nowrap;         /* 줄바꿈 방지 */
-            margin: 0;
         }
 
 
@@ -78,18 +107,16 @@
 
 
         .id-box input {
-            flex: 1;        /* ⭐ 다시 이걸로 */
-            min-width: 0;
-            height: 15px/* ⭐ 필수 */
+            width: 100%;
+            padding: 10px 80px 10px 10px; /* ⭐ 버튼 공간 확보 */
+            box-sizing: border-box;
+
+            padding-right: 80px;   /* ⭐ 버튼 공간 확보 */
         }
 
-        .check-btn {
-            width: 84px;
-            padding: 10px;
-            background-color: #2196F3;
-            border-radius: 6px;
-            font-size: 12px;
-        }
+
+
+
 
         .check-btn:hover {
             background-color: #1976D2;
@@ -102,7 +129,7 @@
         }
 
         button {
-            margin-top: 50px;
+            margin-top: 80px;
             width: 100%;
             padding: 12px;
             background-color:  black !important;
@@ -111,6 +138,9 @@
             border-radius: 6px;
             font-size: 16px;
             cursor: pointer;
+
+
+
         }
 
         button:hover {
@@ -124,7 +154,7 @@
     <h1>회원가입</h1>
 
     <!-- ⭐ 아이디 부분 수정 -->
-    <div class="input-box" >
+    <div class="input-box " >
         <label>아이디</label>
 
         <div class="id-box">
