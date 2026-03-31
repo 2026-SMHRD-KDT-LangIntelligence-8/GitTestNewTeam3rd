@@ -47,15 +47,16 @@ public class CalendarService {
                 .mapToLong(log -> log.getAmount() != null ? log.getAmount().longValue() : 0L)
                 .sum();
 
-        Map<Integer, String> dailyEmojis = new HashMap<>();
+        Map<String, String> dailyEmojis = new HashMap<>();
         AtomicInteger impulseCount = new AtomicInteger(0);
 
         for (SpendingLog log : monthLogs) {
             int day = log.getRegDate().getDayOfMonth();
+            String dayKey = String.valueOf(day);
 
             // 🍙 3. 추가한 곳: 자동 데이터(Diary 없는 경우)를 위해 기본 💰 설정
-            if (!dailyEmojis.containsKey(day)) {
-                dailyEmojis.put(day, "💰");
+            if (!dailyEmojis.containsKey(dayKey)) {
+                dailyEmojis.put(dayKey, "💰");
             }
 
             diaryRepository.findByLogId(log.getLogId()).ifPresent(diary -> {
@@ -66,10 +67,24 @@ public class CalendarService {
                 }
 
                 // 🍙 5. 수정한 곳: 이모티콘 로직 (대표 지출이거나 아직 기본값인 경우 덮어쓰기)
-                if (Boolean.TRUE.equals(diary.getIsMain()) || "💰".equals(dailyEmojis.get(day))) {
-                    dailyEmojis.put(day, diary.getEmotionTag());
+                if (Boolean.TRUE.equals(diary.getIsMain()) || "💰".equals(dailyEmojis.get(dayKey))) {
+                    dailyEmojis.put(dayKey, diary.getEmotionTag());
                 }
             });
+        }
+
+        if (monthLogs.isEmpty()) {
+            List<Diary> diaries = diaryRepository.findByUserIdAndRegDateBetween(userId, startDate, endDate);
+
+            for (Diary diary : diaries) {
+                int day = diary.getRegDate().getDayOfMonth();
+
+                if (Boolean.TRUE.equals(diary.getIsImpulsive())) {
+                    impulseCount.incrementAndGet();
+                }
+                String dayKey = String.valueOf(day);
+                dailyEmojis.put(dayKey, diary.getEmotionTag());
+            }
         }
 
         // 결과 데이터 맵에 담기

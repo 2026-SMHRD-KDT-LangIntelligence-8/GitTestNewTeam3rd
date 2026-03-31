@@ -35,6 +35,10 @@ public class CalendarController {
 
         model.addAttribute("totalWithFixed", fixedSummary.getOrDefault("totalWithFixed", 0L));
         model.addAttribute("totalWithoutFixed", fixedSummary.getOrDefault("totalWithoutFixed", 0L));
+
+        System.out.println("🔥 totalWithFixed = " + totalWithFixed);
+        System.out.println("🔥 totalWithoutFixed = " + totalWithoutFixed);
+
         //목표금액
         model.addAttribute("totalAmount", calendarData.getOrDefault("totalAmount", 0L));
         model.addAttribute("impulseCount", calendarData.get("impulseCount"));

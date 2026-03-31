@@ -99,7 +99,8 @@ public class TodayRecordService {
         LocalDate endDate = ym.atEndOfMonth();
 
         // 지출내
-        List<SpendingLog> monthLogs = spendingLogRepository.findByUserIdAndRegDateBetween(userId, startDate, endDate);
+        List<SpendingLog> monthLogs =
+                spendingLogRepository.findMonthlyLogs(userId, startDate, endDate);
 
         System.out.println("🍙 DB에서 찾으려는 ID: [" + userId + "]");
         System.out.println("📊 실제 가져온 리스트 크기: " + monthLogs.size());

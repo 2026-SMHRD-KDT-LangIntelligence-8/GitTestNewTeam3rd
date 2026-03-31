@@ -14,6 +14,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     Optional<Diary> findByLogId(Long logId);
     List<Diary> findByUserIdAndRegDate(String userId, LocalDate regDate);
     boolean existsByUserIdAndRegDate(String userId, LocalDate regDate);
+    List<Diary> findByUserIdAndRegDateBetween(String userId, LocalDate startDate, LocalDate endDate);
 
     @Query("SELECT d FROM Diary d WHERE d.userId = :userId AND d.regDate BETWEEN :startDate AND :endDate")
     List<Diary> findMonthlyDiaries(@Param("userId") String userId,
