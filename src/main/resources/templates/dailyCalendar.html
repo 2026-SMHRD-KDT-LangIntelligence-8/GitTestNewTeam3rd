@@ -6,53 +6,37 @@
     <title>주먹밥 - 소비 캘린더</title>
     <style>
         body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background-color: white; width: 360px; height: 640px; padding: 25px 20px; border-radius: 20px; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-
-        /* 헤더 */
+        .container { background-color: white; width: 360px; min-height: 640px; padding: 25px 20px; border-radius: 20px; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .close-btn { cursor: pointer; font-size: 20px; color: #888; border: none; background: none; }
         .month-title { font-size: 18px; font-weight: bold; color: #333; }
-
-        /* 1. 소비 요약 섹션 */
         .summary-section { background-color: #fafff0; border: 1px solid #e0e7d0; border-radius: 15px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-around; }
         .summary-item { text-align: center; flex: 1; }
         .summary-item:first-child { border-right: 1px solid #e0e7d0; }
         .label { font-size: 11px; color: #888; display: block; margin-bottom: 5px; }
-        .value { font-size: 15px; font-weight: bold; color: #333; transition: color 0.3s; }
+        .value { font-size: 15px; font-weight: bold; color: #333; }
         .highlight { color: #ffcc00; }
-        .fixed-excluded { color: #5fb1f7 !important; } /* 고정비 제외 시 색상 */
-
-        /* 📌 고정비 토글 영역 */
         .toggle-container { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; gap: 8px; }
         .toggle-text { font-size: 11px; color: #888; font-weight: bold; }
-
-        /* 스위치 디자인 */
         .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
         .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: #ffcc00; }
         input:checked + .slider:before { transform: translateX(14px); }
-
-        /* 2. 먹밥 감성 분석 섹션 */
         .analysis-section { background-color: #fff; border: 1px solid #eee; border-radius: 12px; padding: 12px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .analysis-title { font-size: 13px; color: #555; font-weight: 600; }
         .analysis-result { font-size: 15px; font-weight: bold; color: #e74c3c; }
-
-        /* 3. 소비 캘린더 섹션 */
-        .calendar-wrap { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .calendar-wrap { flex-grow: 1; display: flex; flex-direction: column; }
         .weekdays { display: flex; justify-content: space-around; margin-bottom: 10px; border-bottom: 1px solid #f5f5f5; padding-bottom: 5px; }
         .weekday { flex: 1; text-align: center; font-size: 12px; color: #bbb; font-weight: bold; }
-
-        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-content: start; }
-        .day { aspect-ratio: 1/1; background: #fdfdfd; border-radius: 10px; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #f0f0f0; cursor: pointer; transition: 0.2s; }
-        .day:hover { background-color: #f2f7e5; border-color: #e0e7d0; }
-        .day-num { position: absolute; top: 5px; left: 7px; font-size: 10px; color: #ccc; line-height: 1; }
-        .day-emoji { font-size: 24px; margin-top: 5px; }
-        .day.today { border: 1px solid #ffcc00; background-color: #fffcf0; }
-
+        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .day { aspect-ratio: 1/1; background: #fdfdfd; border-radius: 10px; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #f0f0f0; text-decoration: none; color: inherit; transition: 0.2s; }
+        .day-num { position: absolute; top: 5px; left: 7px; font-size: 10px; color: #ccc; }
+        .day-emoji { font-size: 20px; margin-top: 5px; }
+        .day.today { border: 1.5px solid #ffcc00; background-color: #fffcf0; }
         .footer-btns { margin-top: 15px; }
-        .btn-goal { width: 100%; padding: 12px; border: 1px solid #ffcc00; background: white; color: #333; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .btn-goal { width: 100%; padding: 12px; border: 1px solid #ffcc00; background: white; color: #333; border-radius: 10px; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -74,15 +58,20 @@
 
     <div class="summary-section">
         <div class="summary-item">
-            <span class="label" id="spending-label">이번 달 지출</span>
+            <span class="label" id="spending-label">이번 달 지출 (포함)</span>
             <span class="value highlight" id="totalSpentValue"
-                  th:data-fixed="${totalWithFixed}"
-                  th:data-none="${totalWithoutFixed}"
-                  th:text="${#numbers.formatInteger(totalWithFixed, 0, 'COMMA') + '원'}">0원</span>
+                  th:data-fixed="${totalWithFixed ?: 0}"
+                  th:data-none="${totalWithoutFixed ?: 0}"
+                  th:text="${totalWithFixed != null ? #numbers.formatInteger(totalWithFixed, 0, 'COMMA') + '원' : '0원'}">
+                0원
+            </span>
         </div>
         <div class="summary-item">
             <span class="label">소비 목표</span>
-            <span class="value" th:text="${totalAmount != null and totalAmount > 0 ? #numbers.formatInteger(totalAmount, 0, 'COMMA') + '원' : '목표 없음'}">목표 없음</span>
+            <span class="value"
+                  th:text="${totalAmount != null and totalAmount > 0 ? #numbers.formatInteger(totalAmount, 0, 'COMMA') + '원' : '목표 없음'}">
+                목표 없음
+            </span>
         </div>
     </div>
 
@@ -100,21 +89,26 @@
             <div class="weekday">토</div>
         </div>
         <div class="days-grid">
-            <div class="day" th:each="i : ${#numbers.sequence(1, daysInMonth ?: 31)}"
-                 th:classappend="${i == #temporals.day(#temporals.createNow())} ? 'today' : ''">
-
+            <a th:each="i : ${#numbers.sequence(1, daysInMonth ?: 31)}"
+               th:href="@{|/api/recordMain/${userId}?date=2026-03-${i < 10 ? '0' + i : i}|}"
+               class="day"
+               th:classappend="${i == 31} ? 'today' : ''">
                 <span class="day-num" th:text="${i}"></span>
 
                 <span class="day-emoji"
-                      th:if="${dailyEmojis != null and dailyEmojis.containsKey(i)}"
-                      th:text="${dailyEmojis.get(i)}">
+                      th:if="${dailyEmojis != null}"
+                      th:text="${dailyEmojis.get(i) ?: dailyEmojis.get(T(String).valueOf(i))}">
                 </span>
-            </div>
+            </a>
         </div>
     </div>
 
     <div class="footer-btns">
-        <button class="btn-goal" onclick="location.href='/api/setGoal'">소비 목표 설정하기</button>
+        <button class="btn-goal"
+                th:data-user-id="${userId}"
+                onclick="location.href='/api/setGoal?userId=' + this.getAttribute('data-user-id')">
+            소비 목표 설정하기
+        </button>
     </div>
 </div>
 
@@ -125,20 +119,15 @@
         const labelElement = document.getElementById('spending-label');
         const toggleLabel = document.getElementById('toggle-label');
 
-        // data 속성에 저장된 값 가져오기
         const withFixed = parseInt(valueElement.getAttribute('data-fixed')) || 0;
         const noneFixed = parseInt(valueElement.getAttribute('data-none')) || 0;
 
         if (toggle.checked) {
-            // 고정비 포함 모드
             valueElement.innerText = withFixed.toLocaleString() + "원";
-            valueElement.classList.remove('fixed-excluded');
             labelElement.innerText = "이번 달 지출 (포함)";
             toggleLabel.innerText = "고정비 포함";
         } else {
-            // 고정비 제외 모드
             valueElement.innerText = noneFixed.toLocaleString() + "원";
-            valueElement.classList.add('fixed-excluded');
             labelElement.innerText = "이번 달 지출 (제외)";
             toggleLabel.innerText = "고정비 제외";
         }

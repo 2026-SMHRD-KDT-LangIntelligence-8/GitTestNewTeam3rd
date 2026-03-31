@@ -41,7 +41,6 @@ public class TodayRecordService {
 
         }
         LocalDate recordDate;
-
         if (dto.getRegDate() != null && !dto.getRegDate().isEmpty()) {
             // 💡 문자열 "2026-03-26" 등을 LocalDate 객체로 변환
             recordDate = LocalDate.parse(dto.getRegDate());
@@ -51,15 +50,23 @@ public class TodayRecordService {
 
         String resultFromServer = analyzeText(dto.getContent());
         boolean isImpulsive = "1".equals(resultFromServer);
-
         boolean existsDiary = diaryRepository.existsByUserIdAndRegDate(dto.getUserId(), recordDate);
         boolean isMain = !existsDiary;
 
+        Integer amountValue = 0;
+        try {
+            if (dto.getAmount() != null && !dto.getAmount().trim().isEmpty()) {
+                amountValue = Integer.valueOf(dto.getAmount().replace(",", "")); // 콤마 포함 대비
+            }
+        } catch (NumberFormatException e) {
+            amountValue = 0;
+        }
+
         SpendingLog spendingLog = SpendingLog.builder()
                 .userId(dto.getUserId())
-                .amount(Integer.valueOf(dto.getAmount()))
+                .amount(amountValue)
                 .storeName(dto.getStoreName())
-                .spentAt(parseSpentAt(dto.getSpentAt()))
+                .spentAt(dto.getSpentAt() != null ? parseSpentAt(dto.getSpentAt()) : LocalDateTime.now())
                 .imageUrl(fileName)
                 .isImpulsive(isImpulsive)
                 .isMain(isMain)
@@ -69,11 +76,6 @@ public class TodayRecordService {
 
         SpendingLog saveLog = spendingLogRepository.save(spendingLog);
 
-
-        // 3. 콘솔 확인용 로그
-        System.out.println("🤖 AI 분석 결과: " + resultFromServer);
-
-
         Diary diary = Diary.builder()
                 .userId(dto.getUserId())
                 .content(dto.getContent())
@@ -81,6 +83,7 @@ public class TodayRecordService {
                 .sentimentScore(0.0)
                 .isImpulsive(isImpulsive)
                 .isMain(isMain)
+                .isFixed(dto.getIsFixed() != null ? dto.getIsFixed() : false)
                 .logId(saveLog.getLogId())
                 .regDate(recordDate)
                 .build();
@@ -90,24 +93,29 @@ public class TodayRecordService {
     }
 
     // 고정비 등록
-    public Map<String, Long> getMonthlyTotal(String userId, String yearMonthStr) {
-        YearMonth ym = YearMonth.parse(yearMonthStr);
+    public Map<String, Long> getMonthlyTotal(String userId, String month) {
+        YearMonth ym = YearMonth.parse(month);
         LocalDate startDate = ym.atDay(1);
         LocalDate endDate = ym.atEndOfMonth();
 
-        List<Diary> diaries = diaryRepository.findMonthlyDiaries(userId, startDate, endDate);
+        // 지출내
+        List<SpendingLog> monthLogs = spendingLogRepository.findByUserIdAndRegDateBetween(userId, startDate, endDate);
+
+        System.out.println("🍙 DB에서 찾으려는 ID: [" + userId + "]");
+        System.out.println("📊 실제 가져온 리스트 크기: " + monthLogs.size());
 
         long totalWithFixed = 0;
         long totalWithoutFixed = 0;
 
-        for (Diary d : diaries) {
-            long amount = spendingLogRepository.findById(d.getLogId())
-                    .map(SpendingLog::getAmount)
-                    .orElse(0);
-
+        for (SpendingLog log : monthLogs) {
+            long amount = (log.getAmount() != null) ? log.getAmount().longValue() : 0L;
             totalWithFixed += amount;
 
-            if (!Boolean.TRUE.equals(d.getIsFixed())) {
+            boolean isFixed = diaryRepository.findByLogId(log.getLogId())
+                    .map(Diary::getIsFixed)
+                    .orElse(false); // 일기가 없으면 고정비가 아니라고 판단
+
+            if (!isFixed) {
                 totalWithoutFixed += amount;
             }
         }

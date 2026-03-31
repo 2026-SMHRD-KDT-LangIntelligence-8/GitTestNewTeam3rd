@@ -52,7 +52,7 @@ public class TodayRecordController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "error";
+            return "redirect:/main/" + dto.getUserId();
         }
     }
 
