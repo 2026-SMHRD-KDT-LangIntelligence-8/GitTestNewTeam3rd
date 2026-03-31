@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class TodayRecordRequest {
 
+    private String logId;
     private String userId;
     private String date;
 

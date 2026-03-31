@@ -6,7 +6,6 @@ import com.smhrd.jumeokbap.dto.TodayRecordRequest;
 import com.smhrd.jumeokbap.repository.DiaryRepository;
 import com.smhrd.jumeokbap.repository.SpendingLogRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.Optional;
 
 
 @RequiredArgsConstructor
@@ -28,21 +28,19 @@ import java.util.List;
 public class TodayRecordService {
     private final DiaryRepository diaryRepository;
     private final SpendingLogRepository spendingLogRepository;
-    // 파이썬 서버와 통신하기 위한 도구
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Transactional
-    // 수동입력
+    // 수동입력 및 초기 저장
     public void manualRecord(TodayRecordRequest dto, org.springframework.web.multipart.MultipartFile imageFile) {
 
         String fileName = "";
         if (imageFile != null && !imageFile.isEmpty()) {
             fileName = imageFile.getOriginalFilename();
-
         }
+
         LocalDate recordDate;
         if (dto.getRegDate() != null && !dto.getRegDate().isEmpty()) {
-            // 💡 문자열 "2026-03-26" 등을 LocalDate 객체로 변환
             recordDate = LocalDate.parse(dto.getRegDate());
         } else {
             recordDate = LocalDate.now();
@@ -56,7 +54,7 @@ public class TodayRecordService {
         Integer amountValue = 0;
         try {
             if (dto.getAmount() != null && !dto.getAmount().trim().isEmpty()) {
-                amountValue = Integer.valueOf(dto.getAmount().replace(",", "")); // 콤마 포함 대비
+                amountValue = Integer.valueOf(dto.getAmount().replace(",", ""));
             }
         } catch (NumberFormatException e) {
             amountValue = 0;
@@ -89,21 +87,14 @@ public class TodayRecordService {
                 .build();
 
         diaryRepository.save(diary);
-
     }
 
-    // 고정비 등록
     public Map<String, Long> getMonthlyTotal(String userId, String month) {
         YearMonth ym = YearMonth.parse(month);
         LocalDate startDate = ym.atDay(1);
         LocalDate endDate = ym.atEndOfMonth();
 
-        // 지출내
-        List<SpendingLog> monthLogs =
-                spendingLogRepository.findMonthlyLogs(userId, startDate, endDate);
-
-        System.out.println("🍙 DB에서 찾으려는 ID: [" + userId + "]");
-        System.out.println("📊 실제 가져온 리스트 크기: " + monthLogs.size());
+        List<SpendingLog> monthLogs = spendingLogRepository.findMonthlyLogs(userId, startDate, endDate);
 
         long totalWithFixed = 0;
         long totalWithoutFixed = 0;
@@ -114,7 +105,7 @@ public class TodayRecordService {
 
             boolean isFixed = diaryRepository.findByLogId(log.getLogId())
                     .map(Diary::getIsFixed)
-                    .orElse(false); // 일기가 없으면 고정비가 아니라고 판단
+                    .orElse(false);
 
             if (!isFixed) {
                 totalWithoutFixed += amount;
@@ -127,12 +118,10 @@ public class TodayRecordService {
     }
 
     @Transactional(readOnly = true)
-    // 조회기능
     public List<SpendingLog> getDailyTimeline(String userId) {
         return spendingLogRepository.findByUserIdOrderBySpentAtDesc(userId);
     }
 
-    // 날짜별 조회
     public List<SpendingLog> getDailyTimeline(String userId, LocalDate date){
         List<SpendingLog> logs = spendingLogRepository.findByUserIdAndRegDate(userId, date);
 
@@ -146,17 +135,17 @@ public class TodayRecordService {
         return logs;
     }
 
-    // 특정 내역 건의 상세페이지로 이동!
+    // 🍙 [수정됨] 상세페이지 조회 시 에러 방지
     public SpendingLog getLogDetail(Long logId) {
         return spendingLogRepository.findById(logId)
-                .orElseThrow(() -> new RuntimeException("기록을 못찾겠어요! ID: " + logId));
+                .orElseGet(() -> {
+                    System.out.println("⚠️ SpendingLog를 찾지 못했습니다. ID: " + logId);
+                    return new SpendingLog(); // 에러를 던지는 대신 빈 객체 반환
+                });
     }
 
-    // 감성분석(flask 주소) 연동
     public String analyzeText(String content) {
-        RestTemplate restTemplate = new RestTemplate();
         String url = "http://127.0.0.1:5000/predict";
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -166,36 +155,36 @@ public class TodayRecordService {
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
 
         try {
-            // Map으로 받아서 "label" 키의 값을 추출
             Map<String, Object> response = restTemplate.postForObject(url, entity, Map.class);
-
-            // 플라스크의 label이 숫자 1이면 "1", 아니면 "0"을 확실히 반환
             if (response != null && response.get("label") != null) {
-                String label = String.valueOf(response.get("label")); // "1" 또는 "1.0" 등 대응
+                String label = String.valueOf(response.get("label"));
                 return label.startsWith("1") ? "1" : "0";
             }
             return "0";
         } catch (Exception e) {
-            e.printStackTrace();
             return "0";
         }
-
     }
 
+    // 🍙 [수정됨] 일기 정보가 없으면 새로 생성해서 반환 (Null 방지)
     public Diary getDiaryByLogId(Long logId){
         return diaryRepository.findByLogId(logId)
-                .orElse(new Diary());
+                .orElseGet(() -> {
+                    Diary newDiary = new Diary();
+                    newDiary.setLogId(logId);
+                    newDiary.setEmotionTag("😊"); // 기본 이모티콘 설정
+                    newDiary.setContent("");
+                    return newDiary;
+                });
     }
 
     @Transactional
-    // 기록 삭제
     public void deleteRecord(Long logId) {
         diaryRepository.deleteByLogId(logId);
         spendingLogRepository.deleteById(logId);
     }
 
     @Transactional
-    // 오늘의 대표 지출 건
     public void setAsMainRecord(Long logId) {
         Diary targetDiary = diaryRepository.findByLogId(logId)
                 .orElseThrow(() -> new RuntimeException("해당 기록의 일기 정보를 찾을 수 없습니다."));
@@ -211,31 +200,25 @@ public class TodayRecordService {
     }
 
     @Transactional
-    // 고정비 등록
     public void toggleFixedStatus(Long diaryId) {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new RuntimeException("해당 기록을 찾을 수 없습니다."));
 
         boolean currentStatus = (diary.getIsFixed() != null) ? diary.getIsFixed() : false;
         diary.setIsFixed(!currentStatus);
-
     }
+
     private LocalDateTime parseSpentAt(String spentAt) {
         try {
-            if (spentAt == null || spentAt.isBlank()) {
-                return LocalDateTime.now();
-            }
-
+            if (spentAt == null || spentAt.isBlank()) return LocalDateTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             return LocalDateTime.parse(spentAt, formatter);
-
         } catch (Exception e) {
             return LocalDateTime.now();
         }
     }
+
     public List<SpendingLog> getTodayRecords(String userId, LocalDate regDate) {
         return spendingLogRepository.findByUserIdAndRegDateOrderBySpentAtDesc(userId, regDate);
     }
-
 }
-

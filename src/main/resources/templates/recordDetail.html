@@ -4,266 +4,50 @@
     <meta charset="UTF-8">
     <title>오늘의 기록 상세</title>
     <style>
-        body {
-            background-color: #e9e9e9;
-            font-family: 'Pretendard', sans-serif;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-            margin: 0;
-            min-height: 100vh;
-            align-items: center;
-            box-sizing: border-box;
-        }
+        body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; min-height: 100vh; align-items: center; box-sizing: border-box; }
+        .container { background-color: white; width: 360px; height: 640px; padding: 20px 16px 20px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        .scroll-area { flex: 1; overflow-y: auto; overflow-x: hidden; padding-right: 4px; box-sizing: border-box; }
+        .scroll-area::-webkit-scrollbar { width: 6px; }
+        .scroll-area::-webkit-scrollbar-thumb { background-color: #d6d6d6; border-radius: 10px; }
+        .scroll-area::-webkit-scrollbar-track { background: transparent; }
+        .header { color: #888; font-size: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { cursor: pointer; border: none; background: none; font-size: 18px; color: #888; }
+        .info-row { display: flex; justify-content: space-around; align-items: center; font-size: 18px; font-weight: bold; margin-bottom: 30px; color: #333; }
+        .info-item { flex: 1; text-align: center; word-break: keep-all; }
+        .amount-text { color: #ffcc00; }
+        .box { background-color: #fafff0; border: 1px solid #e0e7d0; border-radius: 10px; width: 100%; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; overflow: hidden; box-sizing: border-box; }
+        .photo-box { height: 180px; }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .no-image { color: #bbb; font-size: 14px; }
 
-        .container {
-            background-color: white;
-            width: 360px;
-            height: 640px; /* 고정 높이 */
-            padding: 20px 16px 20px 20px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; /* 바깥은 안 늘어나게 */
-        }
+        .memo-box { height: 100px; border: 1px solid #e0e7d0; resize: none; text-align: center; font-size: 16px; padding: 15px; box-sizing: border-box; background-color: #fafff0; width: 100%; border-radius: 10px; outline: none; margin-bottom: 15px; overflow-y: auto; font-family: inherit; }
+        .memo-box:focus { border-color: #ffcc00; background-color: #fffdf7; }
 
-        .scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding-right: 4px; /* 스크롤바 공간 */
-            box-sizing: border-box;
-        }
+        .options-row { display: flex; margin-bottom: 15px; }
+        .option-item { background-color: #fafff0; border: 1px solid #e0e7d0; flex: 1; padding: 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 80px; box-sizing: border-box; }
 
-        .scroll-area::-webkit-scrollbar {
-            width: 6px;
-        }
+        /* 🍙 이모티콘 크기 수정 (28px) */
+        .emoji-select { font-size: 28px; border: none; background: transparent; cursor: pointer; outline: none; appearance: none; text-align: center; width: 100%; padding: 5px 0; }
+        .select-label { font-size: 12px; color: #888; margin-bottom: 5px; }
 
-        .scroll-area::-webkit-scrollbar-thumb {
-            background-color: #d6d6d6;
-            border-radius: 10px;
-        }
+        .btn-wrapper { margin-bottom: 10px; }
+        .btn-action { width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; box-sizing: border-box; font-size: 14px; }
+        .btn-save { background-color: #ffcc00; color: white; border: none; margin-bottom: 15px; }
+        .btn-set-fixed { border: 2px solid #5fb1f7; background-color: white; color: #333; }
+        .is-fixed-active { background-color: #5fb1f7 !important; color: white !important; border: none; }
+        .btn-set-main { border: 2px solid #ffcc00; background-color: white; color: #333; }
+        .is-main-active { background-color: #ffcc00 !important; color: white !important; border: none; cursor: default; }
 
-        .scroll-area::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .header {
-            color: #888;
-            font-size: 14px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .back-btn {
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-size: 18px;
-            color: #888;
-        }
-
-        /* 상단 정보 (시간, 장소, 금액) */
-        .info-row {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 30px;
-            color: #333;
-        }
-
-        .info-item {
-            flex: 1;
-            text-align: center;
-            word-break: keep-all;
-        }
-
-        .amount-text {
-            color: #ffcc00;
-        }
-
-        /* 사진 & 메모 영역 */
-        .box {
-            background-color: #fafff0;
-            border: 1px solid #e0e7d0;
-            border-radius: 10px;
-            width: 100%;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            box-sizing: border-box;
-        }
-
-        .photo-box {
-            height: 180px;
-        }
-
-        .photo-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .no-image {
-            color: #bbb;
-            font-size: 14px;
-        }
-
-        .memo-box {
-            height: 120px;
-            border: 1px solid #e0e7d0;
-            resize: none;
-            text-align: center;
-            font-size: 16px;
-            padding: 15px;
-            box-sizing: border-box;
-            background-color: #fafff0;
-            width: 100%;
-            border-radius: 10px;
-            outline: none;
-            margin-bottom: 20px;
-            overflow-y: auto;
-        }
-
-        /* 이모티콘 & 구분 영역 */
-        .options-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .option-item {
-            background-color: #fafff0;
-            border: 1px solid #e0e7d0;
-            flex: 1;
-            padding: 15px 5px;
-            border-radius: 10px;
-            font-size: 14px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 80px;
-            box-sizing: border-box;
-        }
-
-        .emoji-large {
-            font-size: 50px !important;
-            margin: 0 !important;
-            line-height: 1;
-        }
-
-        .emoji-val {
-            font-size: 24px;
-            display: block;
-            margin-top: 5px;
-        }
-
-        /* 버튼 공통 스타일 */
-        .btn-wrapper {
-            margin-bottom: 10px;
-        }
-
-        .btn-action {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            box-sizing: border-box;
-        }
-
-        /* 고정비 버튼 스타일 */
-        .btn-set-fixed {
-            border: 2px solid #5fb1f7;
-            background-color: white;
-            color: #333;
-        }
-
-        .btn-set-fixed:hover {
-            background-color: #f0f8ff;
-        }
-
-        .is-fixed-active {
-            background-color: #5fb1f7 !important;
-            color: white !important;
-            border: none;
-        }
-
-        /* 대표 설정 버튼 스타일 */
-        .btn-set-main {
-            border: 2px solid #ffcc00;
-            background-color: white;
-            color: #333;
-        }
-
-        .btn-set-main:hover {
-            background-color: #fff9e6;
-        }
-
-        .is-main-active {
-            background-color: #ffcc00 !important;
-            color: white !important;
-            border: none;
-            cursor: default;
-        }
-
-        /* 하단 버튼 */
-        .btn-group {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-top: 20px;
-            margin-bottom: 4px;
-        }
-
-        .btn {
-            flex: 1;
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-back {
-            background-color: #eee;
-            color: #666;
-        }
-
-        .btn-delete {
-            background-color: #ff4d4d;
-            color: white;
-        }
-
-        .btn:hover {
-            opacity: 0.8;
-        }
+        .btn-group { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; }
+        .btn { flex: 1; border: none; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-back { background-color: #eee; color: #666; }
+        .btn-delete { background-color: #ff4d4d; color: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="scroll-area">
-
         <div class="header">
             <span class="back-btn" onclick="history.back()">←</span>
             <span>오늘의 기록 상세</span>
@@ -271,48 +55,45 @@
         </div>
 
         <div class="info-row">
-            <span class="info-item"
-                  th:text="${#strings.length(detail.spentAt) > 5 ? #strings.substring(detail.spentAt, 11, 16) : detail.spentAt}">시간</span>
+            <span class="info-item" th:text="${#strings.length(detail.spentAt) > 5 ? #strings.substring(detail.spentAt, 11, 16) : detail.spentAt}">시간</span>
             <span class="info-item" th:text="${detail.storeName}">장소</span>
-            <span class="info-item amount-text"
-                  th:text="${#numbers.formatInteger(detail.amount, 0, 'COMMA') + '원'}">금액</span>
+            <span class="info-item amount-text" th:text="${#numbers.formatInteger(detail.amount, 0, 'COMMA') + '원'}">금액</span>
         </div>
 
         <div class="box photo-box">
-            <img th:if="${detail.imageUrl != null and detail.imageUrl != ''}"
-                 th:src="@{'/upload/' + ${detail.imageUrl}}" alt="지출 사진">
-            <span th:unless="${detail.imageUrl != null and detail.imageUrl != ''}"
-                  class="no-image">등록된 사진이 없습니다.</span>
+            <img th:if="${detail.imageUrl != null and detail.imageUrl != ''}" th:src="@{'/upload/' + ${detail.imageUrl}}" alt="지출 사진">
+            <span th:unless="${detail.imageUrl != null and detail.imageUrl != ''}" class="no-image">등록된 사진이 없습니다.</span>
         </div>
 
-        <textarea class="memo-box" th:text="${diary.content}" readonly>메모가 없습니다.</textarea>
+        <textarea id="memoContent" class="memo-box" placeholder="여기에 소비 메모를 남겨보세요!" th:text="${diary.content}"></textarea>
 
         <div class="options-row">
             <div class="option-item">
-                <span class="emoji-large" th:text="${diary.emotionTag}">😊</span>
-            </div>
-
-            <div class="option-item">
-                구분
-                <span class="emoji-val" style="font-size: 16px; margin-top: 12px;"
-                      th:text="${detail.isManual == 'Y' ? '수동입력' : '자동입력'}">입력방식</span>
+                <span class="select-label">오늘의 기분 선택</span>
+                <select id="emotionTag" class="emoji-select">
+                    <option value="😊" th:selected="${diary.emotionTag == '😊'}">😊</option>
+                    <option value="😋" th:selected="${diary.emotionTag == '😋'}">😋</option>
+                    <option value="😭" th:selected="${diary.emotionTag == '😭'}">😭</option>
+                    <option value="😡" th:selected="${diary.emotionTag == '😡'}">😡</option>
+                    <option value="💸" th:selected="${diary.emotionTag == '💸'}">💸</option>
+                </select>
             </div>
         </div>
 
         <div class="btn-wrapper">
-            <button type="button" id="fixedSetBtn"
-                    th:classappend="${diary.isFixed} ? 'is-fixed-active' : ''"
-                    class="btn-action btn-set-fixed"
-                    th:onclick="|toggleFixedRecord(${diary.diaryId})|">
+            <button type="button" class="btn-action btn-save" onclick="saveDiaryData()">
+                💾 메모 및 기분 저장하기
+            </button>
+        </div>
+
+        <div class="btn-wrapper">
+            <button type="button" id="fixedSetBtn" th:classappend="${diary.isFixed} ? 'is-fixed-active' : ''" class="btn-action btn-set-fixed" th:onclick="|toggleFixedRecord(${diary.diaryId})|">
                 <span th:text="${diary.isFixed} ? '📌 고정비 해제' : '📌 고정비로 등록'">고정비 설정</span>
             </button>
         </div>
 
         <div class="btn-wrapper">
-            <button type="button" id="mainSetBtn"
-                    th:classappend="${diary.isMain} ? 'is-main-active' : ''"
-                    class="btn-action btn-set-main"
-                    th:onclick="${diary.isMain} ? '' : |updateMainRecord(${detail.logId})|">
+            <button type="button" id="mainSetBtn" th:classappend="${diary.isMain} ? 'is-main-active' : ''" class="btn-action btn-set-main" th:onclick="${diary.isMain} ? '' : |updateMainRecord(${detail.logId})|">
                 <span th:text="${diary.isMain} ? '🌟 오늘의 대표 지출' : '🍙 대표 지출로 설정하기'">대표 설정</span>
             </button>
         </div>
@@ -321,60 +102,59 @@
             <button type="button" class="btn btn-back" onclick="history.back()">뒤로가기</button>
             <button type="button" class="btn btn-delete" th:onclick="|deleteRecord(${detail.logId})|">내역 삭제</button>
         </div>
-
     </div>
 </div>
 
 <script th:inline="javascript">
-    // 📌 고정비 등록/해제 함수
-    function toggleFixedRecord(diaryId) {
-        const msg = "고정비 상태를 변경하시겠습니까?";
-        if(confirm(msg)) {
-            fetch('/api/record/toggleFixed/' + diaryId, {
-                method: 'POST'
+    // 🍙 메모 및 감정 저장 함수
+    function saveDiaryData() {
+        // Thymeleaf 변수를 자바스크립트에서 안전하게 받기
+        const logId = /*[[${detail.logId}]]*/ 0;
+        const content = document.getElementById('memoContent').value;
+        const emotionTag = document.getElementById('emotionTag').value;
+
+        fetch('/api/record/updateDiary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                logId: String(logId), // DTO의 logId 필드와 매칭
+                content: content,
+                emotionTag: emotionTag
             })
+        })
+            .then(response => response.text())
+            .then(data => {
+                if(data === "success") {
+                    alert("기록이 저장되었습니다! 🍙");
+                    location.reload();
+                } else {
+                    alert("저장에 실패했습니다. 서버 로그를 확인해 주세요.");
+                }
+            })
+            .catch(err => {
+                console.error("오류:", err);
+                alert("통신 중 오류가 발생했습니다.");
+            });
+    }
+
+    function toggleFixedRecord(diaryId) {
+        if(confirm("고정비 상태를 변경하시겠습니까?")) {
+            fetch('/api/record/toggleFixed/' + diaryId, { method: 'POST' })
                 .then(response => response.text())
-                .then(data => {
-                    if(data === "success") {
-                        alert("고정비 설정이 변경되었습니다! 📌");
-                        location.reload();
-                    } else {
-                        alert("설정에 실패했습니다.");
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert("오류가 발생했습니다.");
-                });
+                .then(data => { if(data === "success") { alert("고정비 설정 변경! 📌"); location.reload(); } })
         }
     }
 
-    // 💡 대표 지출 업데이트 함수
     function updateMainRecord(logId) {
-        if(confirm("이 기록을 오늘의 대표 지출로 설정하시겠습니까?\n(다른 대표 기록은 자동으로 해제됩니다.)")) {
-            fetch('/api/record/updateMain/' + logId, {
-                method: 'POST'
-            })
+        if(confirm("이 기록을 오늘의 대표 지출로 설정하시겠습니까?")) {
+            fetch('/api/record/updateMain/' + logId, { method: 'POST' })
                 .then(response => response.text())
-                .then(data => {
-                    if(data === "success") {
-                        alert("대표 지출로 설정되었습니다! 🍙");
-                        location.reload();
-                    } else {
-                        alert("설정에 실패했습니다.");
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert("오류가 발생했습니다.");
-                });
+                .then(data => { if(data === "success") { alert("대표 지출 설정 완료! 🌟"); location.reload(); } })
         }
     }
 
     function deleteRecord(logId) {
-        if(confirm("이 기록을 정말 삭제하시겠습니까?")) {
-            location.href = '/api/delete/' + logId;
-        }
+        if(confirm("정말 삭제하시겠습니까?")) { location.href = '/api/delete/' + logId; }
     }
 </script>
 
