@@ -22,10 +22,15 @@ cardOrganizations.forEach(org => {
     organizationMap[org.code] = org.name;
 });
 
+// ===== 최초 등록 여부 판단용 상태값 =====
+// true  -> 이미 연결된 카드가 있음
+// false -> 아직 연결된 카드가 없음 (첫 카드 등록 대상)
+let hasExistingAccounts = false;
+
 // ===== 초기 실행 =====
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     renderOrganizationOptions();
-    loadAccounts();
+    await loadAccounts();
 });
 
 // ===== 카드사 목록 렌더링 =====
@@ -69,6 +74,10 @@ async function connectAccount() {
         return;
     }
 
+    // 등록 버튼을 누르기 직전 상태 저장
+    // false면 '첫 카드 등록', true면 '추가 등록'
+    const wasFirstRegistration = !hasExistingAccounts;
+
     try {
         console.log("카드 연결 요청 시작", data);
 
@@ -97,7 +106,15 @@ async function connectAccount() {
         alert("카드 연결 성공!");
 
         resetForm();
-        loadAccounts();
+
+        // 최초 등록이면 메인페이지로 이동
+        if (wasFirstRegistration) {
+            window.location.href = "/";
+            return;
+        }
+
+        // 추가 등록이면 현재 페이지 유지
+        await loadAccounts();
 
     } catch (error) {
         console.error("connectAccount 에러:", error);
@@ -122,14 +139,17 @@ async function loadAccounts() {
 
         if (!accountList) {
             console.error("accountList 요소를 찾지 못했습니다.");
-            return;
+            return [];
         }
 
         accountList.innerHTML = "";
 
+        // 연결 계정 존재 여부 상태 갱신
+        hasExistingAccounts = Array.isArray(list) && list.length > 0;
+
         if (!list || list.length === 0) {
             accountList.innerHTML = `<div class="account-item">연결된 계정이 없습니다.</div>`;
-            return;
+            return [];
         }
 
         list.forEach(account => {
@@ -138,7 +158,7 @@ async function loadAccounts() {
 
             item.innerHTML = `
                 <span>${account.loginId || "-"}</span>
-                <span 
+                <span
                     style="float: right; cursor: pointer; color: #e74c3c; font-weight: bold;"
                     onclick="deleteAccount(${account.id})"
                 >✕</span>
@@ -147,8 +167,14 @@ async function loadAccounts() {
             accountList.appendChild(item);
         });
 
+        return list;
+
     } catch (error) {
         console.error("loadAccounts 에러:", error);
+
+        // 조회 실패 시에는 일단 기존값 유지보다 안전하게 false로 두지 않고
+        // 현재 상태 판단을 흐리지 않기 위해 그대로 둡니다.
+        return [];
     }
 }
 
@@ -169,7 +195,7 @@ async function deleteAccount(id) {
         }
 
         alert("계정이 삭제되었습니다.");
-        loadAccounts();
+        await loadAccounts();
 
     } catch (error) {
         console.error("deleteAccount 에러:", error);
