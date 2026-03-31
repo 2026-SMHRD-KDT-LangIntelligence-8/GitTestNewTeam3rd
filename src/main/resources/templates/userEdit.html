@@ -167,16 +167,20 @@
 
 <script th:inline="javascript">
     function requestUpdate() {
-        const nickname = document.getElementById('nickname').value;
+        const nickname = document.getElementById('nickname').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
         const password = document.getElementById('password').value;
         const passwordCheck = document.getElementById('passwordCheck').value;
 
-        if (!nickname) {
-            alert("닉네임을 입력해주세요! 🍙");
+// 아무것도 안 입력했으면 막기
+        if (!nickname && !email && !phoneNumber && !password && !passwordCheck) {
+            alert("수정할 정보를 하나 이상 입력해주세요! 🍙");
             return;
         }
 
-        if (password !== passwordCheck) {
+// 비밀번호 입력했으면 체크
+        if (password && password !== passwordCheck) {
             alert("비밀번호가 일치하지 않습니다! 🍙");
             return;
         }
@@ -189,7 +193,10 @@
             credentials: 'include',
             body: JSON.stringify({
                 nickname: nickname,
-                password: password
+                email: email,
+                phoneNumber: phoneNumber,
+                password: password,
+                passwordCheck: passwordCheck
             })
         })
             .then(response => response.text().then(text => ({

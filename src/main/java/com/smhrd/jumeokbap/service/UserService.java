@@ -67,13 +67,40 @@ public class UserService {
 
     // 회원정보 수정
     @Transactional
-    public void updateUser(String userId, String nickname, String email, String phoneNumber) {
+    public void updateUser(String userId,
+                           String nickname,
+                           String email,
+                           String phoneNumber,
+                           String password,
+                           String passwordCheck) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        user.setNickname(nickname);
-        user.setEmail(email);
-        user.setPhoneNumber(phoneNumber);
+        // 닉네임
+        if (nickname != null && !nickname.trim().isEmpty()) {
+            user.setNickname(nickname.trim());
+        }
+
+        // 이메일
+        if (email != null && !email.trim().isEmpty()) {
+            user.setEmail(email.trim());
+        }
+
+        // 전화번호
+        if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
+            user.setPhoneNumber(phoneNumber.trim());
+        }
+
+        // ⭐ 비밀번호 (조건부 변경)
+        if (password != null && !password.isEmpty()) {
+
+            if (passwordCheck == null || !password.equals(passwordCheck)) {
+                throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            }
+
+            user.setPassword(passwordEncoder.encode(password));
+        }
     }
 
     // 아이디 중복 확인
