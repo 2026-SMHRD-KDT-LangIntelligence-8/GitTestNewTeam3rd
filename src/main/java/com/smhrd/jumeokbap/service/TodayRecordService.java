@@ -249,29 +249,30 @@ public class TodayRecordService {
                 return LocalDateTime.now();
             }
 
-            // "2026-03-31 12:30:00" 형식
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             return LocalDateTime.parse(spentAt, formatter);
 
         } catch (Exception e1) {
             try {
-                // "12:30" 형식 saveLog 입력용
                 LocalDate today = LocalDate.now();
-                return LocalDateTime.parse(today + " " + spentAt + ":00",
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                return LocalDateTime.parse(
+                        today + " " + spentAt + ":00",
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                );
             } catch (Exception e2) {
                 return LocalDateTime.now();
             }
         }
     }
 
+    // 외부 uploads 폴더에 저장
     private String saveImageFile(MultipartFile imageFile) {
         if (imageFile == null || imageFile.isEmpty()) {
             return "";
         }
 
         try {
-            String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/uploads/";
+            String uploadDir = System.getProperty("user.dir") + "/uploads/";
             String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
 
             File saveFile = new File(uploadDir + fileName);
@@ -282,6 +283,7 @@ public class TodayRecordService {
 
             imageFile.transferTo(saveFile);
 
+            // DB에는 웹 접근 경로 저장
             return "/uploads/" + fileName;
 
         } catch (IOException e) {
@@ -290,14 +292,16 @@ public class TodayRecordService {
         }
     }
 
+    // 외부 uploads 폴더에서 실제 파일 삭제
     private void deletePhysicalImageFile(String imageUrl) {
         if (imageUrl == null || imageUrl.isEmpty()) {
             return;
         }
 
         try {
-            String uploadBaseDir = System.getProperty("user.dir") + "/src/main/resources/static";
-            File file = new File(uploadBaseDir + imageUrl);
+            String uploadBaseDir = System.getProperty("user.dir") + "/uploads";
+            String fileName = imageUrl.replace("/uploads/", "");
+            File file = new File(uploadBaseDir + "/" + fileName);
 
             if (file.exists()) {
                 boolean deleted = file.delete();

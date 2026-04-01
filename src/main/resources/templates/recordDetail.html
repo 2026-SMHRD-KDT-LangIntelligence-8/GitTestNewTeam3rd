@@ -266,11 +266,10 @@
             </span>
         </div>
 
-        <!-- 사진 클릭 시 언제든 수정 가능 -->
         <label for="imageFile" class="box photo-box">
             <img id="previewImage"
                  th:if="${detail.imageUrl != null and detail.imageUrl != ''}"
-                 th:src="@{'/upload/' + ${detail.imageUrl}}"
+                 th:src="@{${detail.imageUrl}}"
                  alt="지출 사진">
 
             <div id="photoPlaceholder"
@@ -339,7 +338,6 @@
 
 <script th:inline="javascript">
     const imageInput = document.getElementById('imageFile');
-    const previewImage = document.getElementById('previewImage');
     const photoPlaceholder = document.getElementById('photoPlaceholder');
     const currentLogId = /*[[${detail.logId}]]*/ 0;
 
@@ -387,6 +385,7 @@
             .then(data => {
                 if (data === "success") {
                     alert("사진이 저장되었습니다! 📸");
+                    location.reload();
                 } else {
                     alert("사진 저장에 실패했습니다.");
                 }
