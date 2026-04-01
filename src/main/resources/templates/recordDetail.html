@@ -110,25 +110,37 @@
     function saveDiaryData() {
         // Thymeleaf 변수를 자바스크립트에서 안전하게 받기
         const logId = /*[[${detail.logId}]]*/ 0;
+        const userId = /*[[${detail.userId}]]*/ '';
         const content = document.getElementById('memoContent').value;
         const emotionTag = document.getElementById('emotionTag').value;
+
+        console.log("전송 데이터:", { logId, userId, content, emotionTag });
+
+        if (!logId || logId === 0) {
+            alert("지출 내역 ID가 없습니다. 다시 시도해주세요.");
+            return;
+        }
 
         fetch('/api/record/updateDiary', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 logId: String(logId), // DTO의 logId 필드와 매칭
+                userId: userId,
                 content: content,
                 emotionTag: emotionTag
             })
         })
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) throw new Error('서버 응답 실패');
+                return response.text();
+            })
             .then(data => {
-                if(data === "success") {
+                if (data === "success") {
                     alert("기록이 저장되었습니다! 🍙");
-                    location.reload();
+                    location.reload(); // 저장 후 화면 새로고침
                 } else {
-                    alert("저장에 실패했습니다. 서버 로그를 확인해 주세요.");
+                    alert("저장에 실패했습니다. (사유: " + data + ")");
                 }
             })
             .catch(err => {
