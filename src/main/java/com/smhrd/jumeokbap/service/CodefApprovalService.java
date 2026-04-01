@@ -91,7 +91,7 @@ public class CodefApprovalService {
         }
     }
 
-    // 자동 동기화용 메서드 추가
+    // 자동 동기화용 메서드
     public JsonNode getApprovalListWithConnectedId(
             String connectedId,
             String organization,
@@ -166,6 +166,20 @@ public class CodefApprovalService {
                 LocalDateTime spentAt = parseDateTime(approvalDateText, approvalTimeText);
 
                 System.out.println("가맹점: " + storeName + ", 금액: " + amount + ", 날짜: " + regDate + ", 시간: " + spentAt);
+
+                boolean exists = spendingLogRepository
+                        .existsByUserIdAndRegDateAndSpentAtAndAmountAndStoreName(
+                                userId,
+                                regDate,
+                                spentAt,
+                                amount,
+                                storeName
+                        );
+
+                if (exists) {
+                    System.out.println("중복 승인내역 → 저장 생략");
+                    continue;
+                }
 
                 SpendingLog log = new SpendingLog();
                 log.setUserId(userId);

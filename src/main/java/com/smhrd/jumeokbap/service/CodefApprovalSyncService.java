@@ -22,7 +22,11 @@ public class CodefApprovalSyncService {
     private final CodefApprovalService codefApprovalService;
 
     public void syncLatestApprovals(String userId) {
+        System.out.println("===== 로그인 후 승인내역 자동 동기화 시작 =====");
+        System.out.println("동기화 대상 userId = " + userId);
+
         List<UserCodefAccount> accounts = userCodefAccountRepository.findByUserId(userId);
+        System.out.println("계정 개수 = " + accounts.size());
 
         if (accounts.isEmpty()) {
             System.out.println("저장된 connectedId 없음");
@@ -30,18 +34,28 @@ public class CodefApprovalSyncService {
         }
 
         LocalDate today = LocalDate.now();
-        LocalDate startDate = today.minusDays(7);
+        LocalDate startDate = today.minusDays(30);
+
+        System.out.println("조회 기간 = " + startDate + " ~ " + today);
 
         for (UserCodefAccount account : accounts) {
             try {
+                System.out.println("----------------------------------");
+                System.out.println("account businessType = " + account.getBusinessType());
+
                 if (!"CD".equalsIgnoreCase(account.getBusinessType())) {
+                    System.out.println("카드 계정이 아니므로 건너뜀");
                     continue;
                 }
 
                 String connectedId = account.getConnectedId();
                 String organization = account.getOrganization();
 
+                System.out.println("조회 시작 connectedId = " + connectedId);
+                System.out.println("조회 시작 organization = " + organization);
+
                 if (connectedId == null || connectedId.isBlank()) {
+                    System.out.println("connectedId 없음 → 건너뜀");
                     continue;
                 }
 
@@ -52,6 +66,8 @@ public class CodefApprovalSyncService {
                         today
                 );
 
+                System.out.println("CODEF result = " + result);
+
                 saveApprovalList(userId, result);
 
             } catch (Exception e) {
@@ -59,6 +75,8 @@ public class CodefApprovalSyncService {
                 e.printStackTrace();
             }
         }
+
+        System.out.println("===== 로그인 후 승인내역 자동 동기화 종료 =====");
     }
 
     private void saveApprovalList(String userId, JsonNode root) {
@@ -77,12 +95,19 @@ public class CodefApprovalSyncService {
             return;
         }
 
+        System.out.println("자동 동기화 승인내역 건수 = " + list.size());
+
         for (JsonNode item : list) {
             try {
                 String dateStr = item.path("resUsedDate").asText();
                 String timeStr = item.path("resUsedTime").asText();
                 String storeName = item.path("resMemberStoreName").asText("");
                 int amount = parseAmount(item.path("resUsedAmount").asText());
+
+                System.out.println("승인내역 확인 중 → date=" + dateStr
+                        + ", time=" + timeStr
+                        + ", store=" + storeName
+                        + ", amount=" + amount);
 
                 LocalDate regDate = LocalDate.parse(
                         dateStr,

@@ -3,6 +3,7 @@ package com.smhrd.jumeokbap.controller;
 import com.smhrd.jumeokbap.dto.UserLoginRequest;
 import com.smhrd.jumeokbap.dto.UserSignupRequest;
 import com.smhrd.jumeokbap.dto.UserUpdateRequest;
+import com.smhrd.jumeokbap.service.CodefApprovalSyncService;
 import com.smhrd.jumeokbap.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final CodefApprovalSyncService codefApprovalSyncService;
 
     // 회원가입
     @PostMapping("/signup")
@@ -36,6 +38,15 @@ public class UserController {
 
         // 로그인 성공 시 세션 저장
         session.setAttribute("loginUserId", userId);
+
+        // 로그인 성공 후 카드 승인내역 자동 업데이트
+        try {
+            codefApprovalSyncService.syncLatestApprovals(userId);
+            System.out.println("로그인 후 승인내역 자동 동기화 성공");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("로그인 후 승인내역 자동 동기화 실패: " + e.getMessage());
+        }
 
         return ResponseEntity.ok(userId + "님 로그인 성공");
     }
