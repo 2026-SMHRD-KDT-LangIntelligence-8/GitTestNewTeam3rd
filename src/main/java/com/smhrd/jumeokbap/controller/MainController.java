@@ -1,7 +1,6 @@
 package com.smhrd.jumeokbap.controller;
 
 import com.smhrd.jumeokbap.dto.MainDashboardResponse;
-import com.smhrd.jumeokbap.service.CodefApprovalSyncService;
 import com.smhrd.jumeokbap.service.MainService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +16,6 @@ public class MainController {
     @Autowired
     private MainService mainService;
 
-    @Autowired
-    private CodefApprovalSyncService codefApprovalSyncService;
-
     @GetMapping("/dashboard")
     public ResponseEntity<MainDashboardResponse> getDashboardData(HttpSession session) {
         // 1. 세션에서 로그인한 유저 ID 꺼내오기
@@ -32,10 +28,7 @@ public class MainController {
                     .build());
         }
 
-        // 3. 저장된 connectedId로 카드 승인내역 자동 동기화
-        codefApprovalSyncService.syncLatestApprovals(loginId);
-
-        // 4. 동기화 후 메인 데이터 조회
+        // 3. 메인 데이터 조회
         MainDashboardResponse response = mainService.getMainData(loginId);
 
         return ResponseEntity.ok(response);

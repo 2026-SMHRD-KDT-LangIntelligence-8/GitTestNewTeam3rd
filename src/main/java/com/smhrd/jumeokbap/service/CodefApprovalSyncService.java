@@ -104,10 +104,12 @@ public class CodefApprovalSyncService {
                 String storeName = item.path("resMemberStoreName").asText("");
                 int amount = parseAmount(item.path("resUsedAmount").asText());
 
-                System.out.println("승인내역 확인 중 → date=" + dateStr
-                        + ", time=" + timeStr
-                        + ", store=" + storeName
-                        + ", amount=" + amount);
+                System.out.println(
+                        "승인내역 확인 중 → date=" + dateStr
+                                + ", time=" + timeStr
+                                + ", store=" + storeName
+                                + ", amount=" + amount
+                );
 
                 LocalDate regDate = LocalDate.parse(
                         dateStr,
