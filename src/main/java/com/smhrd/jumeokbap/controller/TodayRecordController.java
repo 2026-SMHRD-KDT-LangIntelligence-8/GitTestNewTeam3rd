@@ -102,6 +102,7 @@ public class TodayRecordController {
 
             model.addAttribute("detail", detail);
             model.addAttribute("diary", diary);
+            model.addAttribute("userId", detail.getUserId());
 
             return "recordDetail";
         } catch (Exception e) {

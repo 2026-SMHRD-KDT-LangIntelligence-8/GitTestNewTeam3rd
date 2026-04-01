@@ -110,7 +110,7 @@
     function saveDiaryData() {
         // Thymeleaf 변수를 자바스크립트에서 안전하게 받기
         const logId = /*[[${detail.logId}]]*/ 0;
-        const userId = /*[[${detail.userId}]]*/ '';
+        const userId = /*[[${detail.userId != null ? detail.userId : session.loginUserId}]]*/ '';
         const content = document.getElementById('memoContent').value;
         const emotionTag = document.getElementById('emotionTag').value;
 

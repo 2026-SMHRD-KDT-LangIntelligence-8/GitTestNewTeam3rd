@@ -62,7 +62,8 @@ public class CalendarController {
     @PostMapping("/record/updateDiary")
     @ResponseBody
     public String updateDiary(@RequestBody TodayRecordRequest request) {
-        System.out.println("🍙 [저장 시도] 받은 logId: " + request.getLogId());
+        System.out.println("🍙 [저장 요청] logId: " + request.getLogId() + " | userId: " + request.getUserId());
+        System.out.println("🍙 [저장 내용] content: " + request.getContent() + " | emotion: " + request.getEmotionTag());
 
         try {
             // 1. logId 유효성 체크
@@ -80,8 +81,17 @@ public class CalendarController {
                         System.out.println("ℹ️ ID " + logId + "에 대한 기존 일기가 없어 새로 생성합니다.");
                         Diary newDiary = new Diary();
                         newDiary.setLogId(logId);
+
+                        if (request.getUserId() == null || request.getUserId().isEmpty()) {
+                            System.out.println("⚠️ 경고: userId가 비어있습니다.");
+                            // 필요하다면 여기서 강제로 세팅하거나 에러를 던질 수 있습니다.
+                        }
+
                         newDiary.setUserId(request.getUserId()); // DTO에 userId가 있다면 세팅
                         newDiary.setRegDate(LocalDate.now());   // 기본 날짜 세팅
+                        newDiary.setIsFixed(false);       // 고정비 여부 기본값
+                        newDiary.setIsImpulsive(false);
+                        newDiary.setSentimentScore(0.0);
                         newDiary.setIsMain(true);                // 캘린더 표시를 위해 기본 true 설정
                         return newDiary;
                     });
