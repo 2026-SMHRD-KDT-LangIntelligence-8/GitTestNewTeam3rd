@@ -91,6 +91,45 @@ public class CodefApprovalService {
         }
     }
 
+    // 자동 동기화용 메서드 추가
+    public JsonNode getApprovalListWithConnectedId(
+            String connectedId,
+            String organization,
+            LocalDate startDate,
+            LocalDate endDate
+    ) {
+        try {
+            Map<String, Object> requestMap = new LinkedHashMap<>();
+            requestMap.put("organization", organization);
+            requestMap.put("startDate", startDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+            requestMap.put("endDate", endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+            requestMap.put("orderBy", "0");
+            requestMap.put("inquiryType", "1");
+            requestMap.put("connectedId", connectedId);
+            requestMap.put("memberStoreInfoType", "0");
+
+            String jsonBody = objectMapper.writeValueAsString(requestMap);
+
+            JsonNode response = codefApiService.post("/v1/kr/card/p/account/approval-list", jsonBody);
+
+            String resultCode = response.path("result").path("code").asText();
+            String resultMessage = response.path("result").path("message").asText();
+
+            System.out.println("자동 승인내역 resultCode = " + resultCode);
+            System.out.println("자동 승인내역 resultMessage = " + resultMessage);
+
+            if (!"CF-00000".equals(resultCode)) {
+                throw new RuntimeException("자동 승인내역 조회 실패: " + resultMessage);
+            }
+
+            return response;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("자동 승인내역 조회 요청 생성 중 오류가 발생했습니다.", e);
+        }
+    }
+
     private void saveApprovalList(String userId, JsonNode response) {
         JsonNode dataNode = response.path("data");
 
@@ -101,9 +140,6 @@ public class CodefApprovalService {
 
         JsonNode approvalList;
 
-        // CODEF 응답 구조 대응
-        // 1) data 자체가 배열인 경우
-        // 2) data.resApprovalList 인 경우
         if (dataNode.isArray()) {
             approvalList = dataNode;
         } else {
@@ -138,7 +174,6 @@ public class CodefApprovalService {
                 log.setRegDate(regDate);
                 log.setSpentAt(spentAt);
 
-                // 자동 수집 데이터 기본값
                 log.setIsManual(false);
                 log.setIsMain(false);
                 log.setIsImpulsive(false);

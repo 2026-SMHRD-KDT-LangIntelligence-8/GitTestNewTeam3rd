@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface SpendingLogRepository extends JpaRepository<SpendingLog, Long> {
@@ -35,6 +36,15 @@ public interface SpendingLogRepository extends JpaRepository<SpendingLog, Long> 
     Long sumSpendingByPeriod(@Param("userId") String userId,
                              @Param("startDate") LocalDate startDate,
                              @Param("endDate") LocalDate endDate);
+
+    // 자동 동기화 시 중복 저장 방지
+    boolean existsByUserIdAndRegDateAndSpentAtAndAmountAndStoreName(
+            String userId,
+            LocalDate regDate,
+            LocalDateTime spentAt,
+            Integer amount,
+            String storeName
+    );
 
     void deleteByUserId(String userId);
 }
