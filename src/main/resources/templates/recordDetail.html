@@ -4,44 +4,244 @@
     <meta charset="UTF-8">
     <title>오늘의 기록 상세</title>
     <style>
-        body { background-color: #e9e9e9; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; min-height: 100vh; align-items: center; box-sizing: border-box; }
-        .container { background-color: white; width: 360px; height: 640px; padding: 20px 16px 20px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; display: flex; flex-direction: column; overflow: hidden; }
-        .scroll-area { flex: 1; overflow-y: auto; overflow-x: hidden; padding-right: 4px; box-sizing: border-box; }
-        .scroll-area::-webkit-scrollbar { width: 6px; }
-        .scroll-area::-webkit-scrollbar-thumb { background-color: #d6d6d6; border-radius: 10px; }
-        .scroll-area::-webkit-scrollbar-track { background: transparent; }
-        .header { color: #888; font-size: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .back-btn { cursor: pointer; border: none; background: none; font-size: 18px; color: #888; }
-        .info-row { display: flex; justify-content: space-around; align-items: center; font-size: 18px; font-weight: bold; margin-bottom: 30px; color: #333; }
-        .info-item { flex: 1; text-align: center; word-break: keep-all; }
-        .amount-text { color: #ffcc00; }
-        .box { background-color: #fafff0; border: 1px solid #e0e7d0; border-radius: 10px; width: 100%; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; overflow: hidden; box-sizing: border-box; }
-        .photo-box { height: 180px; }
-        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
-        .no-image { color: #bbb; font-size: 14px; }
+        body {
+            background-color: #e9e9e9;
+            font-family: 'Pretendard', sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            align-items: center;
+            box-sizing: border-box;
+        }
 
-        .memo-box { height: 100px; border: 1px solid #e0e7d0; resize: none; text-align: center; font-size: 16px; padding: 15px; box-sizing: border-box; background-color: #fafff0; width: 100%; border-radius: 10px; outline: none; margin-bottom: 15px; overflow-y: auto; font-family: inherit; }
-        .memo-box:focus { border-color: #ffcc00; background-color: #fffdf7; }
+        .container {
+            background-color: white;
+            width: 360px;
+            height: 640px;
+            padding: 20px 16px 20px 20px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-        .options-row { display: flex; margin-bottom: 15px; }
-        .option-item { background-color: #fafff0; border: 1px solid #e0e7d0; flex: 1; padding: 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 80px; box-sizing: border-box; }
+        .scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 4px;
+            box-sizing: border-box;
+        }
 
-        /* 🍙 이모티콘 크기 수정 (28px) */
-        .emoji-select { font-size: 28px; border: none; background: transparent; cursor: pointer; outline: none; appearance: none; text-align: center; width: 100%; padding: 5px 0; }
-        .select-label { font-size: 12px; color: #888; margin-bottom: 5px; }
+        .scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
 
-        .btn-wrapper { margin-bottom: 10px; }
-        .btn-action { width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; box-sizing: border-box; font-size: 14px; }
-        .btn-save { background-color: #ffcc00; color: white; border: none; margin-bottom: 15px; }
-        .btn-set-fixed { border: 2px solid #5fb1f7; background-color: white; color: #333; }
-        .is-fixed-active { background-color: #5fb1f7 !important; color: white !important; border: none; }
-        .btn-set-main { border: 2px solid #ffcc00; background-color: white; color: #333; }
-        .is-main-active { background-color: #ffcc00 !important; color: white !important; border: none; cursor: default; }
+        .scroll-area::-webkit-scrollbar-thumb {
+            background-color: #d6d6d6;
+            border-radius: 10px;
+        }
 
-        .btn-group { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; }
-        .btn { flex: 1; border: none; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .btn-back { background-color: #eee; color: #666; }
-        .btn-delete { background-color: #ff4d4d; color: white; }
+        .scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .header {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 18px;
+            color: #888;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .info-item {
+            flex: 1;
+            text-align: center;
+            word-break: keep-all;
+        }
+
+        .amount-text {
+            color: #ffcc00;
+        }
+
+        .box {
+            background-color: #fafff0;
+            border: 1px solid #e0e7d0;
+            border-radius: 10px;
+            width: 100%;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .photo-box {
+            height: 180px;
+            cursor: pointer;
+            position: relative;
+            flex-direction: column;
+        }
+
+        .photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .no-image {
+            color: #bbb;
+            font-size: 14px;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .memo-box {
+            height: 100px;
+            border: 1px solid #e0e7d0;
+            resize: none;
+            text-align: center;
+            font-size: 16px;
+            padding: 15px;
+            box-sizing: border-box;
+            background-color: #fafff0;
+            width: 100%;
+            border-radius: 10px;
+            outline: none;
+            margin-bottom: 15px;
+            overflow-y: auto;
+            font-family: inherit;
+        }
+
+        .memo-box:focus {
+            border-color: #ffcc00;
+            background-color: #fffdf7;
+        }
+
+        .options-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .option-item {
+            background-color: #fafff0;
+            border: 1px solid #e0e7d0;
+            flex: 1;
+            padding: 8px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80px;
+            box-sizing: border-box;
+        }
+
+        .emoji-select {
+            font-size: 28px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            text-align: center;
+            width: 100%;
+            padding: 5px 0;
+        }
+
+        .select-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .btn-wrapper {
+            margin-bottom: 10px;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .btn-save {
+            background-color: #ffcc00;
+            color: white;
+            border: none;
+            margin-bottom: 15px;
+        }
+
+        .btn-set-fixed {
+            border: 2px solid #5fb1f7;
+            background-color: white;
+            color: #333;
+        }
+
+        .is-fixed-active {
+            background-color: #5fb1f7 !important;
+            color: white !important;
+            border: none;
+        }
+
+        .btn-set-main {
+            border: 2px solid #ffcc00;
+            background-color: white;
+            color: #333;
+        }
+
+        .is-main-active {
+            background-color: #ffcc00 !important;
+            color: white !important;
+            border: none;
+            cursor: default;
+        }
+
+        .btn-delete {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -55,17 +255,38 @@
         </div>
 
         <div class="info-row">
-            <span class="info-item" th:text="${#strings.length(detail.spentAt) > 5 ? #strings.substring(detail.spentAt, 11, 16) : detail.spentAt}">시간</span>
+            <span class="info-item"
+                  th:text="${#strings.length(detail.spentAt) > 5 ? #strings.substring(detail.spentAt, 11, 16) : detail.spentAt}">
+                시간
+            </span>
             <span class="info-item" th:text="${detail.storeName}">장소</span>
-            <span class="info-item amount-text" th:text="${#numbers.formatInteger(detail.amount, 0, 'COMMA') + '원'}">금액</span>
+            <span class="info-item amount-text"
+                  th:text="${#numbers.formatInteger(detail.amount, 0, 'COMMA') + '원'}">
+                금액
+            </span>
         </div>
 
-        <div class="box photo-box">
-            <img th:if="${detail.imageUrl != null and detail.imageUrl != ''}" th:src="@{'/upload/' + ${detail.imageUrl}}" alt="지출 사진">
-            <span th:unless="${detail.imageUrl != null and detail.imageUrl != ''}" class="no-image">등록된 사진이 없습니다.</span>
-        </div>
+        <!-- 사진 클릭 시 언제든 수정 가능 -->
+        <label for="imageFile" class="box photo-box">
+            <img id="previewImage"
+                 th:if="${detail.imageUrl != null and detail.imageUrl != ''}"
+                 th:src="@{'/upload/' + ${detail.imageUrl}}"
+                 alt="지출 사진">
 
-        <textarea id="memoContent" class="memo-box" placeholder="여기에 소비 메모를 남겨보세요!" th:text="${diary.content}"></textarea>
+            <div id="photoPlaceholder"
+                 th:if="${detail.imageUrl == null or detail.imageUrl == ''}"
+                 class="no-image">
+                등록된 사진이 없습니다.<br>
+                눌러서 사진을 추가해주세요.
+            </div>
+        </label>
+
+        <input type="file" id="imageFile" class="file-input" accept="image/*">
+
+        <textarea id="memoContent"
+                  class="memo-box"
+                  placeholder="여기에 소비 메모를 남겨보세요!"
+                  th:text="${diary.content}"></textarea>
 
         <div class="options-row">
             <div class="option-item">
@@ -87,34 +308,100 @@
         </div>
 
         <div class="btn-wrapper">
-            <button type="button" id="fixedSetBtn" th:classappend="${diary.isFixed} ? 'is-fixed-active' : ''" class="btn-action btn-set-fixed" th:onclick="|toggleFixedRecord(${diary.diaryId})|">
+            <button type="button"
+                    id="fixedSetBtn"
+                    class="btn-action btn-set-fixed"
+                    th:classappend="${diary.isFixed} ? 'is-fixed-active' : ''"
+                    th:onclick="|toggleFixedRecord(${diary.diaryId})|">
                 <span th:text="${diary.isFixed} ? '📌 고정비 해제' : '📌 고정비로 등록'">고정비 설정</span>
             </button>
         </div>
 
         <div class="btn-wrapper">
-            <button type="button" id="mainSetBtn" th:classappend="${diary.isMain} ? 'is-main-active' : ''" class="btn-action btn-set-main" th:onclick="${diary.isMain} ? '' : |updateMainRecord(${detail.logId})|">
+            <button type="button"
+                    id="mainSetBtn"
+                    class="btn-action btn-set-main"
+                    th:classappend="${diary.isMain} ? 'is-main-active' : ''"
+                    th:onclick="${diary.isMain} ? '' : |updateMainRecord(${detail.logId})|">
                 <span th:text="${diary.isMain} ? '🌟 오늘의 대표 지출' : '🍙 대표 지출로 설정하기'">대표 설정</span>
             </button>
         </div>
 
-        <div class="btn-group">
-            <button type="button" class="btn btn-back" onclick="history.back()">뒤로가기</button>
-            <button type="button" class="btn btn-delete" th:onclick="|deleteRecord(${detail.logId})|">내역 삭제</button>
+        <div class="btn-wrapper">
+            <button type="button"
+                    class="btn-action btn-delete"
+                    th:onclick="|deleteRecord(${detail.logId})|">
+                내역 삭제
+            </button>
         </div>
     </div>
 </div>
 
 <script th:inline="javascript">
-    // 🍙 메모 및 감정 저장 함수
+    const imageInput = document.getElementById('imageFile');
+    const previewImage = document.getElementById('previewImage');
+    const photoPlaceholder = document.getElementById('photoPlaceholder');
+    const currentLogId = /*[[${detail.logId}]]*/ 0;
+
+    if (imageInput) {
+        imageInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                let img = document.getElementById('previewImage');
+
+                if (!img) {
+                    img = document.createElement('img');
+                    img.id = 'previewImage';
+                    img.alt = '지출 사진';
+                    document.querySelector('.photo-box').prepend(img);
+                }
+
+                img.src = e.target.result;
+                img.style.display = 'block';
+
+                if (photoPlaceholder) {
+                    photoPlaceholder.style.display = 'none';
+                }
+            };
+            reader.readAsDataURL(file);
+
+            uploadImage(file);
+        });
+    }
+
+    function uploadImage(file) {
+        const formData = new FormData();
+        formData.append("imageFile", file);
+
+        fetch('/api/record/uploadImage/' + currentLogId, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('서버 응답 실패');
+                return response.text();
+            })
+            .then(data => {
+                if (data === "success") {
+                    alert("사진이 저장되었습니다! 📸");
+                } else {
+                    alert("사진 저장에 실패했습니다.");
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert("사진 업로드 중 오류가 발생했습니다.");
+            });
+    }
+
     function saveDiaryData() {
-        // Thymeleaf 변수를 자바스크립트에서 안전하게 받기
         const logId = /*[[${detail.logId}]]*/ 0;
         const userId = /*[[${detail.userId != null ? detail.userId : session.loginUserId}]]*/ '';
         const content = document.getElementById('memoContent').value;
         const emotionTag = document.getElementById('emotionTag').value;
-
-        console.log("전송 데이터:", { logId, userId, content, emotionTag });
 
         if (!logId || logId === 0) {
             alert("지출 내역 ID가 없습니다. 다시 시도해주세요.");
@@ -125,7 +412,7 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                logId: String(logId), // DTO의 logId 필드와 매칭
+                logId: String(logId),
                 userId: userId,
                 content: content,
                 emotionTag: emotionTag
@@ -138,7 +425,7 @@
             .then(data => {
                 if (data === "success") {
                     alert("기록이 저장되었습니다! 🍙");
-                    location.reload(); // 저장 후 화면 새로고침
+                    location.reload();
                 } else {
                     alert("저장에 실패했습니다. (사유: " + data + ")");
                 }
@@ -150,23 +437,35 @@
     }
 
     function toggleFixedRecord(diaryId) {
-        if(confirm("고정비 상태를 변경하시겠습니까?")) {
+        if (confirm("고정비 상태를 변경하시겠습니까?")) {
             fetch('/api/record/toggleFixed/' + diaryId, { method: 'POST' })
                 .then(response => response.text())
-                .then(data => { if(data === "success") { alert("고정비 설정 변경! 📌"); location.reload(); } })
+                .then(data => {
+                    if (data === "success") {
+                        alert("고정비 설정 변경! 📌");
+                        location.reload();
+                    }
+                });
         }
     }
 
     function updateMainRecord(logId) {
-        if(confirm("이 기록을 오늘의 대표 지출로 설정하시겠습니까?")) {
+        if (confirm("이 기록을 오늘의 대표 지출로 설정하시겠습니까?")) {
             fetch('/api/record/updateMain/' + logId, { method: 'POST' })
                 .then(response => response.text())
-                .then(data => { if(data === "success") { alert("대표 지출 설정 완료! 🌟"); location.reload(); } })
+                .then(data => {
+                    if (data === "success") {
+                        alert("대표 지출 설정 완료! 🌟");
+                        location.reload();
+                    }
+                });
         }
     }
 
     function deleteRecord(logId) {
-        if(confirm("정말 삭제하시겠습니까?")) { location.href = '/api/delete/' + logId; }
+        if (confirm("정말 삭제하시겠습니까?")) {
+            location.href = '/api/delete/' + logId;
+        }
     }
 </script>
 

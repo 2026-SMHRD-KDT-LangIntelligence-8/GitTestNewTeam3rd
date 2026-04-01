@@ -22,7 +22,9 @@ public class TodayRecordController {
 
     @GetMapping("/saveLog")
     // 수동 입력 페이지
-    public String showSaveLog(@RequestParam("userId") String userId, @RequestParam("date") String date, Model model) {
+    public String showSaveLog(@RequestParam("userId") String userId,
+                              @RequestParam("date") String date,
+                              Model model) {
         model.addAttribute("userId", userId);
         model.addAttribute("selectedDate", date);
         return "saveLog";
@@ -47,12 +49,24 @@ public class TodayRecordController {
                              @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
         try {
             todayRecordService.manualRecord(dto, imageFile);
-
             return "redirect:/api/recordMain/" + dto.getUserId() + "?date=" + dto.getRegDate();
-
         } catch (Exception e) {
             e.printStackTrace();
             return "redirect:/main/" + dto.getUserId();
+        }
+    }
+
+    @PostMapping("/record/uploadImage/{logId}")
+    @ResponseBody
+    // 상세페이지에서 사진 추가/수정
+    public String uploadImage(@PathVariable("logId") Long logId,
+                              @RequestParam("imageFile") MultipartFile imageFile) {
+        try {
+            todayRecordService.updateImage(logId, imageFile);
+            return "success";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
         }
     }
 
@@ -65,7 +79,7 @@ public class TodayRecordController {
             LocalDate regDate = log.getRegDate();
             todayRecordService.deleteRecord(logId);
 
-            return "redirect:/api/recordMain/"+ userId + "?date=" + regDate;
+            return "redirect:/api/recordMain/" + userId + "?date=" + regDate;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,14 +89,14 @@ public class TodayRecordController {
 
     @GetMapping("/recordMain/{userId}")
     // 메인화면
-    public String getRecordMain(
-            @PathVariable String userId,
-            @RequestParam(value = "date", required = false) LocalDate date,
-            Model model) {
+    public String getRecordMain(@PathVariable String userId,
+                                @RequestParam(value = "date", required = false) LocalDate date,
+                                Model model) {
 
         if (date == null) {
             date = LocalDate.now();
         }
+
         List<SpendingLog> logs = todayRecordService.getDailyTimeline(userId, date);
 
         model.addAttribute("list", logs);
@@ -94,10 +108,9 @@ public class TodayRecordController {
 
     @GetMapping("/recordDetail/{logId}")
     // 특정 지출 조회 기능
-    public String getRecordDetail(@PathVariable("logId") Long logId, Model model){
+    public String getRecordDetail(@PathVariable("logId") Long logId, Model model) {
         try {
             SpendingLog detail = todayRecordService.getLogDetail(logId);
-
             Diary diary = todayRecordService.getDiaryByLogId(logId);
 
             model.addAttribute("detail", detail);
@@ -115,11 +128,11 @@ public class TodayRecordController {
     @ResponseBody
     // 소비메모 감성분석(flask연동)
     public String analyzeEmotion(@RequestParam("logId") Long logId,
-                                 @RequestParam("content") String content){
+                                 @RequestParam("content") String content) {
 
         String emotion = todayRecordService.analyzeText(content);
 
-        if(emotion.equals("1")) return "충동구매!!!💥";
+        if (emotion.equals("1")) return "충동구매!!!💥";
         else return "잘 사셨어요!🍙";
     }
 
@@ -131,14 +144,8 @@ public class TodayRecordController {
             todayRecordService.toggleFixedStatus(diaryId);
             return "success";
         } catch (Exception e) {
+            e.printStackTrace();
             return "fail";
         }
     }
-
-
-
-
 }
-
-
-

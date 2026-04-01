@@ -6,61 +6,38 @@ import com.smhrd.jumeokbap.dto.TodayRecordRequest;
 import com.smhrd.jumeokbap.repository.DiaryRepository;
 import com.smhrd.jumeokbap.repository.SpendingLogRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
-import java.util.Optional;
-
+import java.util.Map;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
 public class TodayRecordService {
+
     private final DiaryRepository diaryRepository;
     private final SpendingLogRepository spendingLogRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Transactional
     // 수동입력 및 초기 저장
-    public void manualRecord(TodayRecordRequest dto, org.springframework.web.multipart.MultipartFile imageFile) {
+    public void manualRecord(TodayRecordRequest dto, MultipartFile imageFile) {
 
-        //  이미지 파일
-        String savedPath = ""; // DB에 저장할 경로 변수
-        if (imageFile != null && !imageFile.isEmpty()) {
-            try {
-                // 프로젝트 내의 static/uploads 폴더 경로 설정
-                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/uploads/";
-
-                // 파일명 중복 방지를 위해 UUID나 타임스탬프 추가 (선택사항이지만 권장)
-                String fileName = java.util.UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
-                java.io.File saveFile = new java.io.File(uploadDir + fileName);
-
-                // 폴더가 없으면 생성
-                if (!saveFile.getParentFile().exists()) {
-                    saveFile.getParentFile().mkdirs();
-                }
-
-                // 실제 폴더에 파일 저장
-                imageFile.transferTo(saveFile);
-
-                // DB에는 웹에서 접근 가능한 상대 경로로 저장
-                savedPath = "/uploads/" + fileName;
-
-            } catch (java.io.IOException e) {
-                e.printStackTrace();
-                // 실패 시 빈 값 처리 혹은 예외 발생
-            }
-        }
+        String savedPath = saveImageFile(imageFile);
 
         LocalDate recordDate;
         if (dto.getRegDate() != null && !dto.getRegDate().isEmpty()) {
@@ -112,6 +89,26 @@ public class TodayRecordService {
         diaryRepository.save(diary);
     }
 
+    @Transactional
+    // 상세페이지에서 사진 추가/수정
+    public void updateImage(Long logId, MultipartFile imageFile) {
+        if (imageFile == null || imageFile.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 이미지가 없습니다.");
+        }
+
+        SpendingLog log = spendingLogRepository.findById(logId)
+                .orElseThrow(() -> new RuntimeException("해당 지출 내역을 찾을 수 없습니다. logId=" + logId));
+
+        // 기존 파일이 있으면 먼저 삭제
+        deletePhysicalImageFile(log.getImageUrl());
+
+        // 새 파일 저장
+        String savedPath = saveImageFile(imageFile);
+
+        log.setImageUrl(savedPath);
+        spendingLogRepository.save(log);
+    }
+
     public Map<String, Long> getMonthlyTotal(String userId, String month) {
         YearMonth ym = YearMonth.parse(month);
         LocalDate startDate = ym.atDay(1);
@@ -134,6 +131,7 @@ public class TodayRecordService {
                 totalWithoutFixed += amount;
             }
         }
+
         Map<String, Long> result = new HashMap<>();
         result.put("totalWithFixed", totalWithFixed);
         result.put("totalWithoutFixed", totalWithoutFixed);
@@ -145,10 +143,10 @@ public class TodayRecordService {
         return spendingLogRepository.findByUserIdOrderBySpentAtDesc(userId);
     }
 
-    public List<SpendingLog> getDailyTimeline(String userId, LocalDate date){
+    public List<SpendingLog> getDailyTimeline(String userId, LocalDate date) {
         List<SpendingLog> logs = spendingLogRepository.findByUserIdAndRegDate(userId, date);
 
-        for(SpendingLog log : logs){
+        for (SpendingLog log : logs) {
             diaryRepository.findByLogId(log.getLogId()).ifPresent(diary -> {
                 log.setEmotionTag(diary.getEmotionTag());
                 log.setIsImpulsive(diary.getIsImpulsive());
@@ -158,22 +156,23 @@ public class TodayRecordService {
         return logs;
     }
 
-    // 🍙 [수정됨] 상세페이지 조회 시 에러 방지
+    // 상세페이지 조회
     public SpendingLog getLogDetail(Long logId) {
         return spendingLogRepository.findById(logId)
                 .orElseGet(() -> {
                     System.out.println("⚠️ SpendingLog를 찾지 못했습니다. ID: " + logId);
-                    return new SpendingLog(); // 에러를 던지는 대신 빈 객체 반환
+                    return new SpendingLog();
                 });
     }
 
     public String analyzeText(String content) {
         String url = "http://127.0.0.1:5000/predict";
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, String> body = new HashMap<>();
-        body.put("text", content);
+        body.put("text", content != null ? content : "");
 
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
 
@@ -189,13 +188,13 @@ public class TodayRecordService {
         }
     }
 
-    // 🍙 [수정됨] 일기 정보가 없으면 새로 생성해서 반환 (Null 방지)
-    public Diary getDiaryByLogId(Long logId){
+    // 일기 정보가 없으면 기본 객체 반환
+    public Diary getDiaryByLogId(Long logId) {
         return diaryRepository.findByLogId(logId)
                 .orElseGet(() -> {
                     Diary newDiary = new Diary();
                     newDiary.setLogId(logId);
-                    newDiary.setEmotionTag("😊"); // 기본 이모티콘 설정
+                    newDiary.setEmotionTag("😊");
                     newDiary.setContent("");
                     return newDiary;
                 });
@@ -203,47 +202,33 @@ public class TodayRecordService {
 
     @Transactional
     public void deleteRecord(Long logId) {
-        // 1. [추가] 삭제 전 DB에서 해당 기록의 이미지 경로를 가져옵니다.
         spendingLogRepository.findById(logId).ifPresent(log -> {
-            String imageUrl = log.getImageUrl();
-
-            // 2. [추가] 이미지 경로가 존재한다면 실제 파일 삭제 진행
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                try {
-                    // 저장할 때와 동일한 경로 설정
-                    String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static";
-                    java.io.File file = new java.io.File(uploadDir + imageUrl);
-
-                    if (file.exists()) {
-                        if (file.delete()) {
-                            System.out.println("✅ 실제 이미지 파일 삭제 성공: " + imageUrl);
-                        } else {
-                            System.out.println("⚠️ 이미지 파일 삭제 실패");
-                        }
-                    }
-                } catch (Exception e) {
-                    System.out.println("❌ 파일 삭제 중 에러 발생");
-                    e.printStackTrace();
-                }
-            }
+            deletePhysicalImageFile(log.getImageUrl());
         });
 
-        // 3. 기존 DB 삭제 로직 진행
         diaryRepository.deleteByLogId(logId);
         spendingLogRepository.deleteById(logId);
     }
-
 
     @Transactional
     public void setAsMainRecord(Long logId) {
         Diary targetDiary = diaryRepository.findByLogId(logId)
                 .orElseThrow(() -> new RuntimeException("해당 기록의 일기 정보를 찾을 수 없습니다."));
 
-        List<Diary> dailyDiaries = diaryRepository.findByUserIdAndRegDate(targetDiary.getUserId(), targetDiary.getRegDate());
-        List<SpendingLog> dailyLogs = spendingLogRepository.findByUserIdAndRegDate(targetDiary.getUserId(), targetDiary.getRegDate());
+        List<Diary> dailyDiaries = diaryRepository.findByUserIdAndRegDate(
+                targetDiary.getUserId(), targetDiary.getRegDate()
+        );
+        List<SpendingLog> dailyLogs = spendingLogRepository.findByUserIdAndRegDate(
+                targetDiary.getUserId(), targetDiary.getRegDate()
+        );
 
-        for (Diary d : dailyDiaries) d.setIsMain(false);
-        for (SpendingLog l : dailyLogs) l.setIsMain(false);
+        for (Diary d : dailyDiaries) {
+            d.setIsMain(false);
+        }
+
+        for (SpendingLog l : dailyLogs) {
+            l.setIsMain(false);
+        }
 
         targetDiary.setIsMain(true);
         spendingLogRepository.findById(logId).ifPresent(log -> log.setIsMain(true));
@@ -260,12 +245,71 @@ public class TodayRecordService {
 
     private LocalDateTime parseSpentAt(String spentAt) {
         try {
-            if (spentAt == null || spentAt.isBlank()) return LocalDateTime.now();
+            if (spentAt == null || spentAt.isBlank()) {
+                return LocalDateTime.now();
+            }
+
+            // "2026-03-31 12:30:00" 형식
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             return LocalDateTime.parse(spentAt, formatter);
-        } catch (Exception e) {
-            return LocalDateTime.now();
+
+        } catch (Exception e1) {
+            try {
+                // "12:30" 형식 saveLog 입력용
+                LocalDate today = LocalDate.now();
+                return LocalDateTime.parse(today + " " + spentAt + ":00",
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            } catch (Exception e2) {
+                return LocalDateTime.now();
+            }
         }
     }
 
+    private String saveImageFile(MultipartFile imageFile) {
+        if (imageFile == null || imageFile.isEmpty()) {
+            return "";
+        }
+
+        try {
+            String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/uploads/";
+            String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
+
+            File saveFile = new File(uploadDir + fileName);
+
+            if (!saveFile.getParentFile().exists()) {
+                saveFile.getParentFile().mkdirs();
+            }
+
+            imageFile.transferTo(saveFile);
+
+            return "/uploads/" + fileName;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private void deletePhysicalImageFile(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return;
+        }
+
+        try {
+            String uploadBaseDir = System.getProperty("user.dir") + "/src/main/resources/static";
+            File file = new File(uploadBaseDir + imageUrl);
+
+            if (file.exists()) {
+                boolean deleted = file.delete();
+                if (deleted) {
+                    System.out.println("✅ 실제 이미지 파일 삭제 성공: " + imageUrl);
+                } else {
+                    System.out.println("⚠️ 이미지 파일 삭제 실패: " + imageUrl);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("❌ 파일 삭제 중 에러 발생");
+            e.printStackTrace();
+        }
+    }
 }
