@@ -31,7 +31,9 @@ public class MainService {
         System.out.println("=== [DEBUG 2] 오늘 사용 금액: " + todayUsage + " ===");
 
         // 2. 예산(챌린지) 정보 조회
-        Budget budget = budgetRepository.findLatestBudget(userId).orElse(null);
+        Budget budget = budgetRepository
+                .findTopByUser_UserIdAndIsActiveTrueOrderByGoalIdDesc(userId)
+                .orElse(null);
 
         // 3. 챌린지가 없을 때도 todayUsage는 정상 출력
         if (budget == null) {

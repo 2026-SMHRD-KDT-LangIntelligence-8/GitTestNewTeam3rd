@@ -31,8 +31,14 @@ public class CodefApprovalService {
         validate(dto);
 
         UserCodefAccount account = userCodefAccountRepository
-                .findByUserIdAndOrganizationAndBusinessType(userId, dto.getOrganization(), "CD")
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자의 카드 connectedId가 없습니다. 먼저 카드 연결을 진행해주세요."));
+                .findTopByUserIdAndOrganizationAndBusinessTypeOrderByIdDesc(
+                        userId,
+                        dto.getOrganization(),
+                        "CD"
+                )
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "해당 사용자의 카드 connectedId가 없습니다. 먼저 카드 연결을 진행해주세요."
+                ));
 
         Map<String, Object> requestMap = new LinkedHashMap<>();
         requestMap.put("organization", dto.getOrganization());

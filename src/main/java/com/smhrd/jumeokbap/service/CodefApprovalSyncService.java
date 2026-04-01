@@ -34,7 +34,7 @@ public class CodefApprovalSyncService {
         }
 
         LocalDate today = LocalDate.now();
-        LocalDate startDate = today.minusDays(30);
+        LocalDate startDate = today.minusDays(7);
 
         System.out.println("조회 기간 = " + startDate + " ~ " + today);
 

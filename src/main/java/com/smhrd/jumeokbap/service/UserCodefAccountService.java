@@ -16,13 +16,7 @@ public class UserCodefAccountService {
 
     public void saveConnectedId(String userId, String connectedId, CodefConnectedIdRequest dto) {
 
-        UserCodefAccount entity = repository
-                .findByUserIdAndOrganizationAndBusinessType(
-                        userId,
-                        dto.getOrganization(),
-                        "CD"
-                )
-                .orElse(new UserCodefAccount());
+        UserCodefAccount entity = new UserCodefAccount();
 
         entity.setUserId(userId);
         entity.setConnectedId(connectedId);

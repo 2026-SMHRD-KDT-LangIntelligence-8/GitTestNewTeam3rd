@@ -39,9 +39,9 @@ public class CodefConnectController {
         // 1. connectedId 발급 및 저장
         String connectedId = codefConnectedIdService.createConnectedId(userId, dto);
 
-        // 2. 최근 30일 승인내역 자동 조회
+        // 2. 최근 7일 승인내역 자동 조회
         LocalDate today = LocalDate.now();
-        LocalDate startDate = today.minusDays(30);
+        LocalDate startDate = today.minusDays(7);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 

@@ -38,7 +38,7 @@ public class CalendarService {
         System.out.println("조회 범위: " + startDate + " ~ " + endDate);
 
         // 2. 소비 목표 조회
-        Optional<Budget> budget = budgetRepository.findByUser_UserIdAndIsActiveTrue(userId);
+        Optional<Budget> budget = budgetRepository.findTopByUser_UserIdAndIsActiveTrueOrderByGoalIdDesc(userId);
         data.put("totalAmount", budget.map(Budget::getTotalLimit).orElse(0L));
 
         // 3. 해당 월의 지출 내역 조회
